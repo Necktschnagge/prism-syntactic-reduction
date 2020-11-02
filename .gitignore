@@ -1,46 +1,39 @@
-# general patterns to ignore
-# Emacs backup files
-*~
+# CMake
+CMakeSettings.json
 
-*.aux
-*.synctex.gz
-*.bbl 
-*.blg
-*.toc
-*.out
-*.log
-*.loc
-*.pag
-*.soc
+# Prerequisites
+*.d
 
-paper/*.pdf
-doc/*.pdf
-
-# OS X system files
-.DS_Store
-
-
-# build artefacts by pattern:
+# Compiled Object files
+*.slo
+*.lo
 *.o
-*.a
-*.class
-*.dylib
-*.jnilib
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
 *.so
+*.dylib
 *.dll
 
-# build artefact directories:
-prism/bin/
-prism/classes/
-prism/obj/
+# Fortran module files
+*.mod
+*.smod
 
-# generated JAR files:
-prism/lib/lpsolve55j.jar
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
 
-# generated CUDD headers:
-cudd/include/*.h
+# Executables
+*.exe
+*.out
+*.app
 
-# Eclipse project file (should not be versioned)
-prism/\.project
-# Eclipse project custom settings directory
-prism/\.settings/
+# artifact directories
+build/
+.vs/
