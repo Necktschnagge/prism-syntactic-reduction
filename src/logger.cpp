@@ -13,7 +13,7 @@
 
 namespace {
 
-	const std::string STANDARD_LOGGER_NAME{ "stdlog" };
+	const std::string STANDARD_LOGGER_NAME{ "main" };
 
 }
 
