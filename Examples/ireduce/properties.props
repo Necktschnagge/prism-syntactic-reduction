@@ -1,0 +1,3 @@
+P=? [ F failure ]
+P=? [ F<100 failure ]
+R{"time"}=? [ F failure ]
