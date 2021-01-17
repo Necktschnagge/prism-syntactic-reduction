@@ -11,6 +11,8 @@ public:
 		public:
 			inline static const auto const_keyword{ std::string(R"(const)") };
 			inline static const auto global_keyword{ std::string(R"(global)") };
+			inline static const auto module_keyword{ std::string(R"(module)") };
+			inline static const auto endmodule_keyword{ std::string(R"(endmodule)") };
 			inline static const auto dtmc{ std::string(R"(dtmc)") };
 			inline static const auto equals{ std::string(R"(=)") };
 			inline static const auto formula{ std::string(R"(formula)") };
@@ -37,6 +39,7 @@ public:
 			inline static const auto init_definition{ std::string(R"((init\s[\s\S]*?endinit))") };
 			inline static const auto module_definition{ std::string(R"((module\s[\s\S]*?endmodule))") };
 			inline static const auto reward_definition{ std::string(R"((rewards\s[\s\S]*?endrewards))") };
+			inline static const auto transition{ std::string(R"((\[([_a-zA-Z][_a-zA-Z0-9]*)\][\s\S]*?;))") };
 
 		};
 	};
@@ -44,6 +47,8 @@ public:
 	struct primitives {
 		inline static const auto const_keyword{ boost::regex(strings::primitives::const_keyword) };
 		inline static const auto global_keyword{ boost::regex(strings::primitives::global_keyword) };
+		inline static const auto module_keyword{ boost::regex(strings::primitives::module_keyword) };
+		inline static const auto endmodule_keyword{ boost::regex(strings::primitives::endmodule_keyword) };
 		inline static const auto dtmc{ boost::regex(strings::primitives::dtmc) };
 		inline static const auto equals{ boost::regex(strings::primitives::equals) };
 		inline static const auto formula{ boost::regex(strings::primitives::formula) };
@@ -55,6 +60,7 @@ public:
 		inline static const auto spaces{ boost::regex(strings::primitives::spaces) };
 		inline static const auto spaces_plus{ boost::regex(strings::primitives::spaces_plus) };
 		inline static const auto type_specifier{ boost::regex(strings::primitives::type_specifier) };
+		inline static const auto dot_dot{ boost::regex(strings::primitives::dot_dot) };
 		inline static const auto natural_number{ boost::regex(strings::primitives::natural_number) };
 	};
 
@@ -65,6 +71,7 @@ public:
 		inline static const auto global_definition{ boost::regex(strings::clauses::global_definition) };
 		inline static const auto module_definition{ boost::regex(strings::clauses::module_definition) };
 		inline static const auto reward_definition{ boost::regex(strings::clauses::reward_definition) };
+		inline static const auto transition{ boost::regex(strings::clauses::transition) };
 		inline static const auto init_definition{ boost::regex(strings::clauses::init_definition) };
 	};
 };

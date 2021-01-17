@@ -330,6 +330,27 @@ public:
 	}
 };
 
+class module_token : public primitive_regex_token {
+public:
+
+	using primitive_regex_token::primitive_regex_token;
+
+	virtual boost::regex primitive_regex() const final override {
+		return const_regexes::primitives::module_keyword;
+	}
+};
+
+class endmodule_token : public primitive_regex_token {
+public:
+
+	using primitive_regex_token::primitive_regex_token;
+
+	virtual boost::regex primitive_regex() const final override {
+		return const_regexes::primitives::endmodule_keyword;
+	}
+};
+//### try to do this as a template? using pointer?
+
 class type_specifier_token : public primitive_regex_token {
 public:
 
@@ -351,6 +372,16 @@ public:
 	}
 };
 
+class right_square_brace_token : public primitive_regex_token {
+public:
+
+	using primitive_regex_token::primitive_regex_token;
+
+	virtual boost::regex primitive_regex() const final override {
+		return const_regexes::primitives::right_square_brace;
+	}
+};
+
 class natural_number_token : public primitive_regex_token {
 public:
 
@@ -358,6 +389,16 @@ public:
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::natural_number;
+	}
+};
+
+class two_dots_token : public primitive_regex_token {
+public:
+
+	using primitive_regex_token::primitive_regex_token;
+
+	virtual boost::regex primitive_regex() const final override {
+		return const_regexes::primitives::dot_dot;
 	}
 };
 
@@ -470,7 +511,13 @@ public:
 	std::shared_ptr<left_square_brace_token> _left_brace;
 	std::shared_ptr<space_token> _left_brace_separator;
 	std::shared_ptr<natural_number_token> _lower_bound;
-	std::shared_ptr<expression_token> _expression;
+	std::shared_ptr<space_token> _lower_bound_separator;
+	std::shared_ptr<two_dots_token> _dots;
+	std::shared_ptr<space_token> _dots_separator;
+	std::shared_ptr<natural_number_token> _upper_bound;
+	std::shared_ptr<space_token> _upper_bound_separator;
+	std::shared_ptr<right_square_brace_token> _right_brace;
+	std::shared_ptr<space_token> _right_brace_separator;
 	std::shared_ptr<semicolon_token> _semicolon;
 
 
@@ -482,7 +529,7 @@ public:
 		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::global_keyword);
 		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "global" in global definition.)");
 		parse_error::assert_true(search_keyword->prefix().end() == rest_begin, R"(Global definition does not start with "global".)");
-		_global_token = std::make_shared<const_token>(this, rest_begin, search_keyword->suffix().begin());
+		_global_token = std::make_shared<global_token>(this, rest_begin, search_keyword->suffix().begin());
 		rest_begin = search_keyword->suffix().begin();
 
 		auto search_space_separator_after_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
@@ -506,7 +553,7 @@ public:
 		auto search_colon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::colon);
 		parse_error::assert_true(search_colon != regex_iterator(), R"(Could not find ":" after identifier in global definition.)");
 		parse_error::assert_true(search_colon->prefix().end() == rest_begin, R"(Could not find ":" immediately after identifier in global definition.)");
-		_colon_token = std::make_shared<equals_token>(this, rest_begin, search_colon->suffix().begin());
+		_colon_token = std::make_shared<colon_token>(this, rest_begin, search_colon->suffix().begin());
 		rest_begin = search_colon->suffix().begin();
 
 		auto search_space_separator_after_colon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
@@ -528,18 +575,59 @@ public:
 		rest_begin = search_space_separator_after_left_brace->suffix().begin();
 
 		auto search_lower_bound = regex_iterator(rest_begin, rest_end, const_regexes::primitives::natural_number);
-		parse_error::assert_true(search_left_square_brace != regex_iterator(), R"(Could not lower bound in global definition.)");
-		parse_error::assert_true(search_left_square_brace->prefix().end() == rest_begin, R"(lower bound brace at unexpected position.)");
-		_left_brace = std::make_shared<left_square_brace_token>(this, rest_begin, search_left_square_brace->suffix().begin());
-		rest_begin = search_left_square_brace->suffix().begin();
+		parse_error::assert_true(search_left_square_brace != regex_iterator(), R"(Could not find lower bound in global definition.)");
+		parse_error::assert_true(search_left_square_brace->prefix().end() == rest_begin, R"(lower bound at unexpected position.)");
+		_lower_bound = std::make_shared<natural_number_token>(this, rest_begin, search_lower_bound->suffix().begin());
+		rest_begin = search_lower_bound->suffix().begin();
+
+		auto search_lower_bound_separator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
+		parse_error::assert_true(search_lower_bound_separator != regex_iterator(), R"(Could not find space separators after lower bound in global definition.)");
+		parse_error::assert_true(search_lower_bound_separator->prefix().end() == rest_begin, R"(Could not find space separator immediately after lower bound in global definition.)");
+		_lower_bound_separator = std::make_shared<space_token>(this, rest_begin, search_lower_bound_separator->suffix().begin());
+		rest_begin = search_lower_bound_separator->suffix().begin();
+
+		auto search_dots = regex_iterator(rest_begin, rest_end, const_regexes::primitives::dot_dot);
+		parse_error::assert_true(search_dots != regex_iterator(), R"(Could not find dots after lower bound in global definition.)");
+		parse_error::assert_true(search_dots->prefix().end() == rest_begin, R"(Could not find dots immediately after lower bound in global definition.)");
+		_dots = std::make_shared<two_dots_token>(this, rest_begin, search_dots->suffix().begin());
+		rest_begin = search_dots->suffix().begin();
+
+		auto search_dots_separator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
+		parse_error::assert_true(search_dots_separator != regex_iterator(), R"(Could not find space separators after dots in global definition.)");
+		parse_error::assert_true(search_dots_separator->prefix().end() == rest_begin, R"(Could not find space separator immediately after dots in global definition.)");
+		_dots_separator = std::make_shared<space_token>(this, rest_begin, search_dots_separator->suffix().begin());
+		rest_begin = search_dots_separator->suffix().begin();
+
+		auto search_upper_bound = regex_iterator(rest_begin, rest_end, const_regexes::primitives::natural_number);
+		parse_error::assert_true(search_upper_bound != regex_iterator(), R"(Could not find upper bound in global definition.)");
+		parse_error::assert_true(search_upper_bound->prefix().end() == rest_begin, R"(upper bound at unexpected position.)");
+		_upper_bound = std::make_shared<natural_number_token>(this, rest_begin, search_upper_bound->suffix().begin());
+		rest_begin = search_upper_bound->suffix().begin();
+
+		auto search_upper_bound_separator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
+		parse_error::assert_true(search_upper_bound_separator != regex_iterator(), R"(Could not find space separators after upper bound in global definition.)");
+		parse_error::assert_true(search_upper_bound_separator->prefix().end() == rest_begin, R"(Could not find space separator immediately after upper bound in global definition.)");
+		_upper_bound_separator = std::make_shared<space_token>(this, rest_begin, search_upper_bound_separator->suffix().begin());
+		rest_begin = search_upper_bound_separator->suffix().begin();
+
+		auto search_right_square_brace = regex_iterator(rest_begin, rest_end, const_regexes::primitives::right_square_brace);
+		parse_error::assert_true(search_right_square_brace != regex_iterator(), R"(Could not find right square brace after upper bound in global definition.)");
+		parse_error::assert_true(search_right_square_brace->prefix().end() == rest_begin, R"(Right square brace at unexpected position.)");
+		_right_brace = std::make_shared<right_square_brace_token>(this, rest_begin, search_right_square_brace->suffix().begin());
+		rest_begin = search_right_square_brace->suffix().begin();
+
+		auto search_right_brace_separator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
+		parse_error::assert_true(search_right_brace_separator != regex_iterator(), R"(Could not find space separators after upper bound in global definition.)");
+		parse_error::assert_true(search_right_brace_separator->prefix().end() == rest_begin, R"(Could not find space separator immediately after upper bound in global definition.)");
+		_right_brace_separator = std::make_shared<space_token>(this, rest_begin, search_right_brace_separator->suffix().begin());
+		rest_begin = search_right_brace_separator->suffix().begin();
 
 		auto search_semicolon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::semicolon);
-		parse_error::assert_true(search_semicolon != regex_iterator(), R"(Could not find semicolon at the end of const definition.)");
-		parse_error::assert_true(search_semicolon->suffix().begin() == rest_end, R"(Unexpected semicolon in const definition.)");
+		parse_error::assert_true(search_semicolon != regex_iterator(), R"(Could not find semicolon at the end of global definition.)");
+		parse_error::assert_true(search_semicolon->suffix().begin() == rest_end, R"(Semicolon not at the end of global definition.)");
+		parse_error::assert_true(search_semicolon->prefix().end() == rest_begin, R"(Unexpected characters before semicolon at the end of global definition.)");
 		_semicolon = std::make_shared<semicolon_token>(this, search_semicolon->prefix().end(), search_semicolon->suffix().begin());
 		rest_end = search_semicolon->prefix().end();
-
-		_expression = std::make_shared<expression_token>(this, rest_begin, rest_end); // just assume rest to be an expression
 
 		children.push_back(_global_token);
 		children.push_back(_global_separator);
@@ -548,8 +636,15 @@ public:
 		children.push_back(_colon_token);
 		children.push_back(_colon_separator);
 		children.push_back(_left_brace);
-
-		children.push_back(_expression);
+		children.push_back(_left_brace_separator);
+		children.push_back(_lower_bound);
+		children.push_back(_lower_bound_separator);
+		children.push_back(_dots);
+		children.push_back(_dots_separator);
+		children.push_back(_upper_bound);
+		children.push_back(_upper_bound_separator);
+		children.push_back(_right_brace);
+		children.push_back(_right_brace_separator);
 		children.push_back(_semicolon);
 	}
 
@@ -565,8 +660,81 @@ public:
 
 	using token::token;
 
+	std::shared_ptr<module_token> _module_token;
+	std::shared_ptr<spaces_plus_token> _module_separator;
+	std::shared_ptr<identifier_token> _module_identifier;
+	std::shared_ptr<spaces_plus_token> _identifier_separator;
+	std::vector<
+		std::pair<
+			std::shared_ptr<transition_token>,
+			std::shared_ptr<space_token>
+		>
+	> _transitions;
+	std::shared_ptr<endmodule_token> _endmodule_token;
+
 	virtual void parse_non_primitive() override {
-		throw 0;
+	
+		iterator rest_begin{ cbegin() };
+		iterator rest_end{ cend() };
+
+		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::module_keyword);
+		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "module" in module definition.)");
+		parse_error::assert_true(search_keyword->prefix().end() == rest_begin, R"(Module definition does not start with "module".)");
+		_module_token = std::make_shared<module_token>(this, rest_begin, search_keyword->suffix().begin());
+		rest_begin = search_keyword->suffix().begin();
+
+		auto search_space_separator_after_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
+		parse_error::assert_true(search_space_separator_after_keyword != regex_iterator(), R"(Could not find space separator after keyword "module" in module definition.)");
+		parse_error::assert_true(search_space_separator_after_keyword->prefix().end() == rest_begin, R"(Could not find space separator immediately after keyword "module" in module definition.)");
+		_module_separator = std::make_shared<spaces_plus_token>(this, rest_begin, search_space_separator_after_keyword->suffix().begin());
+		rest_begin = search_space_separator_after_keyword->suffix().begin();
+
+		auto search_identifier = regex_iterator(rest_begin, rest_end, const_regexes::primitives::identifier);
+		parse_error::assert_true(search_identifier != regex_iterator(), R"(Could not find an identifier after keyword "module" in module definition.)");
+		parse_error::assert_true(search_identifier->prefix().end() == rest_begin, R"(Could not find an identifier immediately after keyword "module" in module definition.)");
+		_module_identifier = std::make_shared<identifier_token>(this, rest_begin, search_identifier->suffix().begin());
+		rest_begin = search_identifier->suffix().begin();
+
+		auto search_space_separator_after_identifier = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
+		parse_error::assert_true(search_space_separator_after_identifier != regex_iterator(), R"(Could not find space separators after identifier in module definition.)");
+		parse_error::assert_true(search_space_separator_after_identifier->prefix().end() == rest_begin, R"(Could not find space separator immediately after identifier in module definition.)");
+		_identifier_separator = std::make_shared<spaces_plus_token>(this, rest_begin, search_space_separator_after_identifier->suffix().begin());
+		rest_begin = search_space_separator_after_identifier->suffix().begin();
+
+		auto search_endmodule = regex_iterator(rest_begin, rest_end, const_regexes::primitives::endmodule_keyword);
+		parse_error::assert_true(search_endmodule != regex_iterator(), R"(Could not find endmodule in module definition.)");
+		parse_error::assert_true(search_endmodule->suffix().begin() == rest_end, R"(Keyword "endmodule" not at the end of global definition.)");
+		_endmodule_token = std::make_shared<semicolon_token>(this, search_endmodule->prefix().end(), search_endmodule->suffix().begin());
+		rest_end = search_endmodule->prefix().end();
+
+		while (rest_begin != rest_end) {
+
+			auto search_transition = regex_iterator(rest_begin, rest_end, const_regexes::clauses::transition);
+			parse_error::assert_true(search_transition != regex_iterator(), R"(Could not find a transition in module definition.)");
+			parse_error::assert_true(search_transition->prefix().end() == rest_begin, R"(Could not find a transition immediately at the beginning of the remaining body of module definition.)");
+			auto my_transition{ std::make_shared<colon_token>(this, rest_begin, search_transition->suffix().begin()) };
+			rest_begin = search_transition->suffix().begin();
+
+			auto search_space_separator_after_transition = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
+			parse_error::assert_true(search_space_separator_after_transition != regex_iterator(), R"(Could not find space separators after identifier in module definition.)");
+			parse_error::assert_true(search_space_separator_after_transition->prefix().end() == rest_begin, R"(Could not find space separator immediately after identifier in module definition.)");
+			auto my_separator{ std::make_shared<space_token> (this, rest_begin, search_space_separator_after_transition->suffix().begin()) };
+			rest_begin = search_space_separator_after_transition->suffix().begin();
+
+			_transitions.push_back(my_transition, my_separator);
+		}
+
+		
+
+		children.push_back(_module_token);
+		children.push_back(_module_separator);
+		children.push_back(_module_identifier);
+		children.push_back(_identifier_separator);
+		for (const auto& transition_pair : _transitions) { 
+			children.push_back(transition_pair.first);
+			children.push_back(transition_pair.second);
+		}
+		children.push_back(_endmodule_token);
 	}
 
 	virtual bool is_primitive() const { return false; }//##
