@@ -19,13 +19,20 @@ public:
 			inline static const auto identifier{ std::string(R"([_a-zA-Z][_a-zA-Z0-9]*)") };
 			inline static const auto semicolon{ std::string(R"(;)") };
 			inline static const auto left_square_brace{ std::string(R"(\[)") };
+			inline static const auto left_brace{ std::string(R"(\()") };
 			inline static const auto right_square_brace{ std::string(R"(\])") };
+			inline static const auto right_brace{ std::string(R"(\))") };
 			inline static const auto colon{ std::string(R"(:)") };
 			inline static const auto spaces{ std::string(R"(\s*)") }; //spaces, tabs, line breaks
+			inline static const auto not_spaces{ std::string(R"(\S*)") }; //no spaces, tabs, line breaks
 			inline static const auto spaces_plus{ std::string(R"(\s+)") }; //spaces, tabs, line breaks, at least one
-			inline static const auto type_specifier{ std::string(R"(int)") }; //spaces, tabs, line breaks, at least one
-			inline static const auto dot_dot{ std::string(R"(\.\.)") }; //spaces, tabs, line breaks, at least one
-			inline static const auto natural_number{ std::string(R"([1-9][0-9]*)") }; //spaces, tabs, line breaks, at least one
+			inline static const auto plus{ std::string(R"(\+)") };
+			inline static const auto or { std::string(R"(\|)") };
+			inline static const auto and_sign { std::string(R"(\&)") };
+			inline static const auto type_specifier{ std::string(R"(int)") };
+			inline static const auto dot_dot{ std::string(R"(\.\.)") };
+			inline static const auto natural_number{ std::string(R"([1-9][0-9]*)") };
+			inline static const auto ascii_arrow{ std::string(R"(->)") };
 
 		};
 
@@ -40,6 +47,7 @@ public:
 			inline static const auto module_definition{ std::string(R"((module\s[\s\S]*?endmodule))") };
 			inline static const auto reward_definition{ std::string(R"((rewards\s[\s\S]*?endrewards))") };
 			inline static const auto transition{ std::string(R"((\[([_a-zA-Z][_a-zA-Z0-9]*)\][\s\S]*?;))") };
+			inline static const auto subcondition{ std::string(R"((^\s*\([\s\S]*\)\s*$)") };
 
 		};
 	};
@@ -55,13 +63,20 @@ public:
 		inline static const auto identifier{ boost::regex(strings::primitives::identifier) };
 		inline static const auto semicolon{ boost::regex(strings::primitives::semicolon) };
 		inline static const auto left_square_brace{ boost::regex(strings::primitives::left_square_brace) };
+		inline static const auto left_brace{ boost::regex(strings::primitives::left_brace) };
 		inline static const auto right_square_brace{ boost::regex(strings::primitives::right_square_brace) };
+		inline static const auto right_brace{ boost::regex(strings::primitives::right_brace) };
 		inline static const auto colon{ boost::regex(strings::primitives::colon) };
 		inline static const auto spaces{ boost::regex(strings::primitives::spaces) };
+		inline static const auto not_spaces{ boost::regex(strings::primitives::not_spaces) };
 		inline static const auto spaces_plus{ boost::regex(strings::primitives::spaces_plus) };
+		inline static const auto plus{ boost::regex(strings::primitives::plus) };
+		inline static const auto or { boost::regex(strings::primitives::or) };
+		inline static const auto and_sign{ boost::regex(strings::primitives::and_sign) };
 		inline static const auto type_specifier{ boost::regex(strings::primitives::type_specifier) };
 		inline static const auto dot_dot{ boost::regex(strings::primitives::dot_dot) };
 		inline static const auto natural_number{ boost::regex(strings::primitives::natural_number) };
+		inline static const auto ascii_arrow{ boost::regex(strings::primitives::ascii_arrow) };
 	};
 
 	struct clauses {
@@ -73,5 +88,6 @@ public:
 		inline static const auto reward_definition{ boost::regex(strings::clauses::reward_definition) };
 		inline static const auto transition{ boost::regex(strings::clauses::transition) };
 		inline static const auto init_definition{ boost::regex(strings::clauses::init_definition) };
+		inline static const auto subcondition{ boost::regex(strings::clauses::subcondition) };
 	};
 };
