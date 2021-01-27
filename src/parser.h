@@ -655,6 +655,93 @@ public:
 	}
 };
 
+class transition_token : public token {
+	using token::token;
+
+	std::shared_ptr<module_token> _module_token;
+	std::shared_ptr<spaces_plus_token> _module_separator;
+	std::shared_ptr<identifier_token> _module_identifier;
+	std::shared_ptr<spaces_plus_token> _identifier_separator;
+	std::vector<
+		std::pair<
+		std::shared_ptr<transition_token>,
+		std::shared_ptr<space_token>
+		>
+	> _transitions;
+	std::shared_ptr<endmodule_token> _endmodule_token;
+
+	virtual void parse_non_primitive() override {
+
+		iterator rest_begin{ cbegin() };
+		iterator rest_end{ cend() };
+
+		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::module_keyword);
+		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "module" in module definition.)");
+		parse_error::assert_true(search_keyword->prefix().end() == rest_begin, R"(Module definition does not start with "module".)");
+		_module_token = std::make_shared<module_token>(this, rest_begin, search_keyword->suffix().begin());
+		rest_begin = search_keyword->suffix().begin();
+
+		auto search_space_separator_after_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
+		parse_error::assert_true(search_space_separator_after_keyword != regex_iterator(), R"(Could not find space separator after keyword "module" in module definition.)");
+		parse_error::assert_true(search_space_separator_after_keyword->prefix().end() == rest_begin, R"(Could not find space separator immediately after keyword "module" in module definition.)");
+		_module_separator = std::make_shared<spaces_plus_token>(this, rest_begin, search_space_separator_after_keyword->suffix().begin());
+		rest_begin = search_space_separator_after_keyword->suffix().begin();
+
+		auto search_identifier = regex_iterator(rest_begin, rest_end, const_regexes::primitives::identifier);
+		parse_error::assert_true(search_identifier != regex_iterator(), R"(Could not find an identifier after keyword "module" in module definition.)");
+		parse_error::assert_true(search_identifier->prefix().end() == rest_begin, R"(Could not find an identifier immediately after keyword "module" in module definition.)");
+		_module_identifier = std::make_shared<identifier_token>(this, rest_begin, search_identifier->suffix().begin());
+		rest_begin = search_identifier->suffix().begin();
+
+		auto search_space_separator_after_identifier = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
+		parse_error::assert_true(search_space_separator_after_identifier != regex_iterator(), R"(Could not find space separators after identifier in module definition.)");
+		parse_error::assert_true(search_space_separator_after_identifier->prefix().end() == rest_begin, R"(Could not find space separator immediately after identifier in module definition.)");
+		_identifier_separator = std::make_shared<spaces_plus_token>(this, rest_begin, search_space_separator_after_identifier->suffix().begin());
+		rest_begin = search_space_separator_after_identifier->suffix().begin();
+
+		auto search_endmodule = regex_iterator(rest_begin, rest_end, const_regexes::primitives::endmodule_keyword);
+		parse_error::assert_true(search_endmodule != regex_iterator(), R"(Could not find endmodule in module definition.)");
+		parse_error::assert_true(search_endmodule->suffix().begin() == rest_end, R"(Keyword "endmodule" not at the end of global definition.)");
+		_endmodule_token = std::make_shared<semicolon_token>(this, search_endmodule->prefix().end(), search_endmodule->suffix().begin());
+		rest_end = search_endmodule->prefix().end();
+
+		while (rest_begin != rest_end) {
+
+			auto search_transition = regex_iterator(rest_begin, rest_end, const_regexes::clauses::transition);
+			parse_error::assert_true(search_transition != regex_iterator(), R"(Could not find a transition in module definition.)");
+			parse_error::assert_true(search_transition->prefix().end() == rest_begin, R"(Could not find a transition immediately at the beginning of the remaining body of module definition.)");
+			auto my_transition{ std::make_shared<colon_token>(this, rest_begin, search_transition->suffix().begin()) };
+			rest_begin = search_transition->suffix().begin();
+
+			auto search_space_separator_after_transition = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
+			parse_error::assert_true(search_space_separator_after_transition != regex_iterator(), R"(Could not find space separators after identifier in module definition.)");
+			parse_error::assert_true(search_space_separator_after_transition->prefix().end() == rest_begin, R"(Could not find space separator immediately after identifier in module definition.)");
+			auto my_separator{ std::make_shared<space_token>(this, rest_begin, search_space_separator_after_transition->suffix().begin()) };
+			rest_begin = search_space_separator_after_transition->suffix().begin();
+
+			_transitions.push_back(my_transition, my_separator);
+		}
+
+
+
+		children.push_back(_module_token);
+		children.push_back(_module_separator);
+		children.push_back(_module_identifier);
+		children.push_back(_identifier_separator);
+		for (const auto& transition_pair : _transitions) {
+			children.push_back(transition_pair.first);
+			children.push_back(transition_pair.second);
+		}
+		children.push_back(_endmodule_token);
+	}
+
+	virtual bool is_primitive() const { return false; }//##
+
+	virtual bool is_sound() const final override {
+		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::module_definition);
+	}
+};
+
 class module_definition_token : public token {
 public:
 
