@@ -10,6 +10,7 @@
 #include <memory>
 #include <numeric> // std::accumulate
 #include <string>
+#include <type_traits> // std::remove_pointer
 
 class token {
 public:
@@ -305,7 +306,29 @@ public:
 	using primitive_regex_token::primitive_regex_token;
 
 	virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives:: or ;
+		return const_regexes::primitives::or_sign;
+	}
+
+};
+
+class and_token : public primitive_regex_token {
+public:
+
+	using primitive_regex_token::primitive_regex_token;
+
+	virtual boost::regex primitive_regex() const final override {
+		return const_regexes::primitives::and_sign;
+	}
+
+};
+
+class comparison_operator_token : public primitive_regex_token {
+public:
+
+	using primitive_regex_token::primitive_regex_token;
+
+	virtual boost::regex primitive_regex() const final override {
+		return const_regexes::primitives::comparison_operator;
 	}
 
 };
@@ -321,7 +344,7 @@ public:
 
 	virtual bool is_sound() const final override {
 		try {
-			float x = std::stod(std::string(cbegin(), cend()));
+			double x = std::stod(std::string(cbegin(), cend()));
 		}
 		catch (...) {
 			return false;
@@ -396,6 +419,116 @@ public:
 
 };
 
+class number_token : public token {
+
+public:
+
+	using token::token;
+
+	virtual void parse_non_primitive() final override {
+	}
+
+	virtual bool is_primitive() const final override { return true; }
+
+	virtual bool is_sound() const final override {
+		try {
+			long double x = std::stold(std::string(cbegin(), cend()));
+		}
+		catch (...) {
+			return false;
+		}
+		return true;
+	}
+
+};
+
+
+class identifier_or_number : public token {
+
+public:
+
+	using token::token;
+
+	std::shared_ptr<identifier_token> _identifier;
+	std::shared_ptr<number_token> _number;
+
+	virtual void parse_non_primitive() final override {
+		parse_error::assert_true(cbegin() != cend(), "Empty identifier_or_number token");
+		if (boost::regex_match(cbegin(), std::next(cbegin()), const_regexes::primitives::digit)) {
+			_number = std::make_shared<number_token>(this, cbegin(), cend());
+			children.push_back(_number);
+		}
+		else {
+			_identifier = std::make_shared<identifier_token>(this, cbegin(), cend());
+			children.push_back(_identifier);
+		}
+	}
+
+	virtual bool is_primitive() const final override { return false; }
+
+	virtual bool is_sound() const final override {
+		return true;
+	}
+
+};
+
+class equation_token : public token {
+
+public:
+
+	using token::token;
+
+	std::shared_ptr<space_token> _leading_separator;
+	std::shared_ptr<identifier_or_number> _left_expression;
+	std::shared_ptr<space_token> _left_expression_separator;
+	std::shared_ptr<comparison_operator_token> _root_operator;
+	std::shared_ptr<space_token> _operator_separator;
+	std::shared_ptr<identifier_or_number> _right_expression;
+	std::shared_ptr<space_token> _ltrailing_separator;
+
+	virtual void parse_non_primitive() final override {
+		iterator rest_begin{ cbegin() };
+		iterator rest_end{ cend() };
+		standard_logger().info(std::string(rest_begin, rest_end));
+
+		std::vector<std::string> comparison_operators{ "!=", "<=", ">=", "=", "<", ">" };
+
+		for (const auto& comparator : comparison_operators) {
+			auto search_comparator = regex_iterator(rest_begin, rest_end, boost::regex(comparator));
+			if (search_comparator == regex_iterator()) continue;
+			// found comparator here:
+			_root_operator = std::make_shared<comparison_operator_token>(this, search_comparator->prefix().end(), search_comparator->suffix().begin());
+			auto process_expression = [this](std::shared_ptr<space_token>& _leading_separator, std::shared_ptr<identifier_or_number>& _expression, std::shared_ptr<space_token> _trailing_separator, iterator rest_begin, iterator rest_end) {
+				auto search_leading_spaces = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
+				parse_error::assert_true(search_leading_spaces != regex_iterator(), R"(Could not find leading spaces in equation token.)");
+				parse_error::assert_true(search_leading_spaces->prefix().end() == rest_begin, R"(Could not find leading spaces in equation token but elsewhere.)");
+				_leading_separator = std::make_shared<space_token>(this, rest_begin, search_leading_spaces->suffix().begin());
+				rest_begin = search_leading_spaces->suffix().begin();
+				auto search_expression = regex_iterator(rest_begin, rest_end, const_regexes::primitives::not_spaces);
+				parse_error::assert_true(search_expression != regex_iterator(), R"(Could not find expression in equation token.)");
+				parse_error::assert_true(search_expression->prefix().end() == rest_begin, R"(Could not find expression in equation token at expected position.)");
+				_expression = std::make_shared<identifier_or_number>(this, rest_begin, search_expression->suffix().begin());
+				_trailing_separator = std::make_shared<space_token>(this, search_expression->suffix().begin(), rest_end);
+				children.push_back(_leading_separator);
+				children.push_back(_expression);
+				children.push_back(_trailing_separator);
+
+			};
+			process_expression(_leading_separator, _left_expression, _left_expression_separator, rest_begin, search_comparator->prefix().end());
+			children.push_back(_root_operator);
+			process_expression(_operator_separator, _right_expression, _ltrailing_separator, search_comparator->suffix().begin(),rest_end);
+			return;
+		}
+		throw parse_error("Could not find any comparator in equation_token");
+	}
+
+	virtual bool is_primitive() const final override { return false; }
+
+	virtual bool is_sound() const final override {
+		return true;
+	}
+
+};
 class condition_token : public token {
 
 public:
@@ -405,17 +538,18 @@ public:
 	};
 
 	using token::token;
-
+	/*
 	std::shared_ptr<token> _root_operator;
 	std::shared_ptr<expression_token> _left_expression;
 	std::shared_ptr<expression_token> _right_expression;
 	std::shared_ptr<spaces_plus_token> _ignored_spaces;
 	std::shared_ptr<identifier_token> _identifier;
 	std::shared_ptr<expression_token> _child_expression;
-
+	*/
 	type _type;
 	std::vector<std::shared_ptr<condition_token>> _sub_conditions;
 	std::vector<std::shared_ptr<token>> _separators;
+	std::shared_ptr<equation_token> _equation;
 
 	virtual void parse_non_primitive() final override {
 		iterator rest_begin{ cbegin() };
@@ -441,16 +575,16 @@ public:
 		open_braces.push_back({ rest_end, 0 });;
 
 		const bool first_brace_matches_last_brace = [&] {
-			uint_fast8_t count{ 0 };
+			unsigned int count_here{ 0 };
 			bool has_0_open_braces{ true };
-			for (auto e : open_braces) {
-				if (e.second > 1 && has_0_open_braces) {
+			for (const auto& e : open_braces) {
+				if (e.second > 0 && has_0_open_braces) {
 					has_0_open_braces = false;
-					++count;
+					++count_here;
 				}
 				if (e.second == 0) has_0_open_braces = true;
 			}
-			if (count > 1) return false;
+			if (count_here > 1) return false;
 			return true;
 		}();
 
@@ -499,71 +633,41 @@ public:
 			}
 			return separator_positions;
 		};
+
+		auto split_using_separators = [&](const auto& splitters, auto the_type_ptr) -> bool {
+			if (!splitters.empty()) {
+				for (const auto& split : splitters) {
+					auto sub = std::make_shared<condition_token>(this, rest_begin, split.first);
+					auto splitter = std::make_shared<std::remove_pointer<decltype(the_type_ptr)>::type>(this, split.first, split.second);
+					rest_begin = split.second;
+					_sub_conditions.push_back(sub);
+					children.push_back(sub);
+					_separators.push_back(splitter);
+					children.push_back(splitter);
+				}
+				auto last_sub = std::make_shared<condition_token>(this, rest_begin, rest_end);
+				_sub_conditions.push_back(last_sub);
+				children.push_back(last_sub);
+				return true; // successfully splitted
+			}
+			return false; // no splitters
+		};
 		//search | not inside braces
-		std::vector<std::pair<iterator, iterator>> or_positions = search_separators_outside_braces(const_regexes::primitives::or);
-		if (!or_positions.empty()) { // it is a disjunction
+		std::vector<std::pair<iterator, iterator>> or_positions = search_separators_outside_braces(const_regexes::primitives::or_sign);
+		if (split_using_separators(or_positions, static_cast<or_token*>(nullptr))) {
 			_type = type::OR;
-
-			for (const auto& or_pos : or_positions) {
-				auto sub = std::make_shared<condition_token>(this, rest_begin, or_pos.first);
-				auto or = std::make_shared<or_token>(this, or_pos.first, or_pos.second);
-				rest_begin = or_pos.second;
-				_sub_conditions.push_back(sub);
-				children.push_back(sub);
-				_separators.push_back(or );
-				children.push_back(or );
-			}
-			auto last_sub = std::make_shared<condition_token>(this, rest_begin, rest_end);
-			_sub_conditions.push_back(last_sub);
-			children.push_back(last_sub);
 			return;
 		}
+		//search & not inside braces
 		std::vector<std::pair<iterator, iterator>> and_positions = search_separators_outside_braces(const_regexes::primitives::and_sign);
-
-
-
-		//search &
-		//search =
-
-
-		auto search_equals_operator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::equals);
-		if (search_equals_operator != regex_iterator()) {
-			_root_operator = std::make_shared<equals_token>(this, search_equals_operator->prefix().end(), search_equals_operator->suffix().begin());
-			_left_expression = std::make_shared<expression_token>(this, search_equals_operator->prefix().begin(), search_equals_operator->prefix().end());
-			_right_expression = std::make_shared<expression_token>(this, search_equals_operator->suffix().begin(), search_equals_operator->suffix().end());
-			children.push_back(_left_expression);
-			children.push_back(_root_operator);
-			children.push_back(_right_expression);
+		if (split_using_separators(and_positions, (and_token*)nullptr)) {
+			_type = type::AND;
 			return;
 		}
 
-		auto search_leading_spaces = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
-		if (search_leading_spaces != regex_iterator() && search_leading_spaces->prefix().end() == rest_begin) {
-			_ignored_spaces = std::make_shared<spaces_plus_token>(this, rest_begin, search_leading_spaces->suffix().begin());
-			_child_expression = std::make_shared<expression_token>(this, search_leading_spaces->suffix().begin(), rest_end);
-			children.push_back(_ignored_spaces);
-			children.push_back(_child_expression);
-			return;
-		}
-		auto search_trailing_spaces = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
-		if (search_leading_spaces != regex_iterator()) {
-			// search for last match:
-			while (true) {
-				auto next = search_trailing_spaces;
-				++next;
-				if (next == regex_iterator()) break;
-				search_trailing_spaces = next;
-			}
-			if (search_trailing_spaces->suffix().begin() == rest_end) {
-				_child_expression = std::make_shared<expression_token>(this, rest_begin, search_trailing_spaces->prefix().end());
-				_ignored_spaces = std::make_shared<spaces_plus_token>(this, search_trailing_spaces->prefix().end(), search_trailing_spaces->suffix().begin());
-				children.push_back(_child_expression);
-				children.push_back(_ignored_spaces);
-				return;
-			}
-		}
-		_identifier = std::make_shared<identifier_token>(this, rest_begin, rest_end);
-		children.push_back(_identifier);
+		_type = type::EQUATION;
+		_equation = std::make_shared<equation_token>(this, rest_begin, rest_end);
+		children.push_back(_equation);
 	}
 
 	virtual bool is_primitive() const final override { return false; }
@@ -1015,7 +1119,7 @@ class transition_token : public token {
 			const bool found_last_condition{ search_plus == regex_iterator() };
 			auto _condition_end{ !found_last_condition ? search_plus->prefix().end() : rest_end };
 			auto _condition{ std::make_shared<condition_token>(this, rest_begin, _condition_end) };
-			rest_begin = search_plus->suffix().begin();
+			rest_begin = found_last_condition ? _condition_end : search_plus->suffix().begin();
 
 			if (!found_last_condition) {
 				auto _plus{ std::make_shared<plus_token>(this, search_plus->prefix().end(), search_plus->suffix().begin()) };
@@ -1051,8 +1155,8 @@ class transition_token : public token {
 			children.push_back(std::get<2>(post_condition_tuple));
 			children.push_back(std::get<3>(post_condition_tuple));
 			if (std::get<4>(post_condition_tuple).has_value()) {
-				std::get<0>(*std::get<4>(post_condition_tuple));
-				std::get<1>(*std::get<4>(post_condition_tuple));
+				children.push_back(std::get<0>(*std::get<4>(post_condition_tuple)));
+				children.push_back(std::get<1>(*std::get<4>(post_condition_tuple)));
 			}
 		}
 		children.push_back(_semicolon);
@@ -1114,7 +1218,7 @@ public:
 		auto search_endmodule = regex_iterator(rest_begin, rest_end, const_regexes::primitives::endmodule_keyword);
 		parse_error::assert_true(search_endmodule != regex_iterator(), R"(Could not find endmodule in module definition.)");
 		parse_error::assert_true(search_endmodule->suffix().begin() == rest_end, R"(Keyword "endmodule" not at the end of global definition.)");
-		_endmodule_token = std::make_shared<semicolon_token>(this, search_endmodule->prefix().end(), search_endmodule->suffix().begin());
+		_endmodule_token = std::make_shared<endmodule_token>(this, search_endmodule->prefix().end(), search_endmodule->suffix().begin());
 		rest_end = search_endmodule->prefix().end();
 
 		while (rest_begin != rest_end) {
