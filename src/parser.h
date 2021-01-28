@@ -638,7 +638,7 @@ public:
 			if (!splitters.empty()) {
 				for (const auto& split : splitters) {
 					auto sub = std::make_shared<condition_token>(this, rest_begin, split.first);
-					auto splitter = std::make_shared<std::remove_pointer<decltype(the_type_ptr)>::type>(this, split.first, split.second);
+					auto splitter = std::make_shared<typename std::remove_pointer<decltype(the_type_ptr)>::type>(this, split.first, split.second);
 					rest_begin = split.second;
 					_sub_conditions.push_back(sub);
 					children.push_back(sub);
@@ -1264,7 +1264,6 @@ public:
 	using token::token;
 
 	virtual void parse_non_primitive() override {
-		throw 0;
 	}
 
 	virtual bool is_primitive() const { return false; }//##
@@ -1279,7 +1278,7 @@ public:
 
 	using token::token;
 
-	virtual void parse_non_primitive() override { throw 0; }
+	virtual void parse_non_primitive() override {  }
 
 	virtual bool is_primitive() const { return false; }//##
 
