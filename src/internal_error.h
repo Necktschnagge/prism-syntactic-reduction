@@ -3,9 +3,6 @@
 #include <string>
 #include <exception>
 
-/**
- (C) Maximilian Starke 2020
-*/
 
 class internal_error : public std::exception {
 	std::string message;

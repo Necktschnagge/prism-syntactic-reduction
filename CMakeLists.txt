@@ -1,25 +1,60 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(PROJECT_NAME Syntactic-Reducer)
+
+cmake_policy(SET CMP0091 NEW)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
 project(${PROJECT_NAME} VERSION 1.0)
 
-#message("Flag: ${CMAKE_CXX_FLAGS_DEBUG}")
+
+############### Language and Flags ###############
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS False)
-set(CMAKE_CXX_FLAGS_RELEASE "/MT")
-set(CMAKE_CXX_FLAGS_DEBUG "/MDd /Zi /Ob0 /Od /RTC1 /MTd")
+#message(${CMAKE_CXX_FLAGS})
+set(CMAKE_CXX_FLAGS_RELEASE "/MT /O2 /Ob2 /DNDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "/MTd /Zi /Ob0 /Od /RTC1")
+
+
+############### Libraries ###############
 
 add_subdirectory(extern/googletest)
 
+
+#Boost
+set(Boost_USE_STATIC_LIBS ON)
+FIND_PACKAGE(Boost 1.54.0 COMPONENTS regex REQUIRED )
+INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR} )
+
+
 include_directories(SYSTEM extern/spdlog/include)
+
 #include_directories(SYSTEM extern/json/include)
+
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
+
+############### Sources ###############
+
 add_subdirectory(src)
+
 add_subdirectory(test)
 
+
+
+############### Testing ###############
+
 enable_testing()
+
+
+############### Linkage ###############
+
+
+
+
+############### Visual Studio ###############
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})#Set Visualo Studio start-up project, so that one can directly run the debugger.
 

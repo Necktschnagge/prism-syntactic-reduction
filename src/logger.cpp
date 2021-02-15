@@ -7,9 +7,6 @@
 
 #include <iostream>
 
-/**
- (C) Maximilian Starke 2020
-*/
 
 namespace {
 
