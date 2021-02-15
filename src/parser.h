@@ -12,6 +12,8 @@
 #include <string>
 #include <type_traits> // std::remove_pointer
 
+class file_token;
+
 class token {
 public:
 	using iterator = std::string::const_iterator;
@@ -34,12 +36,22 @@ protected:
 	std::shared_ptr<const std::string> _file_content;
 	iterator _begin;
 	iterator _end;
+	const token* _parent;
+
+	/*const token* root() const {
+		return this == _parent ? this : _parent->root();
+	}
+
+	const file_token* root_file_token() const {
+		return dynamic_cast<const file_token*>(root());
+	}
+	*/
 
 public:
 
-	token(std::shared_ptr<const std::string> file_content, iterator begin, iterator end) : _file_content(file_content), _begin(begin), _end(end) {}
-	token(const token& parent_token, iterator begin, iterator end) : token(parent_token._file_content, begin, end) {}
-	token(const token* parent_token, iterator begin, iterator end) : token(parent_token->_file_content, begin, end) {}
+	token(std::shared_ptr<const std::string> file_content, iterator begin, iterator end) : _file_content(file_content), _begin(begin), _end(end), _parent(this) {}
+	token(const token& parent_token, iterator begin, iterator end) : _file_content(parent_token._file_content), _begin(begin), _end(end), _parent(&parent_token) {}
+	token(const token* parent_token, iterator begin, iterator end) : _file_content(parent_token->_file_content), _begin(begin), _end(end), _parent(parent_token) {}
 
 	virtual bool is_primitive() const = 0;
 	virtual bool is_sound() const = 0;
@@ -281,6 +293,16 @@ public:
 		return const_regexes::primitives::identifier;
 	}
 
+	std::shared_ptr<int> int_value(const std::map<std::string, int>& const_table) {
+		auto iter = const_table.find(str());
+		if (iter != const_table.cend()) {
+			return std::make_shared<int>(iter->second);
+		}
+		else {
+			return nullptr;
+		}
+		
+	}
 };
 
 class equals_token : public primitive_regex_token {
@@ -478,8 +500,11 @@ public:
 		return true;
 	}
 
-};
 
+	int int_value() {
+		return std::stoi(str());
+	}
+};
 
 class identifier_or_number : public token {
 
@@ -508,6 +533,17 @@ public:
 		return true;
 	}
 
+	bool contains_variable(const std::string& var_name) const {
+		if (_identifier) return _identifier->str() == var_name;
+		return false;
+	}
+
+	std::shared_ptr<int> get_value(const std::string& var_name, const std::map<std::string, int>& const_table) {
+		if (_number) {
+			return std::make_shared<int>(_number->int_value());
+		}
+		return _identifier->int_value(const_table);
+	}
 };
 
 class equation_token : public token {
@@ -565,7 +601,20 @@ public:
 	virtual bool is_sound() const final override {
 		return true;
 	}
+public:
+	bool contains_variable(const std::string& var_name) const {
+		return _left_expression->contains_variable(var_name) || _right_expression->contains_variable(var_name);
+	}
 
+	std::shared_ptr<std::vector<int>> get_values(const std::string& var_name) const {
+		if (_left_expression->contains_variable(var_name)) {
+			return std::make_shared<std::vector<int>>({_right_expression->get_value(var_name)});
+		}
+		if (_right_expression->contains_variable(var_name)) {
+			return std::make_shared<std::vector<int>>({ _left_expression->get_value(var_name) });
+		}
+		return nullptr;
+	}
 };
 
 class condition_token : public token {
@@ -713,6 +762,32 @@ public:
 
 	virtual bool is_sound() const final override {
 		return true;
+	}
+
+	bool contains_variable(const std::string& var_name) const {
+		bool accumulator = std::accumulate(_sub_conditions.cbegin(), _sub_conditions.cend(),
+			false, [&](const auto& acc, const auto& element) { return acc || element->contains_variable(var_name); });
+		if (_equation) {
+			accumulator |= _equation->contains_variable(var_name);
+		}
+		return accumulator;
+	}
+
+	std::shared_ptr<std::vector<int>> get_values(const std::string& var_name) const {
+		if (_type == type::EQUATION) {
+			return _equation->get_values(var_name);
+		}
+		if (_type == type::SUB_CONDITION) {
+			return _sub_conditions[0]->get_values(var_name);
+		}
+		// and - or
+		std::vector<std::shared_ptr<std::vector<int>>> sub_values;
+		std::transform(
+			_sub_conditions.cbegin(),
+			_sub_conditions.cend(),
+			std::back_inserter(sub_values),
+			[&](const auto& x) { return x->get_values(); });
+		// accumulate here
 	}
 
 };
@@ -1053,6 +1128,7 @@ public:
 class transition_token : public token {
 	using token::token;
 
+public:
 	std::shared_ptr<left_square_brace_token> _start_label;
 	std::shared_ptr<space_token> _start_label_separator;
 	std::shared_ptr<identifier_token> _label;
@@ -1540,7 +1616,7 @@ private:
 	virtual bool is_sound() const final override {
 		return std::accumulate(children.cbegin(), children.cend(), true, [](bool acc, const auto& element) { return acc && element->is_sound(); }); //check lowercase?
 	}
-
+public:
 	template <class _TokenType>
 	std::list<std::shared_ptr<_TokenType>> children_of_kind() {
 		std::list<std::shared_ptr<_TokenType>> down_casted;
