@@ -18,7 +18,7 @@ int cli(int argc, char** argv) {
 	//prism_dtmc::parse_it(all_tokens);
 	ftoken.parse();
 
-	bool check = ftoken.is_sound();
+	bool check = ftoken.is_sound_recursive();
 	
 	return 0;
 }

@@ -13,17 +13,22 @@ public:
 			inline static const auto global_keyword{ std::string(R"(global)") };
 			inline static const auto module_keyword{ std::string(R"(module)") };
 			inline static const auto endmodule_keyword{ std::string(R"(endmodule)") };
+			inline static const auto rewards_keyword{ std::string(R"(rewards)") };
+			inline static const auto endrewards_keyword{ std::string(R"(endrewards)") };
+			inline static const auto init_keyword{ std::string(R"(init)") };
+			inline static const auto endinit_keyword{ std::string(R"(endinit)") };
 			inline static const auto dtmc{ std::string(R"(dtmc)") };
 			inline static const auto digit{ std::string(R"(\d)") };
 			inline static const auto equals{ std::string(R"(=)") };
 			inline static const auto formula{ std::string(R"(formula)") };
-			inline static const auto identifier{ std::string(R"([_a-zA-Z][_a-zA-Z0-9]*)") };
+			inline static const auto identifier{ std::string(R"([_a-zA-Z][_a-zA-Z0-9']*)") };
 			inline static const auto semicolon{ std::string(R"(;)") };
 			inline static const auto left_square_brace{ std::string(R"(\[)") };
 			inline static const auto left_brace{ std::string(R"(\()") };
 			inline static const auto right_square_brace{ std::string(R"(\])") };
 			inline static const auto right_brace{ std::string(R"(\))") };
 			inline static const auto colon{ std::string(R"(:)") };
+			inline static const auto double_quote{ std::string(R"(")") };
 			inline static const auto spaces{ std::string(R"(\s*)") }; //spaces, tabs, line breaks
 			inline static const auto not_spaces{ std::string(R"(\S*)") }; //no spaces, tabs, line breaks
 			inline static const auto spaces_plus{ std::string(R"(\s+)") }; //spaces, tabs, line breaks, at least one
@@ -33,7 +38,7 @@ public:
 			inline static const auto comparison_operator{ std::string(R"(!=|=||<=|>=|<|>)") };
 			inline static const auto type_specifier{ std::string(R"(int)") };
 			inline static const auto dot_dot{ std::string(R"(\.\.)") };
-			inline static const auto natural_number{ std::string(R"([1-9][0-9]*)") };
+			inline static const auto natural_number{ std::string(R"(([1-9][0-9]*)|0)") };
 			inline static const auto ascii_arrow{ std::string(R"(->)") };
 
 		};
@@ -59,8 +64,13 @@ public:
 		inline static const auto global_keyword{ boost::regex(strings::primitives::global_keyword) };
 		inline static const auto module_keyword{ boost::regex(strings::primitives::module_keyword) };
 		inline static const auto endmodule_keyword{ boost::regex(strings::primitives::endmodule_keyword) };
+		inline static const auto rewards_keyword{ boost::regex(strings::primitives::rewards_keyword) };
+		inline static const auto init_keyword{ boost::regex(strings::primitives::init_keyword) };
+		inline static const auto endinit_keyword{ boost::regex(strings::primitives::endinit_keyword) };
+		inline static const auto endrewards_keyword{ boost::regex(strings::primitives::endrewards_keyword) };
 		inline static const auto dtmc{ boost::regex(strings::primitives::dtmc) };
 		inline static const auto digit{ boost::regex(strings::primitives::digit) };
+		inline static const auto double_quote{ boost::regex(strings::primitives::double_quote) };
 		inline static const auto equals{ boost::regex(strings::primitives::equals) };
 		inline static const auto formula{ boost::regex(strings::primitives::formula) };
 		inline static const auto identifier{ boost::regex(strings::primitives::identifier) };
