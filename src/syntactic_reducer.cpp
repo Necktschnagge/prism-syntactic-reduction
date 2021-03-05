@@ -135,28 +135,44 @@ int cli(int argc, char** argv) {
 
 	// all values for cf variable:
 	std::map<int, bool> recalculate;
-
-
-	// step:
-	int x;
-	// predecessors:
-	std::vector<int> successors;
 	for (const auto& edge : program_graph) {
-		if (std::get<0>(edge) == x) {
-			successors.push_back(std::get<1>(edge));
-		}
+		recalculate[std::get<0>(edge)] = true;
+		recalculate[std::get<1>(edge)] = true;
 	}
-	std::vector<std::string> new_lives = std::accumulate(successors.cbegin(), successors.cend(), std::vector<std::string>(), [&](const auto& acc, const auto& el) {
-		std::pair<std::shared_ptr<transition_token>, std::shared_ptr<condition_token>> tr;
-		for (const auto edge : program_graph) {
-			if (std::get<0>(edge) == x && std::get<1>(edge) == el) tr = std::make_pair(std::get<2>(edge), std::get<3>(edge));
-		}
-		auto killed = int_vector_set_minus(live_vars[el], kill_sets[tr]);
-		auto vec = int_vector_union(killed, gen_sets[tr]);
 
-		return int_vector_union(acc, vec);
-		});
-	live_vars[x] = new_lives;
+
+	while (true) {
+		int x{ -1 };
+		auto iter = recalculate.begin();
+		for(; iter!= recalculate.cend(); ++iter) {
+			if (iter->second == true) {
+				x = iter->first;
+				iter->second = false;
+				break;
+			}
+		}
+		if (iter == recalculate.cend()) break;
+		// step:
+		// predecessors:
+		std::vector<int> successors;
+		for (const auto& edge : program_graph) {
+			if (std::get<0>(edge) == x) {
+				successors.push_back(std::get<1>(edge));
+			}
+		}
+		std::vector<std::string> new_lives = std::accumulate(successors.cbegin(), successors.cend(), std::vector<std::string>(), [&](const auto& acc, const auto& el) {
+			std::pair<std::shared_ptr<transition_token>, std::shared_ptr<condition_token>> tr;
+			for (const auto edge : program_graph) {
+				if (std::get<0>(edge) == x && std::get<1>(edge) == el) tr = std::make_pair(std::get<2>(edge), std::get<3>(edge));
+			}
+			auto killed = int_vector_set_minus(live_vars[el], kill_sets[tr]);
+			auto vec = int_vector_union(killed, gen_sets[tr]);
+
+			return int_vector_union(acc, vec);
+			});
+		live_vars[x] = new_lives;
+		// check if somethign changed, if so add to recalculate
+	}
 
 	return 0;
 }
