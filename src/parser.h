@@ -538,11 +538,22 @@ public:
 		return false;
 	}
 
-	std::shared_ptr<int> get_value(const std::string& var_name, const std::map<std::string, int>& const_table) {
+	/*!
+		@brief Returns the integer value of number or const symbol. Returns nullptr if it is undefined.
+	*/
+	std::shared_ptr<int> get_value(const std::map<std::string, int>& const_table) {
 		if (_number) {
 			return std::make_shared<int>(_number->int_value());
 		}
 		return _identifier->int_value(const_table);
+	}
+
+	std::vector<std::string> all_variables(const std::map<std::string, int>& const_table) const {
+		auto result = std::vector<std::string>();
+		if (!_identifier) return result;
+		if (const_table.find(_identifier->str()) == const_table.cend())
+			result.push_back(_identifier->str());
+		return result;
 	}
 };
 
@@ -601,19 +612,41 @@ public:
 	virtual bool is_sound() const final override {
 		return true;
 	}
+
+	inline std::shared_ptr<std::vector<int>> __get_values_helper(const std::shared_ptr<identifier_or_number>& expression, const std::string& var_name, const std::map<std::string, int>& const_table) const {
+		auto int_ptr = expression->get_value(const_table);
+		if (int_ptr) {
+			auto result = std::make_shared<std::vector<int>>();
+			result->push_back(*int_ptr);
+			return result;
+		}
+		else return nullptr;
+	}
+
 public:
 	bool contains_variable(const std::string& var_name) const {
 		return _left_expression->contains_variable(var_name) || _right_expression->contains_variable(var_name);
 	}
 
-	std::shared_ptr<std::vector<int>> get_values(const std::string& var_name) const {
+	/*!
+		@brief Returns the integer values var_name can take such that the equation evaluates true. Returns nullptr if it is undefined.
+		Error if var_name != CONST is contained.
+	*/
+	std::shared_ptr<std::vector<int>> get_values(const std::string& var_name, const std::map<std::string, int>& const_table) const {
 		if (_left_expression->contains_variable(var_name)) {
-			return std::make_shared<std::vector<int>>({_right_expression->get_value(var_name)});
+			return __get_values_helper(_right_expression, var_name, const_table);
 		}
 		if (_right_expression->contains_variable(var_name)) {
-			return std::make_shared<std::vector<int>>({ _left_expression->get_value(var_name) });
+			return __get_values_helper(_left_expression, var_name, const_table);
 		}
 		return nullptr;
+	}
+
+	std::vector<std::string> all_variables(const std::map<std::string, int>& const_table) const {
+		std::vector<std::string> result = _left_expression->all_variables(const_table);
+		std::vector<std::string> second = _right_expression->all_variables(const_table);
+		result.insert(result.end(), second.begin(), second.end());
+		return result;
 	}
 };
 
@@ -773,12 +806,15 @@ public:
 		return accumulator;
 	}
 
-	std::shared_ptr<std::vector<int>> get_values(const std::string& var_name) const {
+	/*!
+		@brief Returns set of all values var_name can have when this condition is satisfied.
+	*/
+	std::shared_ptr<std::vector<int>> get_values(const std::string& var_name, const std::map<std::string, int>& const_table) const {
 		if (_type == type::EQUATION) {
-			return _equation->get_values(var_name);
+			return _equation->get_values(var_name, const_table);
 		}
 		if (_type == type::SUB_CONDITION) {
-			return _sub_conditions[0]->get_values(var_name);
+			return _sub_conditions[0]->get_values(var_name, const_table);
 		}
 		// and - or
 		std::vector<std::shared_ptr<std::vector<int>>> sub_values;
@@ -786,8 +822,53 @@ public:
 			_sub_conditions.cbegin(),
 			_sub_conditions.cend(),
 			std::back_inserter(sub_values),
-			[&](const auto& x) { return x->get_values(); });
-		// accumulate here
+			[&](const auto& x) { return x->get_values(var_name, const_table); });
+		if (_type  == type::OR) {
+			return std::accumulate(
+				sub_values.cbegin(),
+				sub_values.cend(),
+				std::make_shared<std::vector<int>>(), // empty vector
+				[](auto s_ptr, auto s_ptr2) {
+					if (!s_ptr || !s_ptr2) return std::make_shared<std::vector<int>>(); // nullptr = all values possible.
+					s_ptr->insert(s_ptr->end(), s_ptr2->begin(), s_ptr2->end());
+					return s_ptr;
+				}
+			);
+		}
+		if (_type == type::AND) {
+			return std::accumulate(
+				sub_values.cbegin(),
+				sub_values.cend(),
+				std::shared_ptr<std::vector<int>>(), // nullptr
+				[](std::shared_ptr<std::vector<int>> s_ptr, std::shared_ptr<std::vector<int>> s_ptr2) {
+					if (!s_ptr) return s_ptr2;
+					if (!s_ptr2) return s_ptr;
+					auto new_end = std::remove_if(
+						s_ptr->begin(),
+						s_ptr->end(),
+						[&](int y) {
+							return std::find(s_ptr2->cbegin(), s_ptr2->cend(), y) == s_ptr2->cend();
+						}
+					);
+					s_ptr->erase(new_end, s_ptr->cend());
+					return s_ptr;
+				}
+			);
+		}
+		throw std::bad_exception();
+	}
+
+	std::vector<std::string> all_variables(const std::map<std::string, int>& const_table) const {
+		if (_type == type::OR || _type == type::AND || _type == type::SUB_CONDITION) {
+			std::vector<std::string> result;
+			for (auto& sub : _sub_conditions) {
+				const auto sub_var = sub->all_variables(const_table);
+				result.insert(result.end(), sub_var.begin(), sub_var.end());
+			}
+			return result;
+		}
+		// _type == type::EQUATION
+		return _equation->all_variables(const_table);
 	}
 
 };
