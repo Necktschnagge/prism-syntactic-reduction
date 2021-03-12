@@ -1700,13 +1700,14 @@ private:
 public:
 	template <class _TokenType>
 	std::list<std::shared_ptr<_TokenType>> children_of_kind() {
-		std::list<std::shared_ptr<_TokenType>> down_casted;
-		std::transform(children.cbegin(),
+		std::list<std::shared_ptr<token>> down_castable;
+		std::copy_if(children.cbegin(),
 			children.cend(),
-			std::back_inserter(down_casted),
+			std::back_inserter(down_castable),
 			[](const std::shared_ptr<token>& ptr) { return std::dynamic_pointer_cast<_TokenType>(ptr); }
 		);
-		(void)std::remove_if(down_casted.begin(), down_casted.end(), [](auto ptr) { return ptr.operator bool(); });
+		std::list<std::shared_ptr<_TokenType>> down_casted;
+		std::transform(down_castable.begin(), down_castable.end(), std::back_inserter(down_casted), [](auto ptr) { return std::dynamic_pointer_cast<_TokenType>(ptr); });
 		return down_casted;
 	}
 

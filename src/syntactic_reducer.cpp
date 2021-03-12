@@ -25,7 +25,8 @@ int cli(int argc, char** argv) {
 	// values of const symbols:
 	const std::map<std::string, int> const_table{ [&] {
 		std::map<std::string, int> const_table;
-		for (const auto& const_def : ftoken._dtmc_body_component->const_definitions()) {
+		auto const_def_container = ftoken._dtmc_body_component->const_definitions();
+		for (const auto& const_def : const_def_container) {
 			const_table[const_def->_constant_identifier->str()] = *const_def->_expression->get_value(const_table); // check nullptr?
 		}
 		return const_table;
@@ -80,7 +81,7 @@ int cli(int argc, char** argv) {
 				const auto& post_condition = std::get<3>(transition->_post_conditions[post_index]);
 				std::shared_ptr<std::vector<int>> post_values = post_condition->get_values(var_name_next, const_table);
 				// check for no /more values here! ###
-				program_graph.push_back(std::make_tuple((*pre_values)[0], (*post_values)[0], transition, post_condition));
+				program_graph.push_back(std::make_tuple((*pre_values)[0], (*post_values)[0], transition, post_condition)); //## fix vector subscript error here!
 			}
 		}
 
