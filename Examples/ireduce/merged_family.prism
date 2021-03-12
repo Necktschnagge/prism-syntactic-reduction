@@ -1,0 +1,586 @@
+dtmc
+
+formula failure = y_Integrator_44480461=error;
+
+const int RMAX = 2;
+const int Fuel_Mass_Output_1 = 0;
+const int FromWs_Output_2 = 1;
+const int vCruise_Output_3 = 2;
+const int Memory_Output_4 = 3;
+const int Sum1_Output_5 = 4;
+const int P_Output_6 = 5;
+const int I_Output_7 = 6;
+const int TSamp_Output_8 = 7;
+const int UD_Output_9 = 8;
+const int Diff_Output_10 = 9;
+const int Sum4_Output_11 = 10;
+const int Spent_fuel_Output_12 = 11;
+const int Sum_Output_13 = 12;
+const int Vehicle_Mass_Output_14 = 13;
+const int Sum3_Output_15 = 14;
+const int Engine_thrust_Output_16 = 15;
+const int minus_one_Output_17 = 16;
+const int prod_Output_18 = 17;
+const int Math_Function_Output_19 = 18;
+const int Drag_force_Output_20 = 19;
+const int Sum2_Output_21 = 20;
+const int Acceleration_Output_22 = 21;
+const int Integrator_Output_23 = 22;
+const int Velocity_Output_24 = 23;
+const int Memory_Update_25 = 24;
+const int I_Update_26 = 25;
+const int UD_Update_27 = 26;
+const int Spent_fuel_Update_28 = 27;
+const int Integrator_Update_29 = 28;
+const int check_redandancy0 = 29;
+const int Fuel_Mass_Output_1_2 = 30;
+const int Fuel_Mass_Output_1_3 = 31;
+const int compare0 = 32;
+const int stop_system = 33;
+const int check_redandancy1 = 34;
+const int FromWs_Output_2_2 = 35;
+const int FromWs_Output_2_3 = 36;
+const int compare1 = 37;
+const int check_redandancy2 = 38;
+const int vCruise_Output_3_2 = 39;
+const int vCruise_Output_3_3 = 40;
+const int compare2 = 41;
+const int check_redandancy3 = 42;
+const int Memory_Output_4_2 = 43;
+const int Memory_Output_4_3 = 44;
+const int compare3 = 45;
+const int check_redandancy4 = 46;
+const int Sum1_Output_5_2 = 47;
+const int Sum1_Output_5_3 = 48;
+const int compare4 = 49;
+const int check_redandancy5 = 50;
+const int P_Output_6_2 = 51;
+const int P_Output_6_3 = 52;
+const int compare5 = 53;
+const int check_redandancy6 = 54;
+const int I_Output_7_2 = 55;
+const int I_Output_7_3 = 56;
+const int compare6 = 57;
+const int check_redandancy7 = 58;
+const int TSamp_Output_8_2 = 59;
+const int TSamp_Output_8_3 = 60;
+const int compare7 = 61;
+const int check_redandancy8 = 62;
+const int UD_Output_9_2 = 63;
+const int UD_Output_9_3 = 64;
+const int compare8 = 65;
+const int check_redandancy9 = 66;
+const int Diff_Output_10_2 = 67;
+const int Diff_Output_10_3 = 68;
+const int compare9 = 69;
+const int check_redandancy10 = 70;
+const int Sum4_Output_11_2 = 71;
+const int Sum4_Output_11_3 = 72;
+const int compare10 = 73;
+const int check_redandancy11 = 74;
+const int Spent_fuel_Output_12_2 = 75;
+const int Spent_fuel_Output_12_3 = 76;
+const int compare11 = 77;
+const int check_redandancy12 = 78;
+const int Sum_Output_13_2 = 79;
+const int Sum_Output_13_3 = 80;
+const int compare12 = 81;
+const int check_redandancy13 = 82;
+const int Vehicle_Mass_Output_14_2 = 83;
+const int Vehicle_Mass_Output_14_3 = 84;
+const int compare13 = 85;
+const int check_redandancy14 = 86;
+const int Sum3_Output_15_2 = 87;
+const int Sum3_Output_15_3 = 88;
+const int compare14 = 89;
+const int check_redandancy15 = 90;
+const int Engine_thrust_Output_16_2 = 91;
+const int Engine_thrust_Output_16_3 = 92;
+const int compare15 = 93;
+const int check_redandancy16 = 94;
+const int minus_one_Output_17_2 = 95;
+const int minus_one_Output_17_3 = 96;
+const int compare16 = 97;
+const int check_redandancy17 = 98;
+const int prod_Output_18_2 = 99;
+const int prod_Output_18_3 = 100;
+const int compare17 = 101;
+const int check_redandancy18 = 102;
+const int Math_Function_Output_19_2 = 103;
+const int Math_Function_Output_19_3 = 104;
+const int compare18 = 105;
+const int check_redandancy19 = 106;
+const int Drag_force_Output_20_2 = 107;
+const int Drag_force_Output_20_3 = 108;
+const int compare19 = 109;
+const int check_redandancy20 = 110;
+const int Sum2_Output_21_2 = 111;
+const int Sum2_Output_21_3 = 112;
+const int compare20 = 113;
+const int check_redandancy21 = 114;
+const int Acceleration_Output_22_2 = 115;
+const int Acceleration_Output_22_3 = 116;
+const int compare21 = 117;
+const int check_redandancy22 = 118;
+const int Integrator_Output_23_2 = 119;
+const int Integrator_Output_23_3 = 120;
+const int compare22 = 121;
+const int check_redandancy23 = 122;
+const int Memory_Update_25_2 = 123;
+const int Memory_Update_25_3 = 124;
+const int compare23 = 125;
+const int check_redandancy24 = 126;
+const int I_Update_26_2 = 127;
+const int I_Update_26_3 = 128;
+const int compare24 = 129;
+const int check_redandancy25 = 130;
+const int UD_Update_27_2 = 131;
+const int UD_Update_27_3 = 132;
+const int compare25 = 133;
+const int check_redandancy26 = 134;
+const int Spent_fuel_Update_28_2 = 135;
+const int Spent_fuel_Update_28_3 = 136;
+const int compare26 = 137;
+const int check_redandancy27 = 138;
+const int Integrator_Update_29_2 = 139;
+const int Integrator_Update_29_3 = 140;
+const int compare27 = 141;
+const int no = 0;
+const int v = 1;
+const int ok = 0;
+const int error = 1;
+const int prop_1 = 2;
+const int prop_2 = 3;
+const int c = 2;
+
+global _VehicleMass : [0..3];
+global _FuelMass : [0..3];
+global _SignalBuilder : [0..3];
+global y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2 : [0..3];
+global _DragForce : [0..3];
+global _MathFunction : [0..3];
+global cf : [0..142];
+global y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868 : [0..3];
+global _Sum2 : [0..3];
+global _EngineThrust : [0..3];
+global y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826 : [0..3];
+global y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643 : [0..3];
+global _Prod : [0..3];
+global _MinusOne : [0..3];
+global y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548 : [0..3];
+global _Sum4 : [0..3];
+global y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468 : [0..3];
+global _Sum1 : [0..3];
+global x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369 : [0..3];
+global _D : [0..3];
+global y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850 : [0..3];
+global _P : [0..3];
+global y_P_2955566056_y_Spent_fuel_3470213950 : [0..3];
+global _SpentFuel : [0..3];
+global y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305 : [0..3];
+global x_UD_1_351744370 : [0..3];
+global x_I_1_4231554088 : [0..3];
+global _I : [0..3];
+global x_Spent_fuel_1_1720696567 : [0..3];
+global _Sum5 : [0..3];
+global _Memory : [0..3];
+global x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719 : [0..3];
+global x_Memory_1_2804971516 : [0..3];
+global _Sum3 : [0..3];
+global y_Integrator_44480461 : [0..3];
+global x_Integrator_1_340641100 : [0..3];
+global _Acceleration : [0..3];
+global _Integrator : [0..3];
+global r : [0..RMAX];
+global _vCruise : [0..3];
+
+module control_flowerror_propagation
+
+	[Fuel_Mass_Output_1] cf=Fuel_Mass_Output_1 -> 1.0 : (cf'=check_redandancy0) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_1);
+	[FromWs_Output_2] cf=FromWs_Output_2 -> 1.0 : (cf'=check_redandancy1) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_1);
+	[vCruise_Output_3] cf=vCruise_Output_3&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> 0.9690030399039999 : (cf'=check_redandancy2) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_1) + 3.0996960095999997e-2 : (cf'=check_redandancy2) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[vCruise_Output_3] cf=vCruise_Output_3&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1 -> 1.0 : (cf'=check_redandancy2) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[Memory_Output_4] cf=Memory_Output_4&(y_Integrator_44480461=ok&x_Memory_1_2804971516=ok) -> 0.9800000000000001 : (cf'=check_redandancy3) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_1) + 2.0e-2 : (cf'=check_redandancy3) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[Memory_Output_4] cf=Memory_Output_4&(y_Integrator_44480461!=ok|x_Memory_1_2804971516!=ok) -> 1.0 : (cf'=check_redandancy3) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[Sum1_Output_5] cf=Sum1_Output_5&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1) -> 0.9740022399360001 : (cf'=check_redandancy4) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_1) + 2.5997760063999998e-2 : (cf'=check_redandancy4) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[Sum1_Output_5] cf=Sum1_Output_5&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305!=prop_1) -> 1.0 : (cf'=check_redandancy4) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[P_Output_6] cf=P_Output_6&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> 0.9690030399039999 : (cf'=check_redandancy5) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_1) + 3.0996960095999997e-2 : (cf'=check_redandancy5) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_2);
+	[P_Output_6] cf=P_Output_6&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1 -> 1.0 : (cf'=check_redandancy5) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_2);
+	[I_Output_7] cf=I_Output_7&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1&x_I_1_4231554088=ok) -> 0.9590061396000096 : (cf'=check_redandancy6) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_1) + 4.099386039999041e-2 : (cf'=check_redandancy6) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[I_Output_7] cf=I_Output_7&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1|x_I_1_4231554088!=ok) -> 1.0 : (cf'=check_redandancy6) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[TSamp_Output_8] cf=TSamp_Output_8&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> 0.9690030399039999 : (cf'=check_redandancy7) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_1) + 3.0996960095999997e-2 : (cf'=check_redandancy7) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[TSamp_Output_8] cf=TSamp_Output_8&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1 -> 1.0 : (cf'=check_redandancy7) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[UD_Output_9] cf=UD_Output_9&x_UD_1_351744370=ok -> 0.98400064 : (cf'=check_redandancy8) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_1) + 1.5999360000000004e-2 : (cf'=check_redandancy8) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[UD_Output_9] cf=UD_Output_9&x_UD_1_351744370!=ok -> 1.0 : (cf'=check_redandancy8) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[Diff_Output_10] cf=Diff_Output_10&(y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1) -> 0.9740022399360001 : (cf'=check_redandancy9) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_1) + 2.5997760063999998e-2 : (cf'=check_redandancy9) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Diff_Output_10] cf=Diff_Output_10&(y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850!=prop_1|y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1) -> 1.0 : (cf'=check_redandancy9) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Sum4_Output_11] cf=Sum4_Output_11&((y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1)&y_P_2955566056_y_Spent_fuel_3470213950=prop_1) -> 0.9740022399360001 : (cf'=check_redandancy10) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_1) + 2.5997760063999998e-2 : (cf'=check_redandancy10) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[Sum4_Output_11] cf=Sum4_Output_11&((y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826!=prop_1|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305!=prop_1)|y_P_2955566056_y_Spent_fuel_3470213950!=prop_1) -> 1.0 : (cf'=check_redandancy10) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[Spent_fuel_Output_12] cf=Spent_fuel_Output_12&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1&x_Spent_fuel_1_1720696567=ok) -> 0.9590061396000096 : (cf'=check_redandancy11) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_1) + 4.099386039999041e-2 : (cf'=check_redandancy11) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_2);
+	[Spent_fuel_Output_12] cf=Spent_fuel_Output_12&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1|x_Spent_fuel_1_1720696567!=ok) -> 1.0 : (cf'=check_redandancy11) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_2);
+	[Sum_Output_13] cf=Sum_Output_13&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1&y_P_2955566056_y_Spent_fuel_3470213950=prop_1) -> 0.9740022399360001 : (cf'=check_redandancy12) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_1) + 2.5997760063999998e-2 : (cf'=check_redandancy12) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Sum_Output_13] cf=Sum_Output_13&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719!=prop_1|y_P_2955566056_y_Spent_fuel_3470213950!=prop_1) -> 1.0 : (cf'=check_redandancy12) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Vehicle_Mass_Output_14] cf=Vehicle_Mass_Output_14 -> 1.0 : (cf'=check_redandancy13) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_1);
+	[Sum3_Output_15] cf=Sum3_Output_15&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1) -> 0.9740022399360001 : (cf'=check_redandancy14) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_1) + 2.5997760063999998e-2 : (cf'=check_redandancy14) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[Sum3_Output_15] cf=Sum3_Output_15&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826!=prop_1|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643!=prop_1) -> 1.0 : (cf'=check_redandancy14) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[Engine_thrust_Output_16] cf=Engine_thrust_Output_16&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1 -> 0.9690030399039999 : (cf'=check_redandancy15) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_1) + 3.0996960095999997e-2 : (cf'=check_redandancy15) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Engine_thrust_Output_16] cf=Engine_thrust_Output_16&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1 -> 1.0 : (cf'=check_redandancy15) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[minus_one_Output_17] cf=minus_one_Output_17&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1 -> 0.9690030399039999 : (cf'=check_redandancy16) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_1) + 3.0996960095999997e-2 : (cf'=check_redandancy16) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[minus_one_Output_17] cf=minus_one_Output_17&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1 -> 1.0 : (cf'=check_redandancy16) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[prod_Output_18] cf=prod_Output_18&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1) -> 0.9800000000000001 : (cf'=check_redandancy17) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_1) + 2.0e-2 : (cf'=check_redandancy17) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[prod_Output_18] cf=prod_Output_18&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868!=prop_1) -> 1.0 : (cf'=check_redandancy17) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[Math_Function_Output_19] cf=Math_Function_Output_19&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1 -> 0.9800000000000001 : (cf'=check_redandancy18) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_1) + 2.0e-2 : (cf'=check_redandancy18) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[Math_Function_Output_19] cf=Math_Function_Output_19&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1 -> 1.0 : (cf'=check_redandancy18) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[Drag_force_Output_20] cf=Drag_force_Output_20&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1 -> 0.9690030399039999 : (cf'=check_redandancy19) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_1) + 3.0996960095999997e-2 : (cf'=check_redandancy19) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[Drag_force_Output_20] cf=Drag_force_Output_20&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868!=prop_1 -> 1.0 : (cf'=check_redandancy19) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[Sum2_Output_21] cf=Sum2_Output_21&((y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1) -> 0.9740022399360001 : (cf'=check_redandancy20) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_1) + 2.5997760063999998e-2 : (cf'=check_redandancy20) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[Sum2_Output_21] cf=Sum2_Output_21&((y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826!=prop_1)|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643!=prop_1) -> 1.0 : (cf'=check_redandancy20) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[Acceleration_Output_22] cf=Acceleration_Output_22&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1) -> 0.9800000000000001 : (cf'=check_redandancy21) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_1) + 2.0e-2 : (cf'=check_redandancy21) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[Acceleration_Output_22] cf=Acceleration_Output_22&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868!=prop_1|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719!=prop_1) -> 1.0 : (cf'=check_redandancy21) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[Integrator_Output_23] cf=Integrator_Output_23&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&x_Integrator_1_340641100=ok) -> 0.9590061396000096 : (cf'=check_redandancy22) & (y_Integrator_44480461'=ok) + 4.099386039999041e-2 : (cf'=check_redandancy22) & (y_Integrator_44480461'=error);
+	[Integrator_Output_23] cf=Integrator_Output_23&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|x_Integrator_1_340641100!=ok) -> 1.0 : (cf'=check_redandancy22) & (y_Integrator_44480461'=error);
+	[Velocity_Output_24] cf=Velocity_Output_24 -> 1.0 : (cf'=Memory_Update_25);
+	[Memory_Update_25] cf=Memory_Update_25&x_Memory_1_2804971516=ok -> 0.9800000000000001 : (cf'=check_redandancy23) & (x_Memory_1_2804971516'=ok) + 2.0e-2 : (cf'=check_redandancy23) & (x_Memory_1_2804971516'=error);
+	[Memory_Update_25] cf=Memory_Update_25&x_Memory_1_2804971516!=ok -> 1.0 : (cf'=check_redandancy23) & (x_Memory_1_2804971516'=error);
+	[I_Update_26] cf=I_Update_26&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1) -> 0.98400064 : (cf'=check_redandancy24) & (x_I_1_4231554088'=ok) + 1.5999360000000004e-2 : (cf'=check_redandancy24) & (x_I_1_4231554088'=error);
+	[I_Update_26] cf=I_Update_26&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305!=prop_1|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1) -> 1.0 : (cf'=check_redandancy24) & (x_I_1_4231554088'=error);
+	[UD_Update_27] cf=UD_Update_27&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 -> 0.98400064 : (cf'=check_redandancy25) & (x_UD_1_351744370'=ok) + 1.5999360000000004e-2 : (cf'=check_redandancy25) & (x_UD_1_351744370'=error);
+	[UD_Update_27] cf=UD_Update_27&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850!=prop_1 -> 1.0 : (cf'=check_redandancy25) & (x_UD_1_351744370'=error);
+	[Spent_fuel_Update_28] cf=Spent_fuel_Update_28&(y_P_2955566056_y_Spent_fuel_3470213950=prop_1&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1) -> 0.98400064 : (cf'=check_redandancy26) & (x_Spent_fuel_1_1720696567'=ok) + 1.5999360000000004e-2 : (cf'=check_redandancy26) & (x_Spent_fuel_1_1720696567'=error);
+	[Spent_fuel_Update_28] cf=Spent_fuel_Update_28&(y_P_2955566056_y_Spent_fuel_3470213950!=prop_1|y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1) -> 1.0 : (cf'=check_redandancy26) & (x_Spent_fuel_1_1720696567'=error);
+	[Integrator_Update_29] cf=Integrator_Update_29&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_Integrator_44480461=ok) -> 0.98400064 : (cf'=check_redandancy27) & (x_Integrator_1_340641100'=ok) + 1.5999360000000004e-2 : (cf'=check_redandancy27) & (x_Integrator_1_340641100'=error);
+	[Integrator_Update_29] cf=Integrator_Update_29&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_Integrator_44480461!=ok) -> 1.0 : (cf'=check_redandancy27) & (x_Integrator_1_340641100'=error);
+	[check_redandancy0] cf=check_redandancy0&_FuelMass=no -> (cf'=FromWs_Output_2);
+	[check_redandancy0] cf=check_redandancy0&(_FuelMass=v|_FuelMass=c) -> (cf'=Fuel_Mass_Output_1_2);
+	[Fuel_Mass_Output_1_2] cf=Fuel_Mass_Output_1_2 -> 1.0 : (cf'=compare0) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_1);
+	[Fuel_Mass_Output_1_3] cf=Fuel_Mass_Output_1_3 -> 1.0 : (cf'=FromWs_Output_2) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_1);
+	[compare0] ((cf=compare0&_FuelMass=c)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=FromWs_Output_2);
+	[compare0] (cf=compare0&_FuelMass=c)&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=stop_system);
+	[compare0] ((cf=compare0&_FuelMass=v)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=FromWs_Output_2);
+	[compare0] (cf=compare0&_FuelMass=v)&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=Fuel_Mass_Output_1_3);
+	[stop_system] cf=stop_system -> 1.0 : (cf'=Fuel_Mass_Output_1);
+	[check_redandancy1] cf=check_redandancy1&_SignalBuilder=no -> (cf'=vCruise_Output_3);
+	[check_redandancy1] cf=check_redandancy1&(_SignalBuilder=v|_SignalBuilder=c) -> (cf'=FromWs_Output_2_2);
+	[FromWs_Output_2_2] cf=FromWs_Output_2_2 -> 1.0 : (cf'=compare1) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_1);
+	[FromWs_Output_2_3] cf=FromWs_Output_2_3 -> 1.0 : (cf'=vCruise_Output_3) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_1);
+	[compare1] ((cf=compare1&_SignalBuilder=c)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1)&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1 -> (cf'=vCruise_Output_3);
+	[compare1] (cf=compare1&_SignalBuilder=c)&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=error) -> (cf'=stop_system);
+	[compare1] ((cf=compare1&_SignalBuilder=v)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1)&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1 -> (cf'=vCruise_Output_3);
+	[compare1] (cf=compare1&_SignalBuilder=v)&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=error) -> (cf'=FromWs_Output_2_3);
+	[check_redandancy2] cf=check_redandancy2&_vCruise=no -> (cf'=Memory_Output_4);
+	[check_redandancy2] cf=check_redandancy2&(_vCruise=v|_vCruise=c) -> (cf'=vCruise_Output_3_2);
+	[vCruise_Output_3_2] cf=vCruise_Output_3_2&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> 0.9690030399039999 : (cf'=compare2) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_1) + 3.0996960095999997e-2 : (cf'=compare2) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[vCruise_Output_3_2] cf=vCruise_Output_3_2&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1 -> 1.0 : (cf'=compare2) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[vCruise_Output_3_3] cf=vCruise_Output_3_3&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> 0.9690030399039999 : (cf'=Memory_Output_4) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_1) + 3.0996960095999997e-2 : (cf'=Memory_Output_4) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[vCruise_Output_3_3] cf=vCruise_Output_3_3&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1 -> 1.0 : (cf'=Memory_Output_4) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[compare2] ((cf=compare2&_vCruise=c)&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1)&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 -> (cf'=Memory_Output_4);
+	[compare2] (cf=compare2&_vCruise=c)&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=error|y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=error) -> (cf'=stop_system);
+	[compare2] ((cf=compare2&_vCruise=v)&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1)&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 -> (cf'=Memory_Output_4);
+	[compare2] (cf=compare2&_vCruise=v)&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=error|y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=error) -> (cf'=vCruise_Output_3_3);
+	[check_redandancy3] cf=check_redandancy3&_Memory=no -> (cf'=Sum1_Output_5);
+	[check_redandancy3] cf=check_redandancy3&(_Memory=v|_Memory=c) -> (cf'=Memory_Output_4_2);
+	[Memory_Output_4_2] cf=Memory_Output_4_2&(y_Integrator_44480461=ok&x_Memory_1_2804971516=ok) -> 0.9800000000000001 : (cf'=compare3) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_1) + 2.0e-2 : (cf'=compare3) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[Memory_Output_4_2] cf=Memory_Output_4_2&(y_Integrator_44480461!=ok|x_Memory_1_2804971516!=ok) -> 1.0 : (cf'=compare3) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[Memory_Output_4_3] cf=Memory_Output_4_3&(y_Integrator_44480461=ok&x_Memory_1_2804971516=ok) -> 0.9800000000000001 : (cf'=Sum1_Output_5) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_1) + 2.0e-2 : (cf'=Sum1_Output_5) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[Memory_Output_4_3] cf=Memory_Output_4_3&(y_Integrator_44480461!=ok|x_Memory_1_2804971516!=ok) -> 1.0 : (cf'=Sum1_Output_5) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[compare3] ((cf=compare3&_Memory=c)&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=Sum1_Output_5);
+	[compare3] (cf=compare3&_Memory=c)&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=stop_system);
+	[compare3] ((cf=compare3&_Memory=v)&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=Sum1_Output_5);
+	[compare3] (cf=compare3&_Memory=v)&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=Memory_Output_4_3);
+	[check_redandancy4] cf=check_redandancy4&_Sum1=no -> (cf'=P_Output_6);
+	[check_redandancy4] cf=check_redandancy4&(_Sum1=v|_Sum1=c) -> (cf'=Sum1_Output_5_2);
+	[Sum1_Output_5_2] cf=Sum1_Output_5_2&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1) -> 0.9740022399360001 : (cf'=compare4) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_1) + 2.5997760063999998e-2 : (cf'=compare4) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[Sum1_Output_5_2] cf=Sum1_Output_5_2&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305!=prop_1) -> 1.0 : (cf'=compare4) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[Sum1_Output_5_3] cf=Sum1_Output_5_3&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1) -> 0.9740022399360001 : (cf'=P_Output_6) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_1) + 2.5997760063999998e-2 : (cf'=P_Output_6) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[Sum1_Output_5_3] cf=Sum1_Output_5_3&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305!=prop_1) -> 1.0 : (cf'=P_Output_6) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[compare4] ((cf=compare4&_Sum1=c)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1)&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 -> (cf'=P_Output_6);
+	[compare4] (cf=compare4&_Sum1=c)&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error|y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=error) -> (cf'=stop_system);
+	[compare4] ((cf=compare4&_Sum1=v)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1)&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 -> (cf'=P_Output_6);
+	[compare4] (cf=compare4&_Sum1=v)&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error|y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=error) -> (cf'=Sum1_Output_5_3);
+	[check_redandancy5] cf=check_redandancy5&_P=no -> (cf'=I_Output_7);
+	[check_redandancy5] cf=check_redandancy5&(_P=v|_P=c) -> (cf'=P_Output_6_2);
+	[P_Output_6_2] cf=P_Output_6_2&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> 0.9690030399039999 : (cf'=compare5) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_1) + 3.0996960095999997e-2 : (cf'=compare5) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[P_Output_6_2] cf=P_Output_6_2&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1 -> 1.0 : (cf'=compare5) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[P_Output_6_3] cf=P_Output_6_3&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> 0.9690030399039999 : (cf'=I_Output_7) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_1) + 3.0996960095999997e-2 : (cf'=I_Output_7) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_2);
+	[P_Output_6_3] cf=P_Output_6_3&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1 -> 1.0 : (cf'=I_Output_7) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_2);
+	[compare5] ((cf=compare5&_P=c)&y_P_2955566056_y_Spent_fuel_3470213950=prop_1)&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1 -> (cf'=I_Output_7);
+	[compare5] (cf=compare5&_P=c)&(y_P_2955566056_y_Spent_fuel_3470213950=error|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=error) -> (cf'=stop_system);
+	[compare5] ((cf=compare5&_P=v)&y_P_2955566056_y_Spent_fuel_3470213950=prop_1)&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1 -> (cf'=I_Output_7);
+	[compare5] (cf=compare5&_P=v)&(y_P_2955566056_y_Spent_fuel_3470213950=error|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=error) -> (cf'=P_Output_6_3);
+	[check_redandancy6] cf=check_redandancy6&_I=no -> (cf'=TSamp_Output_8);
+	[check_redandancy6] cf=check_redandancy6&(_I=v|_I=c) -> (cf'=I_Output_7_2);
+	[I_Output_7_2] cf=I_Output_7_2&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1&x_I_1_4231554088=ok) -> 0.9590061396000096 : (cf'=compare6) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_1) + 4.099386039999041e-2 : (cf'=compare6) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[I_Output_7_2] cf=I_Output_7_2&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1|x_I_1_4231554088!=ok) -> 1.0 : (cf'=compare6) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[I_Output_7_3] cf=I_Output_7_3&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1&x_I_1_4231554088=ok) -> 0.9590061396000096 : (cf'=TSamp_Output_8) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_1) + 4.099386039999041e-2 : (cf'=TSamp_Output_8) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[I_Output_7_3] cf=I_Output_7_3&(x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1|x_I_1_4231554088!=ok) -> 1.0 : (cf'=TSamp_Output_8) & (y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305'=prop_2);
+	[compare6] ((cf=compare6&_I=c)&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1)&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 -> (cf'=TSamp_Output_8);
+	[compare6] (cf=compare6&_I=c)&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=error|y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=error) -> (cf'=stop_system);
+	[compare6] ((cf=compare6&_I=v)&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1)&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 -> (cf'=TSamp_Output_8);
+	[compare6] (cf=compare6&_I=v)&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=error|y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=error) -> (cf'=I_Output_7_3);
+	[check_redandancy7] cf=check_redandancy7&_D=no -> (cf'=UD_Output_9);
+	[check_redandancy7] cf=check_redandancy7&(_D=v|_D=c) -> (cf'=TSamp_Output_8_2);
+	[TSamp_Output_8_2] cf=TSamp_Output_8_2&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> 0.9690030399039999 : (cf'=compare7) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_1) + 3.0996960095999997e-2 : (cf'=compare7) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[TSamp_Output_8_2] cf=TSamp_Output_8_2&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1 -> 1.0 : (cf'=compare7) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[TSamp_Output_8_3] cf=TSamp_Output_8_3&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> 0.9690030399039999 : (cf'=UD_Output_9) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_1) + 3.0996960095999997e-2 : (cf'=UD_Output_9) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[TSamp_Output_8_3] cf=TSamp_Output_8_3&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1 -> 1.0 : (cf'=UD_Output_9) & (y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850'=prop_2);
+	[compare7] ((cf=compare7&_D=c)&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1)&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1 -> (cf'=UD_Output_9);
+	[compare7] (cf=compare7&_D=c)&(y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=error|y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=error) -> (cf'=stop_system);
+	[compare7] ((cf=compare7&_D=v)&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1)&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1 -> (cf'=UD_Output_9);
+	[compare7] (cf=compare7&_D=v)&(y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=error|y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=error) -> (cf'=TSamp_Output_8_3);
+	[check_redandancy8] cf=check_redandancy8&_D=no -> (cf'=Diff_Output_10);
+	[check_redandancy8] cf=check_redandancy8&(_D=v|_D=c) -> (cf'=UD_Output_9_2);
+	[UD_Output_9_2] cf=UD_Output_9_2&x_UD_1_351744370=ok -> 0.98400064 : (cf'=compare8) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_1) + 1.5999360000000004e-2 : (cf'=compare8) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[UD_Output_9_2] cf=UD_Output_9_2&x_UD_1_351744370!=ok -> 1.0 : (cf'=compare8) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[UD_Output_9_3] cf=UD_Output_9_3&x_UD_1_351744370=ok -> 0.98400064 : (cf'=Diff_Output_10) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_1) + 1.5999360000000004e-2 : (cf'=Diff_Output_10) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[UD_Output_9_3] cf=UD_Output_9_3&x_UD_1_351744370!=ok -> 1.0 : (cf'=Diff_Output_10) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[compare8] ((cf=compare8&_D=c)&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1 -> (cf'=Diff_Output_10);
+	[compare8] (cf=compare8&_D=c)&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=error|y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error) -> (cf'=stop_system);
+	[compare8] ((cf=compare8&_D=v)&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1 -> (cf'=Diff_Output_10);
+	[compare8] (cf=compare8&_D=v)&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=error|y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error) -> (cf'=UD_Output_9_3);
+	[check_redandancy9] cf=check_redandancy9&_D=no -> (cf'=Sum4_Output_11);
+	[check_redandancy9] cf=check_redandancy9&(_D=v|_D=c) -> (cf'=Diff_Output_10_2);
+	[Diff_Output_10_2] cf=Diff_Output_10_2&(y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1) -> 0.9740022399360001 : (cf'=compare9) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_1) + 2.5997760063999998e-2 : (cf'=compare9) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[Diff_Output_10_2] cf=Diff_Output_10_2&(y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850!=prop_1|y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1) -> 1.0 : (cf'=compare9) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[Diff_Output_10_3] cf=Diff_Output_10_3&(y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1) -> 0.9740022399360001 : (cf'=Sum4_Output_11) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_1) + 2.5997760063999998e-2 : (cf'=Sum4_Output_11) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Diff_Output_10_3] cf=Diff_Output_10_3&(y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850!=prop_1|y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1) -> 1.0 : (cf'=Sum4_Output_11) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[compare9] ((cf=compare9&_D=c)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=Sum4_Output_11);
+	[compare9] (cf=compare9&_D=c)&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=stop_system);
+	[compare9] ((cf=compare9&_D=v)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=Sum4_Output_11);
+	[compare9] (cf=compare9&_D=v)&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=Diff_Output_10_3);
+	[check_redandancy10] cf=check_redandancy10&_Sum4=no -> (cf'=Spent_fuel_Output_12);
+	[check_redandancy10] cf=check_redandancy10&(_Sum4=v|_Sum4=c) -> (cf'=Sum4_Output_11_2);
+	[Sum4_Output_11_2] cf=Sum4_Output_11_2&((y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1)&y_P_2955566056_y_Spent_fuel_3470213950=prop_1) -> 0.9740022399360001 : (cf'=compare10) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_1) + 2.5997760063999998e-2 : (cf'=compare10) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[Sum4_Output_11_2] cf=Sum4_Output_11_2&((y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826!=prop_1|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305!=prop_1)|y_P_2955566056_y_Spent_fuel_3470213950!=prop_1) -> 1.0 : (cf'=compare10) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[Sum4_Output_11_3] cf=Sum4_Output_11_3&((y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1&y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1)&y_P_2955566056_y_Spent_fuel_3470213950=prop_1) -> 0.9740022399360001 : (cf'=Spent_fuel_Output_12) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_1) + 2.5997760063999998e-2 : (cf'=Spent_fuel_Output_12) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[Sum4_Output_11_3] cf=Sum4_Output_11_3&((y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826!=prop_1|y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305!=prop_1)|y_P_2955566056_y_Spent_fuel_3470213950!=prop_1) -> 1.0 : (cf'=Spent_fuel_Output_12) & (y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548'=prop_2);
+	[compare10] ((cf=compare10&_Sum4=c)&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=Spent_fuel_Output_12);
+	[compare10] (cf=compare10&_Sum4=c)&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=stop_system);
+	[compare10] ((cf=compare10&_Sum4=v)&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=Spent_fuel_Output_12);
+	[compare10] (cf=compare10&_Sum4=v)&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=Sum4_Output_11_3);
+	[check_redandancy11] cf=check_redandancy11&_SpentFuel=no -> (cf'=Sum_Output_13);
+	[check_redandancy11] cf=check_redandancy11&(_SpentFuel=v|_SpentFuel=c) -> (cf'=Spent_fuel_Output_12_2);
+	[Spent_fuel_Output_12_2] cf=Spent_fuel_Output_12_2&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1&x_Spent_fuel_1_1720696567=ok) -> 0.9590061396000096 : (cf'=compare11) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_1) + 4.099386039999041e-2 : (cf'=compare11) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Spent_fuel_Output_12_2] cf=Spent_fuel_Output_12_2&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1|x_Spent_fuel_1_1720696567!=ok) -> 1.0 : (cf'=compare11) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Spent_fuel_Output_12_3] cf=Spent_fuel_Output_12_3&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1&x_Spent_fuel_1_1720696567=ok) -> 0.9590061396000096 : (cf'=Sum_Output_13) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_1) + 4.099386039999041e-2 : (cf'=Sum_Output_13) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_2);
+	[Spent_fuel_Output_12_3] cf=Spent_fuel_Output_12_3&(y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1|x_Spent_fuel_1_1720696567!=ok) -> 1.0 : (cf'=Sum_Output_13) & (y_P_2955566056_y_Spent_fuel_3470213950'=prop_2);
+	[compare11] ((cf=compare11&_SpentFuel=c)&y_P_2955566056_y_Spent_fuel_3470213950=prop_1)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1 -> (cf'=Sum_Output_13);
+	[compare11] (cf=compare11&_SpentFuel=c)&(y_P_2955566056_y_Spent_fuel_3470213950=error|y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error) -> (cf'=stop_system);
+	[compare11] ((cf=compare11&_SpentFuel=v)&y_P_2955566056_y_Spent_fuel_3470213950=prop_1)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1 -> (cf'=Sum_Output_13);
+	[compare11] (cf=compare11&_SpentFuel=v)&(y_P_2955566056_y_Spent_fuel_3470213950=error|y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error) -> (cf'=Spent_fuel_Output_12_3);
+	[check_redandancy12] cf=check_redandancy12&_Sum5=no -> (cf'=Vehicle_Mass_Output_14);
+	[check_redandancy12] cf=check_redandancy12&(_Sum5=v|_Sum5=c) -> (cf'=Sum_Output_13_2);
+	[Sum_Output_13_2] cf=Sum_Output_13_2&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1&y_P_2955566056_y_Spent_fuel_3470213950=prop_1) -> 0.9740022399360001 : (cf'=compare12) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_1) + 2.5997760063999998e-2 : (cf'=compare12) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[Sum_Output_13_2] cf=Sum_Output_13_2&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719!=prop_1|y_P_2955566056_y_Spent_fuel_3470213950!=prop_1) -> 1.0 : (cf'=compare12) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[Sum_Output_13_3] cf=Sum_Output_13_3&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1&y_P_2955566056_y_Spent_fuel_3470213950=prop_1) -> 0.9740022399360001 : (cf'=Vehicle_Mass_Output_14) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_1) + 2.5997760063999998e-2 : (cf'=Vehicle_Mass_Output_14) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Sum_Output_13_3] cf=Sum_Output_13_3&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719!=prop_1|y_P_2955566056_y_Spent_fuel_3470213950!=prop_1) -> 1.0 : (cf'=Vehicle_Mass_Output_14) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[compare12] ((cf=compare12&_Sum5=c)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=Vehicle_Mass_Output_14);
+	[compare12] (cf=compare12&_Sum5=c)&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=stop_system);
+	[compare12] ((cf=compare12&_Sum5=v)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=Vehicle_Mass_Output_14);
+	[compare12] (cf=compare12&_Sum5=v)&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=Sum_Output_13_3);
+	[check_redandancy13] cf=check_redandancy13&_VehicleMass=no -> (cf'=Sum3_Output_15);
+	[check_redandancy13] cf=check_redandancy13&(_VehicleMass=v|_VehicleMass=c) -> (cf'=Vehicle_Mass_Output_14_2);
+	[Vehicle_Mass_Output_14_2] cf=Vehicle_Mass_Output_14_2 -> 1.0 : (cf'=compare13) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_1);
+	[Vehicle_Mass_Output_14_3] cf=Vehicle_Mass_Output_14_3 -> 1.0 : (cf'=Sum3_Output_15) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_1);
+	[compare13] ((cf=compare13&_VehicleMass=c)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1 -> (cf'=Sum3_Output_15);
+	[compare13] (cf=compare13&_VehicleMass=c)&(y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error) -> (cf'=stop_system);
+	[compare13] ((cf=compare13&_VehicleMass=v)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1 -> (cf'=Sum3_Output_15);
+	[compare13] (cf=compare13&_VehicleMass=v)&(y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error) -> (cf'=Vehicle_Mass_Output_14_3);
+	[check_redandancy14] cf=check_redandancy14&_Sum3=no -> (cf'=Engine_thrust_Output_16);
+	[check_redandancy14] cf=check_redandancy14&(_Sum3=v|_Sum3=c) -> (cf'=Sum3_Output_15_2);
+	[Sum3_Output_15_2] cf=Sum3_Output_15_2&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1) -> 0.9740022399360001 : (cf'=compare14) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_1) + 2.5997760063999998e-2 : (cf'=compare14) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[Sum3_Output_15_2] cf=Sum3_Output_15_2&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826!=prop_1|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643!=prop_1) -> 1.0 : (cf'=compare14) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[Sum3_Output_15_3] cf=Sum3_Output_15_3&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1) -> 0.9740022399360001 : (cf'=Engine_thrust_Output_16) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_1) + 2.5997760063999998e-2 : (cf'=Engine_thrust_Output_16) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[Sum3_Output_15_3] cf=Sum3_Output_15_3&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826!=prop_1|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643!=prop_1) -> 1.0 : (cf'=Engine_thrust_Output_16) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[compare14] ((cf=compare14&_Sum3=c)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1)&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1 -> (cf'=Engine_thrust_Output_16);
+	[compare14] (cf=compare14&_Sum3=c)&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error|y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=error) -> (cf'=stop_system);
+	[compare14] ((cf=compare14&_Sum3=v)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1)&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1 -> (cf'=Engine_thrust_Output_16);
+	[compare14] (cf=compare14&_Sum3=v)&(x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error|y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=error) -> (cf'=Sum3_Output_15_3);
+	[check_redandancy15] cf=check_redandancy15&_EngineThrust=no -> (cf'=minus_one_Output_17);
+	[check_redandancy15] cf=check_redandancy15&(_EngineThrust=v|_EngineThrust=c) -> (cf'=Engine_thrust_Output_16_2);
+	[Engine_thrust_Output_16_2] cf=Engine_thrust_Output_16_2&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1 -> 0.9690030399039999 : (cf'=compare15) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_1) + 3.0996960095999997e-2 : (cf'=compare15) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[Engine_thrust_Output_16_2] cf=Engine_thrust_Output_16_2&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1 -> 1.0 : (cf'=compare15) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[Engine_thrust_Output_16_3] cf=Engine_thrust_Output_16_3&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1 -> 0.9690030399039999 : (cf'=minus_one_Output_17) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_1) + 3.0996960095999997e-2 : (cf'=minus_one_Output_17) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Engine_thrust_Output_16_3] cf=Engine_thrust_Output_16_3&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1 -> 1.0 : (cf'=minus_one_Output_17) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[compare15] ((cf=compare15&_EngineThrust=c)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=minus_one_Output_17);
+	[compare15] (cf=compare15&_EngineThrust=c)&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=stop_system);
+	[compare15] ((cf=compare15&_EngineThrust=v)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=minus_one_Output_17);
+	[compare15] (cf=compare15&_EngineThrust=v)&(y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=Engine_thrust_Output_16_3);
+	[check_redandancy16] cf=check_redandancy16&_MinusOne=no -> (cf'=prod_Output_18);
+	[check_redandancy16] cf=check_redandancy16&(_MinusOne=v|_MinusOne=c) -> (cf'=minus_one_Output_17_2);
+	[minus_one_Output_17_2] cf=minus_one_Output_17_2&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1 -> 0.9690030399039999 : (cf'=compare16) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_1) + 3.0996960095999997e-2 : (cf'=compare16) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[minus_one_Output_17_2] cf=minus_one_Output_17_2&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1 -> 1.0 : (cf'=compare16) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[minus_one_Output_17_3] cf=minus_one_Output_17_3&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1 -> 0.9690030399039999 : (cf'=prod_Output_18) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_1) + 3.0996960095999997e-2 : (cf'=prod_Output_18) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[minus_one_Output_17_3] cf=minus_one_Output_17_3&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1 -> 1.0 : (cf'=prod_Output_18) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[compare16] ((cf=compare16&_MinusOne=c)&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=prod_Output_18);
+	[compare16] (cf=compare16&_MinusOne=c)&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=stop_system);
+	[compare16] ((cf=compare16&_MinusOne=v)&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 -> (cf'=prod_Output_18);
+	[compare16] (cf=compare16&_MinusOne=v)&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=error|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error) -> (cf'=minus_one_Output_17_3);
+	[check_redandancy17] cf=check_redandancy17&_Prod=no -> (cf'=Math_Function_Output_19);
+	[check_redandancy17] cf=check_redandancy17&(_Prod=v|_Prod=c) -> (cf'=prod_Output_18_2);
+	[prod_Output_18_2] cf=prod_Output_18_2&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1) -> 0.9800000000000001 : (cf'=compare17) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_1) + 2.0e-2 : (cf'=compare17) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_2);
+	[prod_Output_18_2] cf=prod_Output_18_2&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868!=prop_1) -> 1.0 : (cf'=compare17) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_2);
+	[prod_Output_18_3] cf=prod_Output_18_3&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1) -> 0.9800000000000001 : (cf'=Math_Function_Output_19) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_1) + 2.0e-2 : (cf'=Math_Function_Output_19) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[prod_Output_18_3] cf=prod_Output_18_3&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868!=prop_1) -> 1.0 : (cf'=Math_Function_Output_19) & (y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643'=prop_2);
+	[compare17] ((cf=compare17&_Prod=c)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1)&y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=prop_1 -> (cf'=Math_Function_Output_19);
+	[compare17] (cf=compare17&_Prod=c)&(y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error|y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=error) -> (cf'=stop_system);
+	[compare17] ((cf=compare17&_Prod=v)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1)&y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=prop_1 -> (cf'=Math_Function_Output_19);
+	[compare17] (cf=compare17&_Prod=v)&(y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=error|y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=error) -> (cf'=prod_Output_18_3);
+	[check_redandancy18] cf=check_redandancy18&_MathFunction=no -> (cf'=Drag_force_Output_20);
+	[check_redandancy18] cf=check_redandancy18&(_MathFunction=v|_MathFunction=c) -> (cf'=Math_Function_Output_19_2);
+	[Math_Function_Output_19_2] cf=Math_Function_Output_19_2&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1 -> 0.9800000000000001 : (cf'=compare18) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_1) + 2.0e-2 : (cf'=compare18) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_2);
+	[Math_Function_Output_19_2] cf=Math_Function_Output_19_2&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1 -> 1.0 : (cf'=compare18) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_2);
+	[Math_Function_Output_19_3] cf=Math_Function_Output_19_3&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1 -> 0.9800000000000001 : (cf'=Drag_force_Output_20) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_1) + 2.0e-2 : (cf'=Drag_force_Output_20) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[Math_Function_Output_19_3] cf=Math_Function_Output_19_3&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1 -> 1.0 : (cf'=Drag_force_Output_20) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[compare18] ((cf=compare18&_MathFunction=c)&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1)&y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=prop_1 -> (cf'=Drag_force_Output_20);
+	[compare18] (cf=compare18&_MathFunction=c)&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=error|y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=error) -> (cf'=stop_system);
+	[compare18] ((cf=compare18&_MathFunction=v)&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1)&y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=prop_1 -> (cf'=Drag_force_Output_20);
+	[compare18] (cf=compare18&_MathFunction=v)&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=error|y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=error) -> (cf'=Math_Function_Output_19_3);
+	[check_redandancy19] cf=check_redandancy19&_DragForce=no -> (cf'=Sum2_Output_21);
+	[check_redandancy19] cf=check_redandancy19&(_DragForce=v|_DragForce=c) -> (cf'=Drag_force_Output_20_2);
+	[Drag_force_Output_20_2] cf=Drag_force_Output_20_2&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1 -> 0.9690030399039999 : (cf'=compare19) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_1) + 3.0996960095999997e-2 : (cf'=compare19) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_2);
+	[Drag_force_Output_20_2] cf=Drag_force_Output_20_2&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868!=prop_1 -> 1.0 : (cf'=compare19) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_2);
+	[Drag_force_Output_20_3] cf=Drag_force_Output_20_3&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1 -> 0.9690030399039999 : (cf'=Sum2_Output_21) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_1) + 3.0996960095999997e-2 : (cf'=Sum2_Output_21) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[Drag_force_Output_20_3] cf=Drag_force_Output_20_3&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868!=prop_1 -> 1.0 : (cf'=Sum2_Output_21) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[compare19] ((cf=compare19&_DragForce=c)&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1)&y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=prop_1 -> (cf'=Sum2_Output_21);
+	[compare19] (cf=compare19&_DragForce=c)&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=error|y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=error) -> (cf'=stop_system);
+	[compare19] ((cf=compare19&_DragForce=v)&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1)&y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=prop_1 -> (cf'=Sum2_Output_21);
+	[compare19] (cf=compare19&_DragForce=v)&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=error|y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=error) -> (cf'=Drag_force_Output_20_3);
+	[check_redandancy20] cf=check_redandancy20&_Sum2=no -> (cf'=Acceleration_Output_22);
+	[check_redandancy20] cf=check_redandancy20&(_Sum2=v|_Sum2=c) -> (cf'=Sum2_Output_21_2);
+	[Sum2_Output_21_2] cf=Sum2_Output_21_2&((y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1) -> 0.9740022399360001 : (cf'=compare20) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_1) + 2.5997760063999998e-2 : (cf'=compare20) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_2);
+	[Sum2_Output_21_2] cf=Sum2_Output_21_2&((y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826!=prop_1)|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643!=prop_1) -> 1.0 : (cf'=compare20) & (y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2'=prop_2);
+	[Sum2_Output_21_3] cf=Sum2_Output_21_3&((y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1)&y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1) -> 0.9740022399360001 : (cf'=Acceleration_Output_22) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_1) + 2.5997760063999998e-2 : (cf'=Acceleration_Output_22) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[Sum2_Output_21_3] cf=Sum2_Output_21_3&((y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826!=prop_1)|y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643!=prop_1) -> 1.0 : (cf'=Acceleration_Output_22) & (y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868'=prop_2);
+	[compare20] ((cf=compare20&_Sum2=c)&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1)&y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=prop_1 -> (cf'=Acceleration_Output_22);
+	[compare20] (cf=compare20&_Sum2=c)&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=error|y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=error) -> (cf'=stop_system);
+	[compare20] ((cf=compare20&_Sum2=v)&y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1)&y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=prop_1 -> (cf'=Acceleration_Output_22);
+	[compare20] (cf=compare20&_Sum2=v)&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=error|y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=error) -> (cf'=Sum2_Output_21_3);
+	[check_redandancy21] cf=check_redandancy21&_Acceleration=no -> (cf'=Integrator_Output_23);
+	[check_redandancy21] cf=check_redandancy21&(_Acceleration=v|_Acceleration=c) -> (cf'=Acceleration_Output_22_2);
+	[Acceleration_Output_22_2] cf=Acceleration_Output_22_2&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1) -> 0.9800000000000001 : (cf'=compare21) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_1) + 2.0e-2 : (cf'=compare21) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Acceleration_Output_22_2] cf=Acceleration_Output_22_2&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868!=prop_1|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719!=prop_1) -> 1.0 : (cf'=compare21) & (y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826'=prop_2);
+	[Acceleration_Output_22_3] cf=Acceleration_Output_22_3&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1) -> 0.9800000000000001 : (cf'=Integrator_Output_23) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_1) + 2.0e-2 : (cf'=Integrator_Output_23) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[Acceleration_Output_22_3] cf=Acceleration_Output_22_3&(y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868!=prop_1|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719!=prop_1) -> 1.0 : (cf'=Integrator_Output_23) & (y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468'=prop_2);
+	[compare21] ((cf=compare21&_Acceleration=c)&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1 -> (cf'=Integrator_Output_23);
+	[compare21] (cf=compare21&_Acceleration=c)&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=error|y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error) -> (cf'=stop_system);
+	[compare21] ((cf=compare21&_Acceleration=v)&y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1)&y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1 -> (cf'=Integrator_Output_23);
+	[compare21] (cf=compare21&_Acceleration=v)&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=error|y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=error) -> (cf'=Acceleration_Output_22_3);
+	[check_redandancy22] cf=check_redandancy22&_Integrator=no -> (cf'=Velocity_Output_24);
+	[check_redandancy22] cf=check_redandancy22&(_Integrator=v|_Integrator=c) -> (cf'=Integrator_Output_23_2);
+	[Integrator_Output_23_2] cf=Integrator_Output_23_2&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&x_Integrator_1_340641100=ok) -> 0.9590061396000096 : (cf'=compare22) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_1) + 4.099386039999041e-2 : (cf'=compare22) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[Integrator_Output_23_2] cf=Integrator_Output_23_2&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|x_Integrator_1_340641100!=ok) -> 1.0 : (cf'=compare22) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[Integrator_Output_23_3] cf=Integrator_Output_23_3&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&x_Integrator_1_340641100=ok) -> 0.9590061396000096 : (cf'=Velocity_Output_24) & (y_Integrator_44480461'=ok) + 4.099386039999041e-2 : (cf'=Velocity_Output_24) & (y_Integrator_44480461'=error);
+	[Integrator_Output_23_3] cf=Integrator_Output_23_3&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|x_Integrator_1_340641100!=ok) -> 1.0 : (cf'=Velocity_Output_24) & (y_Integrator_44480461'=error);
+	[compare22] ((cf=compare22&_Integrator=c)&y_Integrator_44480461=ok)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1 -> (cf'=Velocity_Output_24);
+	[compare22] (cf=compare22&_Integrator=c)&(y_Integrator_44480461=error|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error) -> (cf'=stop_system);
+	[compare22] ((cf=compare22&_Integrator=v)&y_Integrator_44480461=ok)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1 -> (cf'=Velocity_Output_24);
+	[compare22] (cf=compare22&_Integrator=v)&(y_Integrator_44480461=error|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error) -> (cf'=Integrator_Output_23_3);
+	[check_redandancy23] cf=check_redandancy23&_Memory=no -> (cf'=I_Update_26);
+	[check_redandancy23] cf=check_redandancy23&(_Memory=v|_Memory=c) -> (cf'=Memory_Update_25_2);
+	[Memory_Update_25_2] cf=Memory_Update_25_2&x_Memory_1_2804971516=ok -> 0.9800000000000001 : (cf'=compare23) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_1) + 2.0e-2 : (cf'=compare23) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[Memory_Update_25_2] cf=Memory_Update_25_2&x_Memory_1_2804971516!=ok -> 1.0 : (cf'=compare23) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[Memory_Update_25_3] cf=Memory_Update_25_3&x_Memory_1_2804971516=ok -> 0.9800000000000001 : (cf'=I_Update_26) & (x_Memory_1_2804971516'=ok) + 2.0e-2 : (cf'=I_Update_26) & (x_Memory_1_2804971516'=error);
+	[Memory_Update_25_3] cf=Memory_Update_25_3&x_Memory_1_2804971516!=ok -> 1.0 : (cf'=I_Update_26) & (x_Memory_1_2804971516'=error);
+	[compare23] ((cf=compare23&_Memory=c)&x_Memory_1_2804971516=ok)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1 -> (cf'=I_Update_26);
+	[compare23] (cf=compare23&_Memory=c)&(x_Memory_1_2804971516=error|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error) -> (cf'=stop_system);
+	[compare23] ((cf=compare23&_Memory=v)&x_Memory_1_2804971516=ok)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1 -> (cf'=I_Update_26);
+	[compare23] (cf=compare23&_Memory=v)&(x_Memory_1_2804971516=error|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error) -> (cf'=Memory_Update_25_3);
+	[check_redandancy24] cf=check_redandancy24&_I=no -> (cf'=UD_Update_27);
+	[check_redandancy24] cf=check_redandancy24&(_I=v|_I=c) -> (cf'=I_Update_26_2);
+	[I_Update_26_2] cf=I_Update_26_2&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1) -> 0.98400064 : (cf'=compare24) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_1) + 1.5999360000000004e-2 : (cf'=compare24) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[I_Update_26_2] cf=I_Update_26_2&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305!=prop_1|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1) -> 1.0 : (cf'=compare24) & (x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719'=prop_2);
+	[I_Update_26_3] cf=I_Update_26_3&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1) -> 0.98400064 : (cf'=UD_Update_27) & (x_I_1_4231554088'=ok) + 1.5999360000000004e-2 : (cf'=UD_Update_27) & (x_I_1_4231554088'=error);
+	[I_Update_26_3] cf=I_Update_26_3&(y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305!=prop_1|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369!=prop_1) -> 1.0 : (cf'=UD_Update_27) & (x_I_1_4231554088'=error);
+	[compare24] ((cf=compare24&_I=c)&x_I_1_4231554088=ok)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1 -> (cf'=UD_Update_27);
+	[compare24] (cf=compare24&_I=c)&(x_I_1_4231554088=error|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error) -> (cf'=stop_system);
+	[compare24] ((cf=compare24&_I=v)&x_I_1_4231554088=ok)&x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1 -> (cf'=UD_Update_27);
+	[compare24] (cf=compare24&_I=v)&(x_I_1_4231554088=error|x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=error) -> (cf'=I_Update_26_3);
+	[check_redandancy25] cf=check_redandancy25&_D=no -> (cf'=Spent_fuel_Update_28);
+	[check_redandancy25] cf=check_redandancy25&(_D=v|_D=c) -> (cf'=UD_Update_27_2);
+	[UD_Update_27_2] cf=UD_Update_27_2&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 -> 0.98400064 : (cf'=compare25) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_1) + 1.5999360000000004e-2 : (cf'=compare25) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[UD_Update_27_2] cf=UD_Update_27_2&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850!=prop_1 -> 1.0 : (cf'=compare25) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[UD_Update_27_3] cf=UD_Update_27_3&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 -> 0.98400064 : (cf'=Spent_fuel_Update_28) & (x_UD_1_351744370'=ok) + 1.5999360000000004e-2 : (cf'=Spent_fuel_Update_28) & (x_UD_1_351744370'=error);
+	[UD_Update_27_3] cf=UD_Update_27_3&y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850!=prop_1 -> 1.0 : (cf'=Spent_fuel_Update_28) & (x_UD_1_351744370'=error);
+	[compare25] ((cf=compare25&_D=c)&x_UD_1_351744370=ok)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=Spent_fuel_Update_28);
+	[compare25] (cf=compare25&_D=c)&(x_UD_1_351744370=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=stop_system);
+	[compare25] ((cf=compare25&_D=v)&x_UD_1_351744370=ok)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=Spent_fuel_Update_28);
+	[compare25] (cf=compare25&_D=v)&(x_UD_1_351744370=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=UD_Update_27_3);
+	[check_redandancy26] cf=check_redandancy26&_SpentFuel=no -> (cf'=Integrator_Update_29);
+	[check_redandancy26] cf=check_redandancy26&(_SpentFuel=v|_SpentFuel=c) -> (cf'=Spent_fuel_Update_28_2);
+	[Spent_fuel_Update_28_2] cf=Spent_fuel_Update_28_2&(y_P_2955566056_y_Spent_fuel_3470213950=prop_1&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1) -> 0.98400064 : (cf'=compare26) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_1) + 1.5999360000000004e-2 : (cf'=compare26) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[Spent_fuel_Update_28_2] cf=Spent_fuel_Update_28_2&(y_P_2955566056_y_Spent_fuel_3470213950!=prop_1|y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1) -> 1.0 : (cf'=compare26) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[Spent_fuel_Update_28_3] cf=Spent_fuel_Update_28_3&(y_P_2955566056_y_Spent_fuel_3470213950=prop_1&y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1) -> 0.98400064 : (cf'=Integrator_Update_29) & (x_Spent_fuel_1_1720696567'=ok) + 1.5999360000000004e-2 : (cf'=Integrator_Update_29) & (x_Spent_fuel_1_1720696567'=error);
+	[Spent_fuel_Update_28_3] cf=Spent_fuel_Update_28_3&(y_P_2955566056_y_Spent_fuel_3470213950!=prop_1|y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548!=prop_1) -> 1.0 : (cf'=Integrator_Update_29) & (x_Spent_fuel_1_1720696567'=error);
+	[compare26] ((cf=compare26&_SpentFuel=c)&x_Spent_fuel_1_1720696567=ok)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=Integrator_Update_29);
+	[compare26] (cf=compare26&_SpentFuel=c)&(x_Spent_fuel_1_1720696567=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=stop_system);
+	[compare26] ((cf=compare26&_SpentFuel=v)&x_Spent_fuel_1_1720696567=ok)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=Integrator_Update_29);
+	[compare26] (cf=compare26&_SpentFuel=v)&(x_Spent_fuel_1_1720696567=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=Spent_fuel_Update_28_3);
+	[check_redandancy27] cf=check_redandancy27&_Integrator=no -> (cf'=Fuel_Mass_Output_1);
+	[check_redandancy27] cf=check_redandancy27&(_Integrator=v|_Integrator=c) -> (cf'=Integrator_Update_29_2);
+	[Integrator_Update_29_2] cf=Integrator_Update_29_2&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_Integrator_44480461=ok) -> 0.98400064 : (cf'=compare27) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_1) + 1.5999360000000004e-2 : (cf'=compare27) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[Integrator_Update_29_2] cf=Integrator_Update_29_2&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_Integrator_44480461!=ok) -> 1.0 : (cf'=compare27) & (x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369'=prop_2);
+	[Integrator_Update_29_3] cf=Integrator_Update_29_3&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1&y_Integrator_44480461=ok) -> 0.98400064 : (cf'=Fuel_Mass_Output_1) & (x_Integrator_1_340641100'=ok) + 1.5999360000000004e-2 : (cf'=Fuel_Mass_Output_1) & (x_Integrator_1_340641100'=error);
+	[Integrator_Update_29_3] cf=Integrator_Update_29_3&(y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468!=prop_1|y_Integrator_44480461!=ok) -> 1.0 : (cf'=Fuel_Mass_Output_1) & (x_Integrator_1_340641100'=error);
+	[compare27] ((cf=compare27&_Integrator=c)&x_Integrator_1_340641100=ok)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=Fuel_Mass_Output_1);
+	[compare27] (cf=compare27&_Integrator=c)&(x_Integrator_1_340641100=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=stop_system);
+	[compare27] ((cf=compare27&_Integrator=v)&x_Integrator_1_340641100=ok)&x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 -> (cf'=Fuel_Mass_Output_1);
+	[compare27] (cf=compare27&_Integrator=v)&(x_Integrator_1_340641100=error|x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=error) -> (cf'=Integrator_Update_29_3);
+
+endmodule
+
+module rcounter
+
+	[compare27] (cf=compare27) -> (r'=min(r+1, RMAX));
+
+endmodule
+
+rewards "rounds" 
+
+	cf=Fuel_Mass_Output_1 : 1;
+
+endrewards
+
+
+
+init
+	( _VehicleMass=no | _VehicleMass=v ) & 
+	( _FuelMass=no | _FuelMass=v ) & 
+	( _SignalBuilder=no | _SignalBuilder=v ) & 
+	( y_Sum2_1059244762_2_y_Drag_force_3259182871_2_y_Math_Function_4085514868_2_y_prod_3138168643_2=prop_1 ) & 
+	( _DragForce=no | _DragForce=v ) & 
+	( _MathFunction=no | _MathFunction=v ) & 
+	( cf=Fuel_Mass_Output_1 ) & 
+	( y_Sum3_1098380155_2_y_minus_one_3048299776_y_Sum2_1059244762_y_Math_Function_4085514868=prop_1 ) & 
+	( _Sum2=no | _Sum2=v ) & 
+	( _EngineThrust=no | _EngineThrust=v ) & 
+	( y_Spent_fuel_3470213950_2_y_UD_3294562705_2_y_Acceleration_2930586088_2_y_Diff_3502118422_y_Sum_3408549166_y_Engine_thrust_3051786826=prop_1 ) & 
+	( y_Engine_thrust_3051786826_2_y_Sum_3408549166_2_y_Sum4_1137515548_2_y_Diff_3502118422_2_y_minus_one_3048299776_2_y_Vehicle_Mass_2164879609_y_prod_3138168643=prop_1 ) & 
+	( _Prod=no | _Prod=v ) & 
+	( _MinusOne=no | _MinusOne=v ) & 
+	( y_TSamp_1129767850_2_y_UD_3294562705_y_Sum4_1137515548=prop_1 ) & 
+	( _Sum4=no | _Sum4=v ) & 
+	( y_Drag_force_3259182871_y_Acceleration_2930586088_y_Memory_1425742468=prop_1 ) & 
+	( _Sum1=no | _Sum1=v ) & 
+	( x_Integrator_1_340641100_2_y_Fuel_Mass_3855785719_2_x_Spent_fuel_1_1720696567_2_y_Memory_1425742468_2_x_UD_1_351744370_2_y_FromWs_3738961990_y_Sum1_1020109369=prop_1 ) & 
+	( _D=no | _D=v ) & 
+	( y_vCruise_1772660896_2_y_Sum1_1020109369_2_y_I_2681618305_2_y_TSamp_1129767850=prop_1 ) & 
+	( _P=no | _P=v ) & 
+	( y_P_2955566056_y_Spent_fuel_3470213950=prop_1 ) & 
+	( _SpentFuel=no | _SpentFuel=v ) & 
+	( y_FromWs_3738961990_2_y_P_2955566056_2_y_vCruise_1772660896_y_I_2681618305=prop_1 ) & 
+	( x_UD_1_351744370=ok ) & 
+	( x_I_1_4231554088=ok ) & 
+	( _I=no | _I=v ) & 
+	( x_Spent_fuel_1_1720696567=ok ) & 
+	( _Sum5=no | _Sum5=v ) & 
+	( _Memory=no | _Memory=v ) & 
+	( x_I_1_4231554088_2_x_Memory_1_2804971516_2_y_Integrator_44480461_2_y_Vehicle_Mass_2164879609_2_y_Sum3_1098380155_y_Fuel_Mass_3855785719=prop_1 ) & 
+	( x_Memory_1_2804971516=ok ) & 
+	( _Sum3=no | _Sum3=v ) & 
+	( y_Integrator_44480461=ok ) & 
+	( x_Integrator_1_340641100=ok ) & 
+	( _Acceleration=no | _Acceleration=v ) & 
+	( _Integrator=no | _Integrator=v ) & 
+	( r=0 ) & 
+	( _vCruise=no | _vCruise=v )
+endinit
