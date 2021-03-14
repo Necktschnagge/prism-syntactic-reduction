@@ -301,7 +301,7 @@ public:
 		else {
 			return nullptr;
 		}
-		
+
 	}
 };
 
@@ -823,13 +823,14 @@ public:
 			_sub_conditions.cend(),
 			std::back_inserter(sub_values),
 			[&](const auto& x) { return x->get_values(var_name, const_table); });
-		if (_type  == type::OR) {
+		if (_type == type::OR) {
 			return std::accumulate(
 				sub_values.cbegin(),
 				sub_values.cend(),
 				std::make_shared<std::vector<int>>(), // empty vector
 				[](auto s_ptr, auto s_ptr2) {
-					if (!s_ptr || !s_ptr2) return std::make_shared<std::vector<int>>(); // nullptr = all values possible.
+					if (!s_ptr) return s_ptr;
+					if (!s_ptr2) return s_ptr2; // nullptr = all values possible.
 					s_ptr->insert(s_ptr->end(), s_ptr2->begin(), s_ptr2->end());
 					return s_ptr;
 				}
@@ -1473,12 +1474,12 @@ public:
 	std::shared_ptr<space_token> _identifier_separator;
 	std::vector<
 		std::tuple<
-			std::shared_ptr<condition_token>,
-			std::shared_ptr<colon_token>,
-			std::shared_ptr<space_token>,
-			std::shared_ptr<float_token>,
-			std::shared_ptr<semicolon_token>,
-			std::shared_ptr<space_token>
+		std::shared_ptr<condition_token>,
+		std::shared_ptr<colon_token>,
+		std::shared_ptr<space_token>,
+		std::shared_ptr<float_token>,
+		std::shared_ptr<semicolon_token>,
+		std::shared_ptr<space_token>
 		>
 	> _reward_triggers;
 	std::shared_ptr<endrewards_token> _endrewards_token;
@@ -1594,7 +1595,7 @@ public:
 
 	using token::token;
 
-	virtual void parse_non_primitive() override { 
+	virtual void parse_non_primitive() override {
 		iterator rest_begin{ cbegin() };
 		iterator rest_end{ cend() };
 

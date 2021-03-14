@@ -81,6 +81,9 @@ int cli(int argc, char** argv) {
 				const auto& post_condition = std::get<3>(transition->_post_conditions[post_index]);
 				std::shared_ptr<std::vector<int>> post_values = post_condition->get_values(var_name_next, const_table);
 				// check for no /more values here! ###
+				if (!(pre_values->size() && post_values->size())) {
+					standard_logger().info("debug");
+				}
 				program_graph.push_back(std::make_tuple((*pre_values)[0], (*post_values)[0], transition, post_condition)); //## fix vector subscript error here!
 			}
 		}
