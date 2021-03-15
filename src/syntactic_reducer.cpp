@@ -284,8 +284,8 @@ again_while:
 		std::unordered_set<int> excluded;
 		auto& current_tuple{ graph[*ri] };
 		for (const auto& incident_node_name : neighbours(current_tuple)) {
-			if (is_active(current_tuple))
-				excluded.insert(color(current_tuple));
+			if (is_active(graph[incident_node_name]))
+				excluded.insert(color(graph[incident_node_name]));
 		}
 		int c{ 0 };
 		for (; c < std::numeric_limits<int>::max(); ++c) {
