@@ -5,6 +5,8 @@
 #include "debug_001.h"
 
 #include <memory>
+#include <unordered_set>
+#include <iostream>
 
 
 void test_something() {
@@ -133,7 +135,7 @@ int cli(int argc, char** argv) {
 	live_var_map live_vars;
 
 	const auto flag_of_liveness_tuple = [](liveness_tuple& tup) -> bool& { return std::get<0>(tup); };
-	const auto current_of_liveness_tuple = [](liveness_tuple& tup) { return std::get<1>(tup); };
+	const auto current_of_liveness_tuple = [](liveness_tuple& tup) -> std::vector<std::string>&{ return std::get<1>(tup); };
 	const auto changes_of_liveness_tuple = [](liveness_tuple& tup) { return std::get<2>(tup); };
 
 	// init live var sets from union of incident gen sets
@@ -225,9 +227,91 @@ again_while:
 		changes.clear();
 	}
 	// when here then all live set were computed.
-	// (please test it!!)
 
 
+	// build graph for collapsing variables:
+	std::map < std::string, std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>> graph; // node |-> (!removed, neighbours, active and inactive neighbours, neighbours that were not removed, color)
+
+	const auto is_active = [](std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>& t) -> bool& { return std::get<0>(t); };
+	const auto count_active_neighbours = [](std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>& t) -> int& { return std::get<1>(t); };
+	const auto neighbours = [](std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>& t) -> std::set<std::string>&{ return std::get<2>(t); };
+	const auto color = [](std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>& t) -> int& { return std::get<3>(t); };
+
+	for (auto& live_pair : live_vars) {
+		const std::vector<std::string>& vector_of_incident_var_names{ current_of_liveness_tuple(live_pair.second) };
+		for (auto iter = vector_of_incident_var_names.cbegin(); iter != vector_of_incident_var_names.cend(); ++iter) {
+			neighbours(graph[*iter]).insert(vector_of_incident_var_names.cbegin(), iter);
+			neighbours(graph[*iter]).insert(std::next(iter), vector_of_incident_var_names.cend());
+		}
+	}
+	for (auto& graph_pair : graph) {
+		is_active(graph_pair.second) = true;
+		count_active_neighbours(graph_pair.second) = neighbours(graph_pair.second).size();
+		color(graph_pair.second) = -1;
+	}
+	std::vector<std::string/*std::pair<std::string, std::set<std::string>>*/ > removed_nodes;
+
+	while (true) {
+		// while there are nodes, select one with min incidence:
+		auto selected{ graph.end() };
+		int min_seen{ std::numeric_limits<int>::max() };
+		for (auto iter{ graph.begin() }; iter != graph.end(); ++iter) {
+			if (is_active(iter->second)) {
+				int current_incidence{ count_active_neighbours(iter->second) };
+				if (current_incidence < min_seen) {
+					selected = iter;
+					min_seen = current_incidence;
+				}
+			}
+		}
+		if (selected == graph.end()) break; // all removed
+		// remove selected node:
+		const std::string& node_name{ selected->first };
+		// remove backward edges:
+		for (const auto& incident_node_name : neighbours(selected->second)) {
+				if (is_active(graph[incident_node_name])) {
+					--count_active_neighbours(graph[incident_node_name]);
+				}
+		}
+		// remove the node itself
+		removed_nodes.push_back(node_name);
+		is_active(graph[node_name]) = false;
+	}
+
+	// iterate list backwards and insert the smallest color not used by active neighbours:
+	for (auto ri{ removed_nodes.rbegin() }; ri != removed_nodes.rend(); ++ri) {
+		// select color
+		std::unordered_set<int> excluded;
+		auto& current_tuple{ graph[*ri] };
+		for (const auto& incident_node_name : neighbours(current_tuple)) {
+			if (is_active(current_tuple))
+				excluded.insert(color(current_tuple));
+		}
+		int c{ 0 };
+		for (; c < std::numeric_limits<int>::max(); ++c) {
+			if (excluded.find(c) == excluded.end())
+				break;
+		}
+		color(current_tuple) = c;
+		// reactivate
+		is_active(graph[*ri]) = true;
+	}
+
+	// output result:
+	std::cout << "\n\n::::: color map :::::\n\n";
+	for (auto& graph_pair : graph) {
+		std::cout << "Color " << color(graph_pair.second) << " for var " << graph_pair.first << std::endl;
+	}
+	for (int i{ 0 }; i < std::numeric_limits<int>::max(); ++i) {
+		std::vector<std::string> var_names;
+		for (auto& graph_pair : graph) {
+			if (color(graph_pair.second) == i) var_names.push_back(graph_pair.first);
+		}
+		if (var_names.empty()) break;
+		std::cout << "Variables for color " << i << " :\n\t";
+		for (const auto& s : var_names) std::cout << s << ", ";
+		std::cout << "\n";
+	}
 	return 0;
 }
 
