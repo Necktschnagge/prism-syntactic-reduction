@@ -1223,16 +1223,18 @@ public:
 	//std::shared_ptr<space_token> _pre_condition_separator;
 	std::shared_ptr<ascii_arrow_token> _arrow;
 	std::shared_ptr<space_token> _arrow_separator;
-	bool _simple_transition;
-	std::shared_ptr<condition_token> _simple_post_condition;
+	// bool _simple_transition;
+	//std::shared_ptr<condition_token> _simple_post_condition;
 	std::vector<
+		std::tuple<
+		std::optional<
 		std::tuple<
 		std::shared_ptr<float_token>,
 		std::shared_ptr<space_token>,
-		std::shared_ptr<colon_token>,
-		//std::shared_ptr<space_token>,
+		std::shared_ptr<colon_token>
+		>
+		>,
 		std::shared_ptr<condition_token>,
-		//std::shared_ptr<space_token>,
 		std::optional<
 		std::tuple<
 		std::shared_ptr<plus_token>,
@@ -1240,7 +1242,9 @@ public:
 		>
 		>
 		>
-	> _post_conditions;
+	> _regular_post_conditions;
+
+
 	std::shared_ptr<semicolon_token> _semicolon;
 
 	virtual void parse_non_primitive() override {
@@ -1303,10 +1307,13 @@ public:
 		rest_end = search_semicolon->prefix().end();
 
 		while (rest_begin != rest_end) {
-			_simple_transition = false;
 			auto search_colon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::colon);
 			if (search_colon == regex_iterator()) {
-				_simple_post_condition = std::make_shared< condition_token>(this, rest_begin, rest_end);
+				_regular_post_conditions.push_back({
+					std::optional<std::tuple<std::shared_ptr<float_token>,std::shared_ptr<space_token>,std::shared_ptr<colon_token>>>(),
+					std::make_shared< condition_token>(this, rest_begin, rest_end),
+					std::optional<std::tuple<std::shared_ptr<plus_token>,std::shared_ptr<space_token>>>()
+					});
 				break;
 			}
 			parse_error::assert_true(search_colon != regex_iterator(), R"(Could not find a ":" somewhere after "->" in transition.)");
@@ -1335,10 +1342,18 @@ public:
 				auto _plus_separator = std::make_shared<space_token>(this, rest_begin, search_plus_separator->suffix().begin());
 				rest_begin = search_plus_separator->suffix().begin();
 
-				_post_conditions.push_back({ _probability, _probability_separator, _colon_token, _condition, std::make_tuple(_plus, _plus_separator) });
+				_regular_post_conditions.push_back({
+					std::make_tuple(_probability, _probability_separator, _colon_token),
+					_condition,
+					std::make_tuple(_plus, _plus_separator)
+					});
 			}
 			else {
-				_post_conditions.push_back({ _probability, _probability_separator, _colon_token, _condition, std::tuple_element<4, typename decltype(_post_conditions)::value_type>::type() });
+				_regular_post_conditions.push_back({
+					std::make_tuple(_probability, _probability_separator, _colon_token),
+					_condition,
+					std::tuple_element<2, typename decltype(_regular_post_conditions)::value_type>::type()
+					});
 			}
 		}
 
@@ -1352,18 +1367,16 @@ public:
 		children.push_back(_arrow);
 		children.push_back(_arrow_separator);
 
-		if (_simple_post_condition) {
-			children.push_back(_simple_post_condition);
-		}
-
-		for (const auto& post_condition_tuple : _post_conditions) {
-			children.push_back(std::get<0>(post_condition_tuple));
+		for (const auto& post_condition_tuple : _regular_post_conditions) {
+			if (std::get<0>(post_condition_tuple).has_value()) {
+				children.push_back(std::get<0>(*std::get<0>(post_condition_tuple)));
+				children.push_back(std::get<1>(*std::get<0>(post_condition_tuple)));
+				children.push_back(std::get<2>(*std::get<0>(post_condition_tuple)));
+			}
 			children.push_back(std::get<1>(post_condition_tuple));
-			children.push_back(std::get<2>(post_condition_tuple));
-			children.push_back(std::get<3>(post_condition_tuple));
-			if (std::get<4>(post_condition_tuple).has_value()) {
-				children.push_back(std::get<0>(*std::get<4>(post_condition_tuple)));
-				children.push_back(std::get<1>(*std::get<4>(post_condition_tuple)));
+			if (std::get<2>(post_condition_tuple).has_value()) {
+				children.push_back(std::get<0>(*std::get<2>(post_condition_tuple)));
+				children.push_back(std::get<1>(*std::get<2>(post_condition_tuple)));
 			}
 		}
 		children.push_back(_semicolon);

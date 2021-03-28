@@ -7,17 +7,36 @@
 #include <memory>
 #include <unordered_set>
 #include <iostream>
+#include <fstream>
 
 
-void test_something() {
-
-}
 
 int cli(int argc, char** argv) {
-	test_something();
-	standard_logger().info("Start Parsing example...");
 
-	auto ftoken = file_token(std::make_shared<std::string>(example_family()));
+	std::shared_ptr<std::string> model_string_ptr;
+
+	if (argc >= 2) {
+		std::ifstream model_ifstream;
+		model_ifstream.open(argv[1]);
+		model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
+	}
+
+	if (argc >= 3) {
+		std::ifstream prop_ifstream;
+		prop_ifstream.open(argv[2]);
+		auto property_list = std::make_shared<std::string>(std::istreambuf_iterator<char>(prop_ifstream), std::istreambuf_iterator<char>());
+	}
+
+	if (!model_string_ptr) {
+		model_string_ptr = std::make_shared<std::string>(example_family());
+	}
+
+
+	// when here then all live set were computed.
+	std::vector<std::string> excluded_vars{ "y_Integrator_44480461" };
+
+	standard_logger().info("Start Parsing example...");
+	auto ftoken = file_token(model_string_ptr);
 
 	ftoken.parse();
 
@@ -70,8 +89,8 @@ int cli(int argc, char** argv) {
 			std::vector<std::pair<bool, bool>> relevant_post_conditions; // check if variable is contained. (cf, cf')
 
 			// fill relevant_post_conditions
-			for (const auto& posts : transition->_post_conditions) {
-				const auto& post_condition = std::get<3>(posts); // ignore probability
+			for (const auto& posts : transition->_regular_post_conditions) {
+				const auto& post_condition = std::get<1>(posts); // ignore probability
 				relevant_post_conditions.push_back({
 						post_condition->contains_variable(var_name),
 						post_condition->contains_variable(var_name_next)
@@ -79,8 +98,11 @@ int cli(int argc, char** argv) {
 			}
 
 			std::shared_ptr<std::vector<int>> pre_values = transition->_pre_condition->get_values(var_name, const_table);
+			if (std::find(pre_values->begin(), pre_values->end(), 137) != pre_values->end()) {
+				standard_logger().info("should eventually be reached");
+			}
 			for (int post_index = 0; post_index < relevant_post_conditions.size(); ++post_index) {
-				const auto& post_condition = std::get<3>(transition->_post_conditions[post_index]);
+				const auto& post_condition = std::get<1>(transition->_regular_post_conditions[post_index]);
 				std::shared_ptr<std::vector<int>> post_values = post_condition->get_values(var_name_next, const_table);
 				// check for no /more values here! ###
 				if (!(pre_values->size() && post_values->size())) {
@@ -88,6 +110,9 @@ int cli(int argc, char** argv) {
 				}
 				program_graph.push_back(std::make_tuple((*pre_values)[0], (*post_values)[0], transition, post_condition)); //## fix vector subscript error here!
 			}
+		}
+		else {
+			standard_logger().warn("check here");
 		}
 
 	}
@@ -226,12 +251,9 @@ again_while:
 		}
 		changes.clear();
 	}
-	// when here then all live set were computed.
-
-	std::vector<std::string> excluded_vars{ "y_Integrator_44480461" };
 
 	// build graph for collapsing variables:
-	std::map < std::string, std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>> graph; // node |-> (!removed, count neighbours, active and inactive neighbours, color)
+	std::map<std::string, std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>> graph; // node |-> (!removed, count neighbours, active and inactive neighbours, color)
 
 	const auto is_active = [](std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>& t) -> bool& { return std::get<0>(t); };
 	const auto count_active_neighbours = [](std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>& t) -> int& { return std::get<1>(t); };
@@ -335,7 +357,31 @@ again_while:
 	//Output in prism Format:
 	standard_logger().info("prism format output\n");
 
-	ftoken.get_children();
+	auto& top_level_children = ftoken.get_children();
+
+	const std::function<void(token::token_list&)> print_model = [&](token::token_list& children_list) {
+		for (auto& child : children_list) {
+			if (child->is_primitive()) {
+				if (dynamic_cast<identifier_token*>(child.get())) {
+					const auto entry = graph.find(child->str());
+					if (entry != graph.end())
+						std::cout << "colored_" << color(entry->second);
+					else {
+						const auto entry = graph.find(child->str().substr(0, child->str().length() - 1));
+						if (entry != graph.end())
+							std::cout << "colored_" << color(entry->second) << "'";
+						else std::cout << child->str();
+					}
+				}
+				else std::cout << child->str();
+			}
+			else {
+				print_model(child->get_children());
+			}
+		}
+							};
+
+	print_model(top_level_children);
 
 	return 0;
 }
