@@ -85,6 +85,8 @@ public:
 
 	std::string str() const { return std::string(cbegin(), cend()); }
 
+	inline token_list& get_children() { return children; }
+
 };
 
 class primitive_regex_token : public token {

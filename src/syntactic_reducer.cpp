@@ -228,9 +228,10 @@ again_while:
 	}
 	// when here then all live set were computed.
 
+	std::vector<std::string> excluded_vars{ "y_Integrator_44480461" };
 
 	// build graph for collapsing variables:
-	std::map < std::string, std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>> graph; // node |-> (!removed, neighbours, active and inactive neighbours, neighbours that were not removed, color)
+	std::map < std::string, std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>> graph; // node |-> (!removed, count neighbours, active and inactive neighbours, color)
 
 	const auto is_active = [](std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>& t) -> bool& { return std::get<0>(t); };
 	const auto count_active_neighbours = [](std::tuple<bool, int, std::set<std::string> /*, std::set<std::string>*/, int>& t) -> int& { return std::get<1>(t); };
@@ -244,11 +245,29 @@ again_while:
 			neighbours(graph[*iter]).insert(std::next(iter), vector_of_incident_var_names.cend());
 		}
 	}
+	// fill in all var names that should not be collapsed with others:
+	for (const auto& excluded : excluded_vars) {
+		if (graph.find(excluded) != graph.end()) {
+			for (auto& graph_pair : graph) {
+				if (graph_pair.first != excluded)
+					neighbours(graph_pair.second).insert(excluded);
+				else
+					for (auto& inner_graph_pair : graph)
+						if (inner_graph_pair.first != excluded)
+							neighbours(graph_pair.second).insert(inner_graph_pair.first);
+			}
+		}
+	}
+
 	for (auto& graph_pair : graph) {
 		is_active(graph_pair.second) = true;
 		count_active_neighbours(graph_pair.second) = neighbours(graph_pair.second).size();
 		color(graph_pair.second) = -1;
 	}
+
+
+
+	// find a coloring
 	std::vector<std::string/*std::pair<std::string, std::set<std::string>>*/ > removed_nodes;
 
 	while (true) {
@@ -269,9 +288,9 @@ again_while:
 		const std::string& node_name{ selected->first };
 		// remove backward edges:
 		for (const auto& incident_node_name : neighbours(selected->second)) {
-				if (is_active(graph[incident_node_name])) {
-					--count_active_neighbours(graph[incident_node_name]);
-				}
+			if (is_active(graph[incident_node_name])) {
+				--count_active_neighbours(graph[incident_node_name]);
+			}
 		}
 		// remove the node itself
 		removed_nodes.push_back(node_name);
@@ -312,6 +331,12 @@ again_while:
 		for (const auto& s : var_names) std::cout << s << ", ";
 		std::cout << "\n";
 	}
+
+	//Output in prism Format:
+	standard_logger().info("prism format output\n");
+
+	ftoken.get_children();
+
 	return 0;
 }
 
