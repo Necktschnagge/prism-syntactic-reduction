@@ -885,7 +885,7 @@ public:
 	std::shared_ptr<space_token> _identifier_separator;
 	std::shared_ptr<equals_token> _equals_token;
 	std::shared_ptr<space_token> _equals_separator;
-	std::shared_ptr<expression_token> _expression;
+	std::shared_ptr<expression_token> _expression; // use identifier_or_number_token #####
 	std::shared_ptr<semicolon_token> _semicolon;
 
 	using token::token;
