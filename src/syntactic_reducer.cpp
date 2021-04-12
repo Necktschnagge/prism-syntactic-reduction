@@ -13,6 +13,8 @@
 
 int cli(int argc, char** argv) {
 
+	standard_logger().info(std::string("Running: ") + argv[0]);
+
 	std::shared_ptr<std::string> model_string_ptr;
 
 	if (argc >= 2) {
@@ -30,6 +32,11 @@ int cli(int argc, char** argv) {
 	if (!model_string_ptr) {
 		model_string_ptr = std::make_shared<std::string>(example_family());
 	}
+
+	// debug code:
+	//std::ifstream model_ifstream;
+	//model_ifstream.open(R"(..\..\Examples\bsp.prism)");
+	//model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
 
 
 	// when here then all live set were computed.
@@ -120,7 +127,7 @@ int cli(int argc, char** argv) {
 	std::map<std::pair<std::shared_ptr<transition_token>, std::shared_ptr<condition_token>>, std::vector<std::string>> gen_sets;
 	std::map<std::pair<std::shared_ptr<transition_token>, std::shared_ptr<condition_token>>, std::vector<std::string>> kill_sets;
 
-	// fil gen and kill sets
+	// fill gen and kill sets
 	for (const auto& edge : program_graph) {
 		const auto& tr = std::get<2>(edge);
 		const auto& post_cond = std::get<3>(edge);
@@ -267,6 +274,12 @@ again_while:
 			neighbours(graph[*iter]).insert(std::next(iter), vector_of_incident_var_names.cend());
 		}
 	}
+	// variables that are never generated to be live but are killed from liveness should be added:
+	for (const auto& pair : kill_sets) {
+		for (const auto& var_name : pair.second) {
+			graph[var_name];
+		}
+	}
 	// fill in all var names that should not be collapsed with others:
 	for (const auto& excluded : excluded_vars) {
 		if (graph.find(excluded) != graph.end()) {
@@ -286,8 +299,6 @@ again_while:
 		count_active_neighbours(graph_pair.second) = neighbours(graph_pair.second).size();
 		color(graph_pair.second) = -1;
 	}
-
-
 
 	// find a coloring
 	std::vector<std::string/*std::pair<std::string, std::set<std::string>>*/ > removed_nodes;
@@ -359,8 +370,27 @@ again_while:
 
 	auto& top_level_children = ftoken.get_children();
 
+	std::set<int> already_declared;
+
 	const std::function<void(token::token_list&)> print_model = [&](token::token_list& children_list) {
+		bool omit_newline{ false };
 		for (auto& child : children_list) {
+			if (omit_newline) {
+				auto is_space = dynamic_cast<space_token*>(child.get());
+				if (is_space) {
+					omit_newline = false;
+					continue;
+				}
+			}
+			omit_newline = false;
+			auto global_def = dynamic_cast<global_definition_token*>(child.get());
+			if (global_def) {
+				auto [iter, inserted] = already_declared.insert(color(graph[global_def->_global_identifier->str()]));
+				if (!inserted) {
+					omit_newline = true;
+					continue;
+				};
+			}
 			if (child->is_primitive()) {
 				if (dynamic_cast<identifier_token*>(child.get())) {
 					const auto entry = graph.find(child->str());
@@ -379,7 +409,7 @@ again_while:
 				print_model(child->get_children());
 			}
 		}
-							};
+	};
 
 	print_model(top_level_children);
 

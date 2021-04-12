@@ -273,6 +273,8 @@ class primitive_regex_token_template : public primitive_regex_token {
 };
 
 using double_quote_token = primitive_regex_token_template<&const_regexes::primitives::double_quote>;
+using init_token = primitive_regex_token_template<&const_regexes::primitives::init_keyword>;
+
 
 
 class formula_token : public primitive_regex_token {
@@ -1072,11 +1074,17 @@ public:
 	std::shared_ptr<space_token> _upper_bound_separator;
 	std::shared_ptr<right_square_brace_token> _right_brace;
 	std::shared_ptr<space_token> _right_brace_separator;
+	std::optional<std::tuple<
+		std::shared_ptr<init_token>,
+		std::shared_ptr<spaces_plus_token>,
+		std::shared_ptr<natural_number_token>,
+		std::shared_ptr<space_token>
+		>> _init_clause;
 	std::shared_ptr<semicolon_token> _semicolon;
-
 
 	virtual void parse_non_primitive() override {
 		/* global cf : [0 .. 142]; */
+		/* global cf : [0 .. 142] init 2; */
 		iterator rest_begin{ cbegin() };
 		iterator rest_end{ cend() };
 
@@ -1179,7 +1187,38 @@ public:
 		auto search_semicolon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::semicolon);
 		parse_error::assert_true(search_semicolon != regex_iterator(), R"(Could not find semicolon at the end of global definition.)");
 		parse_error::assert_true(search_semicolon->suffix().begin() == rest_end, R"(Semicolon not at the end of global definition.)");
-		parse_error::assert_true(search_semicolon->prefix().end() == rest_begin, R"(Unexpected characters before semicolon at the end of global definition.)");
+		if (search_semicolon->prefix().end() != rest_begin) { // there is some init clause
+			auto init_begin = rest_begin;
+			auto init_end = search_semicolon->prefix().end();
+			/*init spaces + natural_number + spaces* */
+
+			auto search_init_token = regex_iterator(init_begin, init_end, const_regexes::primitives::init_keyword);
+			parse_error::assert_true(search_init_token != regex_iterator(), R"(Could not find init keyword after ] in global definition.)");
+			auto debugxx = search_init_token->prefix().end();
+			parse_error::assert_true(search_init_token->prefix().end() == init_begin, R"(Could not find init keyword immediately after ] in global definition.)");
+			auto _init_token = std::make_shared<init_token>(this, init_begin, search_init_token->suffix().begin());
+			init_begin = search_init_token->suffix().begin();
+
+			auto search_init_separator = regex_iterator(init_begin, init_end, const_regexes::primitives::spaces_plus);
+			parse_error::assert_true(search_init_separator != regex_iterator(), R"(Could not find space separator after keyword "init" in global definition.)");
+			parse_error::assert_true(search_init_separator->prefix().end() == init_begin, R"(Could not find space separator immediately after keyword "init" in global definition.)");
+			auto _init_separator = std::make_shared<spaces_plus_token>(this, init_begin, search_init_separator->suffix().begin());
+			init_begin = search_init_separator->suffix().begin();
+
+			auto search_init_value = regex_iterator(init_begin, init_end, const_regexes::primitives::natural_number);
+			parse_error::assert_true(search_init_value != regex_iterator(), R"(Could not find init value in init clause.)");
+			parse_error::assert_true(search_init_value->prefix().end() == init_begin, R"(Init value not immediately after init keyword.)");
+			auto _init_value = std::make_shared<natural_number_token>(this, init_begin, search_init_value->suffix().begin());
+			init_begin = search_init_value->suffix().begin();
+
+			auto search_value_separator = regex_iterator(init_begin, init_end, const_regexes::primitives::spaces);
+			parse_error::assert_true(search_value_separator != regex_iterator(), R"(Could not find space separator after value in init clause.)");
+			parse_error::assert_true(
+				search_value_separator->prefix().end() == init_begin && search_value_separator->suffix().begin() == init_end,
+				R"(Unexpected characters in init clause.)");
+			auto _value_separator = std::make_shared<space_token>(this, init_begin, init_end);
+			_init_clause = std::make_tuple(_init_token, _init_separator, _init_value, _value_separator);
+		}
 		_semicolon = std::make_shared<semicolon_token>(this, search_semicolon->prefix().end(), search_semicolon->suffix().begin());
 		rest_end = search_semicolon->prefix().end();
 
@@ -1199,6 +1238,12 @@ public:
 		children.push_back(_upper_bound_separator);
 		children.push_back(_right_brace);
 		children.push_back(_right_brace_separator);
+		if (_init_clause) {
+			children.push_back(std::get<0>(_init_clause.value()));
+			children.push_back(std::get<1>(_init_clause.value()));
+			children.push_back(std::get<2>(_init_clause.value()));
+			children.push_back(std::get<3>(_init_clause.value()));
+		}
 		children.push_back(_semicolon);
 	}
 
