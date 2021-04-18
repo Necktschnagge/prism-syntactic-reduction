@@ -14,11 +14,11 @@ steps:
   displayName: 'Run a one-line script'
 #- script: cd prism-sttt17/prism/
 #  displayName: 'CD'
-- script: sudo apt-get install openjdk-14-jdk-headless
+- script: sudo apt-get install openjdk-8-jdk-headless
   displayName: 'Install Java'
 - script: which javac; whereis javac
   displayName: 'where is Java'
 - script: |
     cd prism-sttt17/prism/
-    make
+    make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
   displayName: 'make prism'
