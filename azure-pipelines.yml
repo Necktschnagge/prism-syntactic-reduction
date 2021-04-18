@@ -15,8 +15,12 @@ steps:
 #- script: cd prism-sttt17/prism/
 #  displayName: 'CD'
 - script: |
-    sudo apt-get remove adoptopenjdk-11-hotspot-amd64
-    sudo apt-get install openjdk-8-jdk-headless
+    #sudo apt-get remove adoptopenjdk-11-hotspot-amd64
+    rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+    #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+    #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+    #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+    #sudo apt-get install openjdk-8-jdk-headless
   displayName: 'Install Java'
 - script: which javac; whereis javac
   displayName: 'where is Java'
