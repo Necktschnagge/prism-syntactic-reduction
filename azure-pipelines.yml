@@ -12,7 +12,9 @@ pool:
 steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
-- script: cd prism-sttt17/prism/
-  displayName: 'CD'
-- script: make
+#- script: cd prism-sttt17/prism/
+#  displayName: 'CD'
+- script: |
+  cd prism-sttt17/prism/
+  make
   displayName: 'make prism'
