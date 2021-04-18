@@ -16,6 +16,8 @@ steps:
 #  displayName: 'CD'
 - script: sudo apt-get install openjdk-14-jdk-headless
   displayName: 'Install Java'
+- script: which javac; whereis javac
+  displayName: 'where is Java'
 - script: |
     cd prism-sttt17/prism/
     make
