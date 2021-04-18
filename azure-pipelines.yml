@@ -10,33 +10,37 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+ - script: git submodule update --init --recursive
+   displayName: "Init Git Submodules"
+   condition: succeeded()
 #- script: cd prism-sttt17/prism/
 #  displayName: 'CD'
+#- script: |
+#    #sudo apt-get remove adoptopenjdk-11-hotspot-amd64
+#    rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+#    #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+#    #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+#    #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+#    sudo apt-get install openjdk-8-jdk-headless
+#  displayName: 'Install Java'
+#- script: which javac; whereis javac
+#  displayName: 'where is Java'
+#- script: |
+#    ls /usr/lib/jvm/
+#    javac -version
+#    cd prism-sttt17/prism/
+#    make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
+#  displayName: 'make prism'
+#- script: |
+#    cd prism-sttt17/prism/bin/
+#    ls -la
+#    chmod +x ./prism
+#    ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, P=? [ F{reward{"rounds"}<=1} failure ], "init")' -mtbdd -cuddmaxmem 2g
+#  displayName: 'Check original in_family.prism'
 - script: |
-    #sudo apt-get remove adoptopenjdk-11-hotspot-amd64
-    rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-    #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-    #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-    #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-    sudo apt-get install openjdk-8-jdk-headless
-  displayName: 'Install Java'
-- script: which javac; whereis javac
-  displayName: 'where is Java'
-- script: |
-    ls /usr/lib/jvm/
-    javac -version
-    cd prism-sttt17/prism/
-    make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
-  displayName: 'make prism'
-- script: |
-    cd prism-sttt17/prism/bin/
-    ls -la
-    chmod +x ./prism
-    ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, P=? [ F{reward{"rounds"}<=1} failure ], "init")' -mtbdd -cuddmaxmem 2g
-  displayName: 'Check original in_family.prism'
-- script: cmake -S . -B ./build/
+    echo $BOOST_ROOT
+  displayName: 'Find boost'
+- script: cmake -DBOOST_ROOT=$BOOST_ROOT -S . -B ./build/ 
   displayName: "CMake: Create Project"
 #  condition: succeeded()
 - script: cmake --build ./build
