@@ -29,6 +29,8 @@ steps:
     javac -version
     cd prism-sttt17/prism/
     make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
-    cd bin/
   displayName: 'make prism'
-- script: prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{rounds}<=10} (failure) ], init)' -mtbdd -cuddmaxmem 2g
+- script: |
+    cd prism-sttt17/prism/bin/
+    prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{rounds}<=10} (failure) ], init)' -mtbdd -cuddmaxmem 2g
+  displayName: 'Check original in_family.prism'
