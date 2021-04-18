@@ -19,6 +19,7 @@ steps:
 - script: which javac; whereis javac
   displayName: 'where is Java'
 - script: |
+    javac -version
     cd prism-sttt17/prism/
     make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
   displayName: 'make prism'
