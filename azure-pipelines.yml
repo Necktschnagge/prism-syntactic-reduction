@@ -14,6 +14,8 @@ steps:
   displayName: 'Run a one-line script'
 #- script: cd prism-sttt17/prism/
 #  displayName: 'CD'
+- script: sudo apt-get install openjdk-8-jre
+  displayName: 'Install Java'
 - script: |
     cd prism-sttt17/prism/
     make
