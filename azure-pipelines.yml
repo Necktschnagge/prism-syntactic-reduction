@@ -34,7 +34,7 @@ steps:
     cd prism-sttt17/prism/bin/
     ls -la
     chmod +x ./prism
-    ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{rounds}<=10} (failure) ], init)' -mtbdd -cuddmaxmem 2g
+    ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, P=? [ F{reward{"rounds"}<=1} failure ], "init")' -mtbdd -cuddmaxmem 2g
   displayName: 'Check original in_family.prism'
 - script: cmake -S . -B ./build/
   displayName: "CMake: Create Project"
