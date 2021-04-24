@@ -12,7 +12,7 @@ trigger:
 
 strategy:
   matrix:
-    ubuntu_20_04_gcc_9:
+    ubuntu_20_04:
       imageName: 'ubuntu-20.04'
       the_name: 'Azure Pipelines'
 
@@ -51,32 +51,8 @@ steps:
    displayName: "Init Git Submodules"
    condition: succeeded()
  - script: sudo apt-get install libboost-all-dev
-   displayName: "Install Boost"
-   condition: succeeded()
- - script: cd prism-sttt17/prism/
-   displayName: 'CD'
- - script: |
-     #sudo apt-get remove adoptopenjdk-11-hotspot-amd64
-     rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-     #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-     #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-     #rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-     sudo apt-get install openjdk-8-jdk-headless
-   displayName: 'Install Java'
- - script: which javac; whereis javac
-   displayName: 'where is Java'
- - script: |
-     ls /usr/lib/jvm/
-     javac -version
-     cd prism-sttt17/prism/
-     make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
-   displayName: 'make prism'
- - script: |
-     cd prism-sttt17/prism/bin/
-     ls -la
-     chmod +x ./prism
-     ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 2g
-   displayName: 'Check original in_family.prism'
+   displayName: "Linux: Install Boost"
+   condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
  - script: cmake -S . -B ./build/ 
    displayName: "CMake: Create Project"
    condition: succeeded()
@@ -89,3 +65,22 @@ steps:
  - script: .\build\test\Debug\TEST-Syntactic-Reducer.exe
    displayName: "Run Tests on Windows"
    condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+ - script: |
+     rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+     sudo apt-get install openjdk-8-jdk-headless
+   displayName: 'Linux: Install Java and uninstall old versions'
+   condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
+ - script: |
+     ls /usr/lib/jvm/
+     javac -version
+     cd prism-sttt17/prism/
+     make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
+   displayName: 'make prism'
+   condition: succeeded()
+ - script: |
+     cd prism-sttt17/prism/bin/
+     ls -la
+     chmod +x ./prism
+     ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 2g
+   displayName: 'Check original in_family.prism'
+   condition: succeeded()
