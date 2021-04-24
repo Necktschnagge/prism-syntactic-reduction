@@ -53,7 +53,7 @@ steps:
  - script: sudo apt-get install libboost-all-dev
    displayName: "Linux: Install Boost"
    condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
- - script: sudo brew install boost
+ - script: brew install boost
    displayName: "Mac: Install Boost"
    condition: and(succeeded(), eq( variables['Agent.OS'], 'Darwin' ))
  - script: cmake -S . -B ./build/ 
