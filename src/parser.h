@@ -31,7 +31,7 @@ public:
 	}
 
 protected:
-	token_list children;
+	virtual token_list children() const = 0;
 
 	std::shared_ptr<const std::string> _file_content;
 	iterator _begin;
@@ -56,7 +56,7 @@ public:
 	token(const token* parent_token, iterator begin, iterator end) : _file_content(parent_token->_file_content), _begin(begin), _end(end), _parent(parent_token) {}
 
 	token(const token& another) {
-		std::transform(
+/*		std::transform(
 			another.children.cbegin(),
 			another.children.cend(),
 			std::back_inserter(this->children),
@@ -64,14 +64,19 @@ public:
 				return std::shared_ptr<token>(ptr->clone());
 			}
 		);
+		*/
 		_file_content = another._file_content;
+		_begin = another._begin;
+		_end = another._end;
+		_parent = this;
 	}
 
 	virtual bool is_primitive() const = 0;
 	virtual bool is_sound() const = 0;
 
 	bool is_sound_recursive() const {
-		auto result = is_sound() && std::accumulate(children.cbegin(), children.cend(), true, [](auto acc, auto& child) { return acc && child->is_sound_recursive(); });
+		auto got_children = children();
+		auto result = is_sound() && std::accumulate(got_children.cbegin(), got_children.cend(), true, [](auto acc, auto& child) { return acc && child->is_sound_recursive(); });
 		if (!result) {
 			standard_logger().error("here");
 		}
@@ -1827,6 +1832,10 @@ public:
 	std::shared_ptr<space_token> _leading_spaces;
 	std::shared_ptr<dtmc_token> _dtmc_declaration;
 	std::shared_ptr<dtmc_body> _dtmc_body_component;
+
+	file_token* clone() const override {
+
+	}
 
 	using token::token;
 	file_token(std::shared_ptr<const std::string> file_content) : token(file_content, file_content->cbegin(), file_content->cend()) {}
