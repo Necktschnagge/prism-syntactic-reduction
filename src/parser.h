@@ -49,9 +49,23 @@ protected:
 
 public:
 
+	virtual token* clone() const = 0;
+		
 	token(std::shared_ptr<const std::string> file_content, iterator begin, iterator end) : _file_content(file_content), _begin(begin), _end(end), _parent(this) {}
 	token(const token& parent_token, iterator begin, iterator end) : _file_content(parent_token._file_content), _begin(begin), _end(end), _parent(&parent_token) {}
 	token(const token* parent_token, iterator begin, iterator end) : _file_content(parent_token->_file_content), _begin(begin), _end(end), _parent(parent_token) {}
+
+	token(const token& another) {
+		std::transform(
+			another.children.cbegin(),
+			another.children.cend(),
+			std::back_inserter(this->children),
+			[](const std::shared_ptr<token>& ptr) {
+				return std::shared_ptr<token>(ptr->clone());
+			}
+		);
+		_file_content = another._file_content;
+	}
 
 	virtual bool is_primitive() const = 0;
 	virtual bool is_sound() const = 0;

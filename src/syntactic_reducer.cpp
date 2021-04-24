@@ -365,6 +365,10 @@ again_while:
 		std::cout << "\n";
 	}
 
+	// copy the whole parse tree
+
+	file_token reduced_file(ftoken);
+
 	//Output in prism Format:
 	standard_logger().info("prism format output\n");
 
