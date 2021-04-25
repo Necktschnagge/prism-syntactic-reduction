@@ -1350,20 +1350,20 @@ public:
 	std::shared_ptr<space_token> _arrow_separator;
 	std::vector<
 		std::tuple<
-			std::optional<
-				std::tuple<
-					std::shared_ptr<float_token>,
-					std::shared_ptr<space_token>,
-					std::shared_ptr<colon_token>
-				>
-			>,
-			std::shared_ptr<condition_token>,
-			std::optional<
-				std::tuple<
-					std::shared_ptr<plus_token>,
-					std::shared_ptr<space_token>
-				>
-			>
+		std::optional<
+		std::tuple<
+		std::shared_ptr<float_token>,
+		std::shared_ptr<space_token>,
+		std::shared_ptr<colon_token>
+		>
+		>,
+		std::shared_ptr<condition_token>,
+		std::optional<
+		std::tuple<
+		std::shared_ptr<plus_token>,
+		std::shared_ptr<space_token>
+		>
+		>
 		>
 	> _regular_post_conditions;
 
@@ -1482,8 +1482,8 @@ public:
 	}
 
 	virtual token_list children() const override {
-		std::vector<std::shared_ptr<token>> possible_tokens,
-		
+		std::vector<std::shared_ptr<token>> possible_tokens;
+
 		possible_tokens.push_back(_start_label);
 		possible_tokens.push_back(_start_label_separator);
 		possible_tokens.push_back(_label);
@@ -1594,18 +1594,27 @@ public:
 
 			_transitions.push_back({ my_transition, my_separator });
 		}
+	}
 
-
-
-		children.push_back(_module_token);
-		children.push_back(_module_separator);
-		children.push_back(_module_identifier);
-		children.push_back(_identifier_separator);
+	virtual token_list children() const override {
+		std::vector<std::shared_ptr<token>> possible_tokens{
+			_module_token, _module_separator, _module_identifier, _identifier_separator
+		};
 		for (const auto& transition_pair : _transitions) {
-			children.push_back(transition_pair.first);
-			children.push_back(transition_pair.second);
+			possible_tokens.push_back(transition_pair.first);
+			possible_tokens.push_back(transition_pair.second);
 		}
-		children.push_back(_endmodule_token);
+		possible_tokens.push_back(_endmodule_token);
+		token_list result;
+		std::copy_if(
+			possible_tokens.cbegin(),
+			possible_tokens.cend(),
+			std::back_inserter(result),
+			[](const std::shared_ptr<token>& ptr) {
+				return ptr.operator bool();
+			}
+		);
+		return result;
 	}
 
 	virtual bool is_primitive() const { return false; }
@@ -1709,22 +1718,32 @@ public:
 			_reward_triggers.push_back({ _condition, _colon, _colon_separator, _accumulator, _semicolon, _semicolon_separator });
 		}
 
-		children.push_back(_rewards_token);
-		children.push_back(_rewards_separator);
-		children.push_back(_open_quote);
-		children.push_back(_reward_identifier);
-		children.push_back(_close_quote);
-		children.push_back(_identifier_separator);
 
+	}
+
+	virtual token_list children() const override {
+		std::vector<std::shared_ptr<token>> possible_tokens{
+			_rewards_token, _rewards_separator, _open_quote, _reward_identifier, _close_quote, _identifier_separator
+		};
 		for (const auto& entry : _reward_triggers) {
-			children.push_back(std::get<0>(entry));
-			children.push_back(std::get<1>(entry));
-			children.push_back(std::get<2>(entry));
-			children.push_back(std::get<3>(entry));
-			children.push_back(std::get<4>(entry));
-			children.push_back(std::get<5>(entry));
+			possible_tokens.push_back(std::get<0>(entry));
+			possible_tokens.push_back(std::get<1>(entry));
+			possible_tokens.push_back(std::get<2>(entry));
+			possible_tokens.push_back(std::get<3>(entry));
+			possible_tokens.push_back(std::get<4>(entry));
+			possible_tokens.push_back(std::get<5>(entry));
 		}
-		children.push_back(_endrewards_token);
+		possible_tokens.push_back(_endrewards_token);
+		token_list result;
+		std::copy_if(
+			possible_tokens.cbegin(),
+			possible_tokens.cend(),
+			std::back_inserter(result),
+			[](const std::shared_ptr<token>& ptr) {
+				return ptr.operator bool();
+			}
+		);
+		return result;
 	}
 
 	virtual bool is_primitive() const { return false; }
@@ -1764,11 +1783,22 @@ public:
 		rest_end = search_end_keyword->prefix().end();
 
 		_start_condition = std::make_shared<condition_token>(this, rest_begin, rest_end);
+	}
 
-		children.push_back(_init_keyword);
-		children.push_back(_start_condition);
-		children.push_back(_endinit_keyword);
-
+	virtual token_list children() const override {
+		std::vector<std::shared_ptr<token>> possible_tokens{
+			_init_keyword, _start_condition, _endinit_keyword
+		};
+		token_list result;
+		std::copy_if(
+			possible_tokens.cbegin(),
+			possible_tokens.cend(),
+			std::back_inserter(result),
+			[](const std::shared_ptr<token>& ptr) {
+				return ptr.operator bool();
+			}
+		);
+		return result;
 	}
 
 	virtual bool is_primitive() const { return false; }
