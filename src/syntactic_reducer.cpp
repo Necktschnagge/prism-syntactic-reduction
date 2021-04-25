@@ -372,7 +372,7 @@ again_while:
 	//Output in prism Format:
 	standard_logger().info("prism format output\n");
 
-	auto& top_level_children = ftoken.get_children();
+	auto& top_level_children = ftoken.children();
 
 	std::set<int> already_declared;
 
@@ -410,7 +410,8 @@ again_while:
 				else std::cout << child->str();
 			}
 			else {
-				print_model(child->get_children());
+				auto got_children = child->children();
+				print_model(got_children);
 			}
 		}
 	};

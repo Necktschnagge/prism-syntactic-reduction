@@ -31,7 +31,6 @@ public:
 	}
 
 protected:
-	virtual token_list children() const = 0;
 
 	std::shared_ptr<const std::string> _file_content;
 	iterator _begin;
@@ -49,22 +48,15 @@ protected:
 
 public:
 
-	virtual token* clone() const = 0;
+	virtual token_list children() const = 0;
+
+	//virtual token* clone() const = 0;
 
 	token(std::shared_ptr<const std::string> file_content, iterator begin, iterator end) : _file_content(file_content), _begin(begin), _end(end), _parent(this) {}
 	token(const token& parent_token, iterator begin, iterator end) : _file_content(parent_token._file_content), _begin(begin), _end(end), _parent(&parent_token) {}
 	token(const token* parent_token, iterator begin, iterator end) : _file_content(parent_token->_file_content), _begin(begin), _end(end), _parent(parent_token) {}
 
 	token(const token& another) {
-		/*		std::transform(
-					another.children.cbegin(),
-					another.children.cend(),
-					std::back_inserter(this->children),
-					[](const std::shared_ptr<token>& ptr) {
-						return std::shared_ptr<token>(ptr->clone());
-					}
-				);
-				*/
 		_file_content = another._file_content;
 		_begin = another._begin;
 		_end = another._end;
@@ -105,8 +97,6 @@ public:
 
 	std::string str() const { return std::string(cbegin(), cend()); }
 
-	[[deprecated]] inline token_list& get_children() { return children(); }
-
 };
 
 class primitive_regex_token : public token {
@@ -114,6 +104,10 @@ class primitive_regex_token : public token {
 	virtual boost::regex primitive_regex() const = 0;
 
 public:
+
+	virtual token_list children() const override {
+		return token_list();
+	}
 
 	using token::token;
 
@@ -424,6 +418,10 @@ public:
 
 	virtual void parse_non_primitive() final override {}
 
+	virtual token_list children() const override {
+		return token_list();
+	}
+
 	virtual bool is_primitive() const final override { return true; }
 
 	virtual bool is_sound() const final override {
@@ -521,6 +519,10 @@ public:
 	using token::token;
 
 	virtual void parse_non_primitive() final override {
+	}
+
+	virtual token_list children() const override {
+		return token_list();
 	}
 
 	virtual bool is_primitive() const final override { return true; }
@@ -869,7 +871,7 @@ public:
 
 	bool contains_variable(const std::string& var_name) const {
 		bool accumulator = std::accumulate(_sub_conditions.cbegin(), _sub_conditions.cend(),
-			false, [&](const auto& acc, const auto& element) { return acc || element->contains_variable(var_name); });
+			false, [&](const auto& acc, const auto& element) { return acc || element.first->contains_variable(var_name); });
 		if (_equation) {
 			accumulator |= _equation->contains_variable(var_name);
 		}
@@ -892,7 +894,7 @@ public:
 			_sub_conditions.cbegin(),
 			_sub_conditions.cend(),
 			std::back_inserter(sub_values),
-			[&](const auto& x) { return x->get_values(var_name, const_table); });
+			[&](const auto& x) { return x.first->get_values(var_name, const_table); });
 		if (_type == type::OR) {
 			return std::accumulate(
 				sub_values.cbegin(),
@@ -1815,10 +1817,10 @@ public:
 
 	virtual bool is_primitive() const { return false; }
 
-
+	token_list local_children;
 private:
 	virtual void parse_non_primitive() override {
-		token_list& result{ children };
+		token_list& result{ local_children };
 
 		iterator rest_begin{ cbegin() };
 		iterator rest_end{ cend() };
@@ -1856,7 +1858,7 @@ private:
 				result.push_back(std::make_unique<space_token>(this, match_begin(current_match_result), match_end(current_match_result)));
 			}
 			if (searchers.front().first == const_regexes::clauses::formula_definition) {
-				children.push_back(std::make_shared<formula_definition_token>(this, match_begin(current_match_result), match_end(current_match_result)));
+				result.push_back(std::make_shared<formula_definition_token>(this, match_begin(current_match_result), match_end(current_match_result)));
 			}
 			if (searchers.front().first == const_regexes::clauses::const_definition) {
 				result.push_back(std::make_unique<const_definition_token>(this, match_begin(current_match_result), match_end(current_match_result)));
@@ -1877,15 +1879,31 @@ private:
 		}
 	}
 
-	virtual bool is_sound() const final override {
-		return std::accumulate(children.cbegin(), children.cend(), true, [](bool acc, const auto& element) { return acc && element->is_sound(); }); //check lowercase?
+	virtual token_list children() const override {
+		token_list result;
+		std::copy_if(
+			local_children.cbegin(),
+			local_children.cend(),
+			std::back_inserter(result),
+			[](const std::shared_ptr<token>& ptr) {
+				return ptr.operator bool();
+			}
+		);
+		return result;
 	}
+
+	virtual bool is_sound() const final override {
+		return true;
+		//return std::accumulate(children.cbegin(), children.cend(), true, [](bool acc, const auto& element) { return acc && element->is_sound(); }); //check lowercase?
+	}
+
 public:
 	template <class _TokenType>
 	std::list<std::shared_ptr<_TokenType>> children_of_kind() {
 		std::list<std::shared_ptr<token>> down_castable;
-		std::copy_if(children.cbegin(),
-			children.cend(),
+		const auto got_children = children();
+		std::copy_if(got_children.cbegin(),
+			got_children.cend(),
 			std::back_inserter(down_castable),
 			[](const std::shared_ptr<token>& ptr) { return std::dynamic_pointer_cast<_TokenType>(ptr); }
 		);
@@ -1910,23 +1928,8 @@ public:
 
 };
 
-class dtmc_token : public token {
+using dtmc_token = primitive_regex_token_template<&const_regexes::primitives::dtmc>;
 
-public:
-	using token::token;
-
-	virtual bool is_primitive() const override {
-		return true;
-	}
-
-private:
-	virtual void parse_non_primitive() override {}
-
-	virtual bool is_sound() const final override {
-		return boost::regex_match(cbegin(), cend(), const_regexes::primitives::dtmc); //check lowercase?
-	}
-
-};
 
 class file_token : public token {
 
@@ -1936,9 +1939,9 @@ public:
 	std::shared_ptr<dtmc_token> _dtmc_declaration;
 	std::shared_ptr<dtmc_body> _dtmc_body_component;
 
-	file_token* clone() const override {
+	/*file_token* clone() const override {
 
-	}
+	}*/
 
 	using token::token;
 	file_token(std::shared_ptr<const std::string> file_content) : token(file_content, file_content->cbegin(), file_content->cend()) {}
@@ -1949,18 +1952,31 @@ public:
 		parse_error::assert_true(it_dtmc != regex_iterator(), R"(No "dtmc" found.)");
 		parse_error::assert_true(boost::regex_match(it_dtmc->prefix().begin(), it_dtmc->prefix().end(), const_regexes::primitives::spaces), R"(Found "dtmc", but input sequence does not start with "dtmc".)");
 
-		_leading_spaces = std::make_unique<space_token>(this, it_dtmc->prefix().begin(), it_dtmc->prefix().end());
-		_dtmc_declaration = std::make_unique<dtmc_token>(*this, it_dtmc->prefix().end(), it_dtmc->suffix().begin());
-		_dtmc_body_component = std::make_unique<dtmc_body>(*this, it_dtmc->suffix().begin(), it_dtmc->suffix().end());
-		children.push_back(_leading_spaces); // leading spaces
-		children.push_back(_dtmc_declaration); // "dtmc"
-		children.push_back(_dtmc_body_component); // body
+		_leading_spaces = std::make_shared<space_token>(this, it_dtmc->prefix().begin(), it_dtmc->prefix().end());
+		_dtmc_declaration = std::make_shared<dtmc_token>(*this, it_dtmc->prefix().end(), it_dtmc->suffix().begin());
+		_dtmc_body_component = std::make_shared<dtmc_body>(*this, it_dtmc->suffix().begin(), it_dtmc->suffix().end());
+	}
+
+	virtual token_list children() const override {
+		std::vector<std::shared_ptr<token>> possible_tokens{
+			_leading_spaces, _dtmc_declaration, _dtmc_body_component
+		};
+		token_list result;
+		std::copy_if(
+			possible_tokens.cbegin(),
+			possible_tokens.cend(),
+			std::back_inserter(result),
+			[](const std::shared_ptr<token>& ptr) {
+				return ptr.operator bool();
+			}
+		);
+		return result;
 	}
 
 	virtual bool is_primitive() const { return false; }
 
 	virtual bool is_sound() const final override {
-		return std::accumulate(children.cbegin(), children.cend(), true, [](bool acc, const auto& element) { return acc && element->is_sound(); }); //check lowercase?
+		return true;
 	}
 private:
 	std::shared_ptr<space_token> leading_spaces() { return _leading_spaces; }
