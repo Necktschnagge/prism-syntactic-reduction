@@ -92,7 +92,7 @@ jobs:
    #     ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 2g
    #   displayName: 'Check original in_family.prism'
    #   condition: succeeded()
- - job: Self-hosted
+ - job: Self_Hosted
    strategy:
      matrix:
        Ubuntu 20.04:
