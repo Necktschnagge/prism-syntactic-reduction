@@ -12,6 +12,21 @@
 #include <string>
 #include <type_traits> // std::remove_pointer
 
+template <class T>
+std::shared_ptr<T> copy_shared_ptr(const std::shared_ptr<T>& ptr) {
+	if (ptr)
+		return std::make_shared<T>(*ptr->get());
+	return std::shared_ptr<T>();
+}
+
+class token;
+
+std::shared_ptr<token> clone_shared_ptr(const std::shared_ptr<token>& ptr) {
+	if (ptr)
+		return ptr->clone();
+	return std::shared_ptr<token>();
+}
+
 class file_token;
 
 class token {
@@ -50,7 +65,7 @@ public:
 
 	virtual token_list children() const = 0;
 
-	//virtual token* clone() const = 0;
+	virtual std::shared_ptr<token> clone() const = 0;
 
 	token(std::shared_ptr<const std::string> file_content, iterator begin, iterator end) : _file_content(file_content), _begin(begin), _end(end), _parent(this) {}
 	token(const token& parent_token, iterator begin, iterator end) : _file_content(parent_token._file_content), _begin(begin), _end(end), _parent(&parent_token) {}
@@ -1049,6 +1064,25 @@ public:
 	std::shared_ptr<identifier_or_number> _expression;
 	std::shared_ptr<semicolon_token> _semicolon;
 
+	const_definition_token(const const_definition_token& another) :
+		token(another),
+		_const_token(copy_shared_ptr(another._const_token)),
+		_const_separator(copy_shared_ptr(another._const_separator)),
+		_type_specifier_token(copy_shared_ptr(another._type_specifier_token)),
+		_type_separator(copy_shared_ptr(another._type_separator)),
+		_constant_identifier(copy_shared_ptr(another._constant_identifier)),
+		_identifier_separator(copy_shared_ptr(another._identifier_separator)),
+		_equals_token(copy_shared_ptr(another._equals_token)),
+		_equals_separator(copy_shared_ptr(another._equals_separator)),
+		_expression(copy_shared_ptr(another._expression)),
+		_semicolon(copy_shared_ptr(another._semicolon))
+	{
+	}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<const_definition_token>(*this);
+	}
+
 	virtual void parse_non_primitive() override {
 		iterator rest_begin{ cbegin() };
 		iterator rest_end{ cend() };
@@ -1163,6 +1197,41 @@ public:
 		std::shared_ptr<space_token>
 		>> _init_clause;
 	std::shared_ptr<semicolon_token> _semicolon;
+
+	global_definition_token(const global_definition_token& another) :
+		token(another),
+		_global_token(copy_shared_ptr(another._global_token)),
+		_global_separator(copy_shared_ptr(another._global_separator)),
+		_global_identifier(copy_shared_ptr(another._global_identifier)),
+		_identifier_separator(copy_shared_ptr(another._identifier_separator)),
+		_colon_token(copy_shared_ptr(another._colon_token)),
+		_colon_separator(copy_shared_ptr(another._colon_separator)),
+		_left_brace(copy_shared_ptr(another._left_brace)),
+		_left_brace_separator(copy_shared_ptr(another._left_brace_separator)),
+		_lower_bound(copy_shared_ptr(another._lower_bound)),
+		_lower_bound_separator(copy_shared_ptr(another._lower_bound_separator)),
+		_dots(copy_shared_ptr(another._dots)),
+		_dots_separator(copy_shared_ptr(another._dots_separator)),
+		_upper_bound(copy_shared_ptr(another._upper_bound)),
+		_upper_bound_separator(copy_shared_ptr(another._upper_bound_separator)),
+		_right_brace(copy_shared_ptr(another._right_brace)),
+		_right_brace_separator(copy_shared_ptr(another._right_brace_separator)),
+		_semicolon(copy_shared_ptr(another._semicolon))
+	{
+		if (another._init_clause)
+			_init_clause = std::make_optional(
+				std::make_tuple(
+					copy_shared_ptr(std::get<0>(another._init_clause.value())),
+					copy_shared_ptr(std::get<1>(another._init_clause.value())),
+					copy_shared_ptr(std::get<2>(another._init_clause.value())),
+					copy_shared_ptr(std::get<3>(another._init_clause.value()))
+				)
+			);
+	}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<global_definition_token>(*this);
+	}
 
 	virtual void parse_non_primitive() override {
 		/* global cf : [0 .. 142]; */
@@ -1338,7 +1407,6 @@ public:
 };
 
 class transition_token : public token {
-	using token::token;
 
 public:
 	std::shared_ptr<left_square_brace_token> _start_label;
@@ -1350,27 +1418,76 @@ public:
 	std::shared_ptr<condition_token> _pre_condition;
 	std::shared_ptr<ascii_arrow_token> _arrow;
 	std::shared_ptr<space_token> _arrow_separator;
-	std::vector<
-		std::tuple<
-		std::optional<
+	using probability_clause = std::optional<
 		std::tuple<
 		std::shared_ptr<float_token>,
 		std::shared_ptr<space_token>,
 		std::shared_ptr<colon_token>
 		>
-		>,
-		std::shared_ptr<condition_token>,
-		std::optional<
+	>;
+	using plus_clause = std::optional<
 		std::tuple<
 		std::shared_ptr<plus_token>,
 		std::shared_ptr<space_token>
 		>
-		>
+	>;
+	std::vector<
+		std::tuple<
+			probability_clause,
+			std::shared_ptr<condition_token>,
+			plus_clause
 		>
 	> _regular_post_conditions;
-
-
 	std::shared_ptr<semicolon_token> _semicolon;
+
+	using token::token;
+
+	transition_token(const transition_token& another) :
+		token(another),
+		_start_label(copy_shared_ptr(another._start_label)),
+		_start_label_separator(copy_shared_ptr(another._start_label_separator)),
+		_label(copy_shared_ptr(another._label)),
+		_label_separator(copy_shared_ptr(another._label_separator)),
+		_end_label(copy_shared_ptr(another._end_label)),
+		_right_brace_separator(copy_shared_ptr(another._right_brace_separator)),
+		_pre_condition(copy_shared_ptr(another._pre_condition)),
+		_arrow(copy_shared_ptr(another._arrow)),
+		_arrow_separator(copy_shared_ptr(another._arrow_separator)),
+		_semicolon(copy_shared_ptr(another._semicolon))
+	{
+		for (const auto& tuple : another._regular_post_conditions) {
+			probability_clause first;
+			if (std::get<0>(tuple)) {
+				first = std::make_optional(
+					std::make_tuple(
+						copy_shared_ptr(std::get<0>(std::get<0>(tuple).value())),
+						copy_shared_ptr(std::get<1>(std::get<0>(tuple).value())),
+						copy_shared_ptr(std::get<2>(std::get<0>(tuple).value()))
+					)
+				);
+			}
+			plus_clause third;
+			if (std::get<2>(tuple)) {
+				third = std::make_optional(
+					std::make_tuple(
+						copy_shared_ptr(std::get<0>(std::get<2>(tuple).value())),
+						copy_shared_ptr(std::get<1>(std::get<2>(tuple).value()))
+					)
+				);
+			}
+			_regular_post_conditions.push_back(
+				std::make_tuple(
+					first,
+					copy_shared_ptr(std::get<1>(tuple)),
+					third
+				)
+			);
+		}
+	}
+
+	virtual std::shared_ptr<token> clone() const override {
+		return std::make_shared<transition_token>(*this);
+	}
 
 	virtual void parse_non_primitive() override {
 
@@ -1545,6 +1662,26 @@ public:
 	> _transitions;
 	std::shared_ptr<endmodule_token> _endmodule_token;
 
+	module_definition_token(const module_definition_token& another) :
+		token(another),
+		_module_token(copy_shared_ptr(another._module_token)),
+		_module_separator(copy_shared_ptr(another._module_separator)),
+		_module_identifier(copy_shared_ptr(another._module_identifier)),
+		_identifier_separator(copy_shared_ptr(another._identifier_separator)),
+		_endmodule_token(copy_shared_ptr(another._endmodule_token))
+	{
+		for (const auto& pair : another._transitions) {
+			_transitions.push_back(std::make_pair(
+				copy_shared_ptr(pair.first),
+				copy_shared_ptr(pair.second)
+			));
+		}
+	}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<module_definition_token>(*this);
+	}
+
 	virtual void parse_non_primitive() override {
 
 		iterator rest_begin{ cbegin() };
@@ -1648,6 +1785,31 @@ public:
 	std::shared_ptr<endrewards_token> _endrewards_token;
 
 	using token::token;
+
+	reward_definition_token(const reward_definition_token& another) :
+		token(another),
+		_rewards_token(copy_shared_ptr(another._rewards_token)),
+		_open_quote(copy_shared_ptr(another._open_quote)),
+		_reward_identifier(copy_shared_ptr(another._reward_identifier)),
+		_close_quote(copy_shared_ptr(another._close_quote)),
+		_identifier_separator(copy_shared_ptr(another._identifier_separator)),
+		_endrewards_token(copy_shared_ptr(another._endrewards_token))
+	{
+		for (const auto& tuple : another._reward_triggers) {
+			_reward_triggers.push_back(std::make_tuple(
+				copy_shared_ptr(std::get<0>(tuple)),
+				copy_shared_ptr(std::get<1>(tuple)),
+				copy_shared_ptr(std::get<2>(tuple)),
+				copy_shared_ptr(std::get<3>(tuple)),
+				copy_shared_ptr(std::get<4>(tuple)),
+				copy_shared_ptr(std::get<5>(tuple))
+				));
+		}
+	}
+
+	std::shared_ptr<token> clone() const override{
+		return std::make_shared<reward_definition_token>(*this);
+	}
 
 	virtual void parse_non_primitive() override {
 		iterator rest_begin{ cbegin() };
@@ -1768,6 +1930,17 @@ public:
 
 	using token::token;
 
+	init_definition_token(const init_definition_token& another) :
+		token(another),
+		_init_keyword(copy_shared_ptr(another._init_keyword)),
+		_start_condition(copy_shared_ptr(another._start_condition)),
+		_endinit_keyword(copy_shared_ptr(another._endinit_keyword))
+	{}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<init_definition_token>(*this);
+	}
+
 	virtual void parse_non_primitive() override {
 		iterator rest_begin{ cbegin() };
 		iterator rest_end{ cend() };
@@ -1818,6 +1991,11 @@ public:
 	virtual bool is_primitive() const { return false; }
 
 	token_list local_children;
+
+	dtmc_body(const dtmc_body& another) : token(another) {
+		std::transform(another.local_children.cbegin(), another.local_children.cend(), std::back_inserter(local_children),
+			[&](std::shared_ptr<token>& original) { return clone_shared_ptr(original); });
+	}
 private:
 	virtual void parse_non_primitive() override {
 		token_list& result{ local_children };
@@ -1939,12 +2117,22 @@ public:
 	std::shared_ptr<dtmc_token> _dtmc_declaration;
 	std::shared_ptr<dtmc_body> _dtmc_body_component;
 
-	/*file_token* clone() const override {
-
-	}*/
 
 	using token::token;
 	file_token(std::shared_ptr<const std::string> file_content) : token(file_content, file_content->cbegin(), file_content->cend()) {}
+
+	std::shared_ptr<token> clone() const override {
+		auto the_clone = std::make_shared<file_token>(*this);
+		return the_clone;
+	}
+
+
+	file_token(const file_token& another) :
+		token(another),
+		_leading_spaces(copy_shared_ptr(another._leading_spaces)),
+		_dtmc_declaration(copy_shared_ptr(another._dtmc_declaration)),
+		_dtmc_body_component(copy_shared_ptr(another._dtmc_body_component))
+	{}
 
 	virtual void parse_non_primitive() override {
 		auto it_dtmc = regex_iterator(_begin, _end, const_regexes::clauses::dtmc);
