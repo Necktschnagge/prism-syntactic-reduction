@@ -562,10 +562,15 @@ class identifier_or_number : public token {
 
 public:
 
-	using token::token;
 
 	std::shared_ptr<identifier_token> _identifier;
 	std::shared_ptr<number_token> _number;
+
+	using token::token;
+
+	identifier_or_number(const identifier_or_number& another) {
+
+	}
 
 	virtual void parse_non_primitive() final override {
 		parse_error::assert_true(cbegin() != cend(), "Empty identifier_or_number token");
@@ -627,7 +632,6 @@ class equation_token : public token {
 
 public:
 
-	using token::token;
 
 	std::shared_ptr<space_token> _leading_separator;
 	std::shared_ptr<identifier_or_number> _left_expression;
@@ -636,6 +640,23 @@ public:
 	std::shared_ptr<space_token> _operator_separator;
 	std::shared_ptr<identifier_or_number> _right_expression;
 	std::shared_ptr<space_token> _trailing_separator;
+
+	using token::token;
+
+	equation_token(const equation_token& another) :
+		token(another),
+		_leading_separator(copy_shared_ptr(another._leading_separator)),
+		_left_expression(copy_shared_ptr(another._left_expression)),
+		_left_expression_separator(copy_shared_ptr(another._left_expression_separator)),
+		_root_operator(copy_shared_ptr(another._root_operator)),
+		_operator_separator(copy_shared_ptr(another._operator_separator)),
+		_right_expression(copy_shared_ptr(another._right_expression)),
+		_trailing_separator(copy_shared_ptr(another._trailing_separator))
+	{}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<equation_token>(*this);
+	}
 
 	virtual void parse_non_primitive() final override {
 		iterator rest_begin{ cbegin() };
@@ -735,7 +756,6 @@ public:
 		OR, AND, SUB_CONDITION, EQUATION
 	};
 
-	using token::token;
 	type _type;
 
 	std::vector<std::shared_ptr<token>> _leading_tokens;
@@ -747,6 +767,27 @@ public:
 	> _sub_conditions;
 	std::vector<std::shared_ptr<token>> _trailing_tokens;
 	std::shared_ptr<equation_token> _equation;
+
+	using token::token;
+
+	condition_token(const condition_token& another) :
+		token(another),
+		_equation(copy_shared_ptr(another._equation))
+	{
+		for (const auto& ltoken : another._leading_tokens) {
+			_leading_tokens.push_back(clone_shared_ptr(ltoken));
+		}
+		for (const auto& pair : another._sub_conditions) {
+			_sub_conditions.push_back(std::make_pair(copy_shared_ptr(pair.first), copy_shared_ptr(pair.second)));
+		}
+		for (const auto& ttoken : another._trailing_tokens) {
+			_trailing_tokens.push_back(clone_shared_ptr(ttoken));
+		}
+	}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<condition_token>(*this);
+	}
 
 	virtual void parse_non_primitive() final override {
 		iterator rest_begin{ cbegin() };
@@ -974,6 +1015,22 @@ public:
 	std::shared_ptr<semicolon_token> _semicolon;
 
 	using token::token;
+
+	formula_definition_token(const formula_definition_token& another) :
+		token(another),
+		_formula_token(copy_shared_ptr(another._formula_token)),
+		_formula_keyword_separator(copy_shared_ptr(another._formula_keyword_separator)),
+		_formula_identifier(copy_shared_ptr(another._formula_identifier)),
+		_identifier_separator(copy_shared_ptr(another._identifier_separator)),
+		_equals_token(copy_shared_ptr(another._equals_token)),
+		_equals_separator(copy_shared_ptr(another._equals_separator)),
+		_expression(copy_shared_ptr(another._expression)),
+		_semicolon(copy_shared_ptr(another._semicolon))
+	{}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<formula_definition_token>(*this);
+	}
 
 	virtual void parse_non_primitive() override {
 		iterator rest_begin{ cbegin() };
