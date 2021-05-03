@@ -12,20 +12,16 @@
 #include <string>
 #include <type_traits> // std::remove_pointer
 
+#define def_standard_clone() std::shared_ptr<token> clone() const override { return std::make_shared<std::remove_const<std::remove_reference<decltype(*this)>::type>::type>(*this); }
+
 template <class T>
 std::shared_ptr<T> copy_shared_ptr(const std::shared_ptr<T>& ptr) {
 	if (ptr)
-		return std::make_shared<T>(*ptr->get());
+		return std::make_shared<T>(*ptr.get());
 	return std::shared_ptr<T>();
 }
 
 class token;
-
-std::shared_ptr<token> clone_shared_ptr(const std::shared_ptr<token>& ptr) {
-	if (ptr)
-		return ptr->clone();
-	return std::shared_ptr<token>();
-}
 
 class file_token;
 
@@ -114,11 +110,22 @@ public:
 
 };
 
+inline std::shared_ptr<token> clone_shared_ptr(const std::shared_ptr<token>& ptr) {
+	if (ptr)
+		return ptr->clone();
+	return std::shared_ptr<token>();
+}
+
+
 class primitive_regex_token : public token {
 
 	virtual boost::regex primitive_regex() const = 0;
 
 public:
+
+	primitive_regex_token(const primitive_regex_token& another) :
+		token(another)
+	{}
 
 	virtual token_list children() const override {
 		return token_list();
@@ -141,6 +148,10 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<const_token>(*this);
+	}
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::const_keyword;
 	}
@@ -150,6 +161,10 @@ class global_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<global_token>(*this);
+	}
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::global_keyword;
@@ -161,6 +176,10 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<module_token>(*this);
+	}
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::module_keyword;
 	}
@@ -170,6 +189,10 @@ class rewards_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<rewards_token>(*this);
+	}
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::rewards_keyword;
@@ -181,6 +204,10 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<endrewards_token>(*this);
+	}
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::endrewards_keyword;
 	}
@@ -190,6 +217,8 @@ class endmodule_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	def_standard_clone()
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::endmodule_keyword;
@@ -201,7 +230,7 @@ class type_specifier_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
-
+	def_standard_clone()
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::type_specifier;
 	}
@@ -213,6 +242,7 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	def_standard_clone()
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::left_square_brace;
 	}
@@ -222,7 +252,8 @@ class left_brace_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
-
+	
+	def_standard_clone()
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::left_brace;
 	}
@@ -232,6 +263,8 @@ class right_square_brace_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	def_standard_clone()
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::right_square_brace;
@@ -243,6 +276,8 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	def_standard_clone()
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::right_brace;
 	}
@@ -252,6 +287,8 @@ class natural_number_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	def_standard_clone()
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::natural_number;
@@ -263,6 +300,8 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	def_standard_clone()
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::dot_dot;
 	}
@@ -272,6 +311,8 @@ class space_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	def_standard_clone()
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::spaces;
@@ -284,6 +325,7 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	def_standard_clone()
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::spaces_plus;
 	}
@@ -295,6 +337,10 @@ class primitive_regex_token_template : public primitive_regex_token {
 	using primitive_regex_token::primitive_regex_token;
 
 	static_assert(_Regex != nullptr, "Cannot use primitive regex token for unspecified regex!");
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<primitive_regex_token_template<_Regex>>(*this);
+	}
 
 	virtual boost::regex primitive_regex() const final override {
 		return *_Regex;
@@ -311,6 +357,8 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	def_standard_clone()
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::formula;
 	}
@@ -321,6 +369,8 @@ class identifier_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	def_standard_clone()
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::identifier;
@@ -343,6 +393,10 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<equals_token>(*this);
+	}
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::equals;
 	}
@@ -353,6 +407,8 @@ class semicolon_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	def_standard_clone()
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::semicolon;
@@ -365,6 +421,8 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	def_standard_clone()
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::colon;
 	}
@@ -375,6 +433,8 @@ class ascii_arrow_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	def_standard_clone()
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::ascii_arrow;
@@ -387,6 +447,8 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	def_standard_clone()
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::plus;
 	}
@@ -397,6 +459,8 @@ class or_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+
+	def_standard_clone()
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::or_sign;
@@ -409,6 +473,8 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 
+	def_standard_clone()
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::and_sign;
 	}
@@ -419,6 +485,8 @@ class comparison_operator_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
+	
+	def_standard_clone()
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::comparison_operator;
@@ -430,6 +498,13 @@ class float_token : public token {
 public:
 
 	using token::token;
+
+	float_token(const float_token& another) : token(another) {}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<float_token>(*this);
+	}
+
 
 	virtual void parse_non_primitive() final override {}
 
@@ -466,6 +541,21 @@ public:
 	std::shared_ptr<spaces_plus_token> _trailing_ignored_spaces;
 
 	std::shared_ptr<identifier_token> _identifier;
+
+	expression_token(const expression_token& another) :
+		token(another),
+		_left_expression(copy_shared_ptr(another._left_expression)),
+		_root_operator(clone_shared_ptr(another._root_operator)),
+		_right_expression(copy_shared_ptr(another._right_expression)),
+		_ignored_spaces(copy_shared_ptr(another._ignored_spaces)),
+		_child_expression(copy_shared_ptr(another._child_expression)),
+		_trailing_ignored_spaces(copy_shared_ptr(another._trailing_ignored_spaces)),
+		_identifier(copy_shared_ptr(another._identifier))
+	{}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<expression_token>(*this);
+	}
 
 	virtual void parse_non_primitive() final override {
 		iterator rest_begin{ cbegin() };
@@ -533,6 +623,13 @@ public:
 
 	using token::token;
 
+	number_token(const number_token& another) : token(another) {}
+
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<number_token>(*this);
+	}
+
+
 	virtual void parse_non_primitive() final override {
 	}
 
@@ -568,8 +665,14 @@ public:
 
 	using token::token;
 
-	identifier_or_number(const identifier_or_number& another) {
+	identifier_or_number(const identifier_or_number& another) :
+		token(another),
+		_identifier(copy_shared_ptr(another._identifier)),
+		_number(copy_shared_ptr(another._number))
+	{}
 
+	std::shared_ptr<token> clone() const override {
+		return std::make_shared<identifier_or_number>(*this);
 	}
 
 	virtual void parse_non_primitive() final override {
@@ -778,7 +881,7 @@ public:
 			_leading_tokens.push_back(clone_shared_ptr(ltoken));
 		}
 		for (const auto& pair : another._sub_conditions) {
-			_sub_conditions.push_back(std::make_pair(copy_shared_ptr(pair.first), copy_shared_ptr(pair.second)));
+			_sub_conditions.push_back(std::make_pair(copy_shared_ptr(pair.first), clone_shared_ptr(pair.second)));
 		}
 		for (const auto& ttoken : another._trailing_tokens) {
 			_trailing_tokens.push_back(clone_shared_ptr(ttoken));
@@ -1490,9 +1593,9 @@ public:
 	>;
 	std::vector<
 		std::tuple<
-			probability_clause,
-			std::shared_ptr<condition_token>,
-			plus_clause
+		probability_clause,
+		std::shared_ptr<condition_token>,
+		plus_clause
 		>
 	> _regular_post_conditions;
 	std::shared_ptr<semicolon_token> _semicolon;
@@ -1860,11 +1963,11 @@ public:
 				copy_shared_ptr(std::get<3>(tuple)),
 				copy_shared_ptr(std::get<4>(tuple)),
 				copy_shared_ptr(std::get<5>(tuple))
-				));
+			));
 		}
 	}
 
-	std::shared_ptr<token> clone() const override{
+	std::shared_ptr<token> clone() const override {
 		return std::make_shared<reward_definition_token>(*this);
 	}
 
@@ -2051,8 +2154,13 @@ public:
 
 	dtmc_body(const dtmc_body& another) : token(another) {
 		std::transform(another.local_children.cbegin(), another.local_children.cend(), std::back_inserter(local_children),
-			[&](std::shared_ptr<token>& original) { return clone_shared_ptr(original); });
+			[&](const std::shared_ptr<token>& original) { return
+			clone_shared_ptr(original); 
+			});
 	}
+
+	def_standard_clone()
+
 private:
 	virtual void parse_non_primitive() override {
 		token_list& result{ local_children };
