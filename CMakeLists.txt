@@ -24,7 +24,11 @@ add_subdirectory(extern/googletest)
 
 
 #Boost
-set(Boost_USE_STATIC_LIBS OFF)
+if (MSVC)
+    set(Boost_USE_STATIC_LIBS ON)
+else()
+	set(Boost_USE_STATIC_LIBS OFF)
+endif (MSVC)
 FIND_PACKAGE(Boost 1.54.0 COMPONENTS regex REQUIRED )
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR} )
 
