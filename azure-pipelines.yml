@@ -14,9 +14,9 @@ jobs:
  - job: Cloud
    strategy:
      matrix:
-       ubuntu_20_04:
-         imageName: 'ubuntu-20.04'
-         the_name: 'Azure Pipelines'
+#       ubuntu_20_04:
+#         imageName: 'ubuntu-20.04'
+#         the_name: 'Azure Pipelines'
    
    #    ubuntu_18_04_gcc_8:
    #      imageName: 'ubuntu-18.04'
@@ -30,9 +30,9 @@ jobs:
    #      CXX: g++-8
    #      the_name: 'Azure Pipelines'
    
-       mac_10_15:
-         imageName: 'macos-10.15'
-         the_name: 'Azure Pipelines'
+#       mac_10_15:
+#         imageName: 'macos-10.15'
+#         the_name: 'Azure Pipelines'
    #    mac_10_14:
    #      imageName: 'macos-10.14'
    #      the_name: 'Azure Pipelines'
@@ -61,6 +61,9 @@ jobs:
 #    - script: vcpkg install boost:x86-windows
 #      displayName: "Windows: Install Boost"
 #      condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
+    - script: .\extern\boost-ci\ci\azure-pipelines\install.bat
+      displayName: "Windows: Install Boost"
+      condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
     - script: cmake -S . -B ./build/ 
       displayName: "CMake: Create Project"
       condition: succeeded()
