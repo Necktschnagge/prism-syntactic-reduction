@@ -500,11 +500,11 @@ again_while:
 	}
 
 	//#if false
-		// replace colored things:
+	// replace colored things:
 
 	standard_logger().info("apply coloring to var names");
 
-	auto& top_level_children_72954 = reduced_file.children();
+	const auto top_level_children_72954 = reduced_file.children();
 
 	const std::function<void(token::token_list&)> apply_coloring = [&](token::token_list children_list) {
 		while (!children_list.empty()) {
