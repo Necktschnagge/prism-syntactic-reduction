@@ -85,6 +85,8 @@ public:
 
 	std::string str() const { return std::string(cbegin(), cend()); }
 
+	inline token_list& get_children() { return children; }
+
 };
 
 class primitive_regex_token : public token {
@@ -271,6 +273,8 @@ class primitive_regex_token_template : public primitive_regex_token {
 };
 
 using double_quote_token = primitive_regex_token_template<&const_regexes::primitives::double_quote>;
+using init_token = primitive_regex_token_template<&const_regexes::primitives::init_keyword>;
+
 
 
 class formula_token : public primitive_regex_token {
@@ -883,7 +887,7 @@ public:
 	std::shared_ptr<space_token> _identifier_separator;
 	std::shared_ptr<equals_token> _equals_token;
 	std::shared_ptr<space_token> _equals_separator;
-	std::shared_ptr<expression_token> _expression;
+	std::shared_ptr<expression_token> _expression; // use identifier_or_number_token #####
 	std::shared_ptr<semicolon_token> _semicolon;
 
 	using token::token;
@@ -1070,11 +1074,17 @@ public:
 	std::shared_ptr<space_token> _upper_bound_separator;
 	std::shared_ptr<right_square_brace_token> _right_brace;
 	std::shared_ptr<space_token> _right_brace_separator;
+	std::optional<std::tuple<
+		std::shared_ptr<init_token>,
+		std::shared_ptr<spaces_plus_token>,
+		std::shared_ptr<natural_number_token>,
+		std::shared_ptr<space_token>
+		>> _init_clause;
 	std::shared_ptr<semicolon_token> _semicolon;
-
 
 	virtual void parse_non_primitive() override {
 		/* global cf : [0 .. 142]; */
+		/* global cf : [0 .. 142] init 2; */
 		iterator rest_begin{ cbegin() };
 		iterator rest_end{ cend() };
 
@@ -1177,7 +1187,38 @@ public:
 		auto search_semicolon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::semicolon);
 		parse_error::assert_true(search_semicolon != regex_iterator(), R"(Could not find semicolon at the end of global definition.)");
 		parse_error::assert_true(search_semicolon->suffix().begin() == rest_end, R"(Semicolon not at the end of global definition.)");
-		parse_error::assert_true(search_semicolon->prefix().end() == rest_begin, R"(Unexpected characters before semicolon at the end of global definition.)");
+		if (search_semicolon->prefix().end() != rest_begin) { // there is some init clause
+			auto init_begin = rest_begin;
+			auto init_end = search_semicolon->prefix().end();
+			/*init spaces + natural_number + spaces* */
+
+			auto search_init_token = regex_iterator(init_begin, init_end, const_regexes::primitives::init_keyword);
+			parse_error::assert_true(search_init_token != regex_iterator(), R"(Could not find init keyword after ] in global definition.)");
+			auto debugxx = search_init_token->prefix().end();
+			parse_error::assert_true(search_init_token->prefix().end() == init_begin, R"(Could not find init keyword immediately after ] in global definition.)");
+			auto _init_token = std::make_shared<init_token>(this, init_begin, search_init_token->suffix().begin());
+			init_begin = search_init_token->suffix().begin();
+
+			auto search_init_separator = regex_iterator(init_begin, init_end, const_regexes::primitives::spaces_plus);
+			parse_error::assert_true(search_init_separator != regex_iterator(), R"(Could not find space separator after keyword "init" in global definition.)");
+			parse_error::assert_true(search_init_separator->prefix().end() == init_begin, R"(Could not find space separator immediately after keyword "init" in global definition.)");
+			auto _init_separator = std::make_shared<spaces_plus_token>(this, init_begin, search_init_separator->suffix().begin());
+			init_begin = search_init_separator->suffix().begin();
+
+			auto search_init_value = regex_iterator(init_begin, init_end, const_regexes::primitives::natural_number);
+			parse_error::assert_true(search_init_value != regex_iterator(), R"(Could not find init value in init clause.)");
+			parse_error::assert_true(search_init_value->prefix().end() == init_begin, R"(Init value not immediately after init keyword.)");
+			auto _init_value = std::make_shared<natural_number_token>(this, init_begin, search_init_value->suffix().begin());
+			init_begin = search_init_value->suffix().begin();
+
+			auto search_value_separator = regex_iterator(init_begin, init_end, const_regexes::primitives::spaces);
+			parse_error::assert_true(search_value_separator != regex_iterator(), R"(Could not find space separator after value in init clause.)");
+			parse_error::assert_true(
+				search_value_separator->prefix().end() == init_begin && search_value_separator->suffix().begin() == init_end,
+				R"(Unexpected characters in init clause.)");
+			auto _value_separator = std::make_shared<space_token>(this, init_begin, init_end);
+			_init_clause = std::make_tuple(_init_token, _init_separator, _init_value, _value_separator);
+		}
 		_semicolon = std::make_shared<semicolon_token>(this, search_semicolon->prefix().end(), search_semicolon->suffix().begin());
 		rest_end = search_semicolon->prefix().end();
 
@@ -1197,6 +1238,12 @@ public:
 		children.push_back(_upper_bound_separator);
 		children.push_back(_right_brace);
 		children.push_back(_right_brace_separator);
+		if (_init_clause) {
+			children.push_back(std::get<0>(_init_clause.value()));
+			children.push_back(std::get<1>(_init_clause.value()));
+			children.push_back(std::get<2>(_init_clause.value()));
+			children.push_back(std::get<3>(_init_clause.value()));
+		}
 		children.push_back(_semicolon);
 	}
 
@@ -1221,16 +1268,18 @@ public:
 	//std::shared_ptr<space_token> _pre_condition_separator;
 	std::shared_ptr<ascii_arrow_token> _arrow;
 	std::shared_ptr<space_token> _arrow_separator;
-	bool _simple_transition;
-	std::shared_ptr<condition_token> _simple_post_condition;
+	// bool _simple_transition;
+	//std::shared_ptr<condition_token> _simple_post_condition;
 	std::vector<
+		std::tuple<
+		std::optional<
 		std::tuple<
 		std::shared_ptr<float_token>,
 		std::shared_ptr<space_token>,
-		std::shared_ptr<colon_token>,
-		//std::shared_ptr<space_token>,
+		std::shared_ptr<colon_token>
+		>
+		>,
 		std::shared_ptr<condition_token>,
-		//std::shared_ptr<space_token>,
 		std::optional<
 		std::tuple<
 		std::shared_ptr<plus_token>,
@@ -1238,7 +1287,9 @@ public:
 		>
 		>
 		>
-	> _post_conditions;
+	> _regular_post_conditions;
+
+
 	std::shared_ptr<semicolon_token> _semicolon;
 
 	virtual void parse_non_primitive() override {
@@ -1301,10 +1352,13 @@ public:
 		rest_end = search_semicolon->prefix().end();
 
 		while (rest_begin != rest_end) {
-			_simple_transition = false;
 			auto search_colon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::colon);
 			if (search_colon == regex_iterator()) {
-				_simple_post_condition = std::make_shared< condition_token>(this, rest_begin, rest_end);
+				_regular_post_conditions.push_back({
+					std::optional<std::tuple<std::shared_ptr<float_token>,std::shared_ptr<space_token>,std::shared_ptr<colon_token>>>(),
+					std::make_shared< condition_token>(this, rest_begin, rest_end),
+					std::optional<std::tuple<std::shared_ptr<plus_token>,std::shared_ptr<space_token>>>()
+					});
 				break;
 			}
 			parse_error::assert_true(search_colon != regex_iterator(), R"(Could not find a ":" somewhere after "->" in transition.)");
@@ -1333,10 +1387,18 @@ public:
 				auto _plus_separator = std::make_shared<space_token>(this, rest_begin, search_plus_separator->suffix().begin());
 				rest_begin = search_plus_separator->suffix().begin();
 
-				_post_conditions.push_back({ _probability, _probability_separator, _colon_token, _condition, std::make_tuple(_plus, _plus_separator) });
+				_regular_post_conditions.push_back({
+					std::make_tuple(_probability, _probability_separator, _colon_token),
+					_condition,
+					std::make_tuple(_plus, _plus_separator)
+					});
 			}
 			else {
-				_post_conditions.push_back({ _probability, _probability_separator, _colon_token, _condition, std::tuple_element<4, typename decltype(_post_conditions)::value_type>::type() });
+				_regular_post_conditions.push_back({
+					std::make_tuple(_probability, _probability_separator, _colon_token),
+					_condition,
+					std::tuple_element<2, typename decltype(_regular_post_conditions)::value_type>::type()
+					});
 			}
 		}
 
@@ -1350,18 +1412,16 @@ public:
 		children.push_back(_arrow);
 		children.push_back(_arrow_separator);
 
-		if (_simple_post_condition) {
-			children.push_back(_simple_post_condition);
-		}
-
-		for (const auto& post_condition_tuple : _post_conditions) {
-			children.push_back(std::get<0>(post_condition_tuple));
+		for (const auto& post_condition_tuple : _regular_post_conditions) {
+			if (std::get<0>(post_condition_tuple).has_value()) {
+				children.push_back(std::get<0>(*std::get<0>(post_condition_tuple)));
+				children.push_back(std::get<1>(*std::get<0>(post_condition_tuple)));
+				children.push_back(std::get<2>(*std::get<0>(post_condition_tuple)));
+			}
 			children.push_back(std::get<1>(post_condition_tuple));
-			children.push_back(std::get<2>(post_condition_tuple));
-			children.push_back(std::get<3>(post_condition_tuple));
-			if (std::get<4>(post_condition_tuple).has_value()) {
-				children.push_back(std::get<0>(*std::get<4>(post_condition_tuple)));
-				children.push_back(std::get<1>(*std::get<4>(post_condition_tuple)));
+			if (std::get<2>(post_condition_tuple).has_value()) {
+				children.push_back(std::get<0>(*std::get<2>(post_condition_tuple)));
+				children.push_back(std::get<1>(*std::get<2>(post_condition_tuple)));
 			}
 		}
 		children.push_back(_semicolon);

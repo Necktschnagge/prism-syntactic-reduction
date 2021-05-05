@@ -1,0 +1,20 @@
+dtmc
+
+global cf : [0..3] init 0;
+global x : [0..1] init 1;
+global y : [0..1] init 1;
+
+module example
+
+[a] cf = 0 & x = 1 -> 
+	(cf' = 1) & (x' = 0);
+[b] cf = 1 & x = 0 -> 
+	0.5:(cf' = 2) & (y' = 0) + 
+	0.5:(cf' = 3) & (y' = 0);
+[c] cf = 2 -> 
+	(cf' = 0) & (x' = 1);
+[c] cf = 3 -> 
+	0.3:(cf' = 0) & (x' = 0) + 
+	0.7:(cf' = 1) & (x' = 0);
+	
+endmodule
