@@ -290,6 +290,17 @@ public:
 
 	def_standard_clone()
 
+	long long get_ll() {
+		return std::stoll(str());
+	}
+
+	void modify(std::string natural_number) {
+		const auto sptr = std::make_shared<std::string>(natural_number);
+		_file_content = sptr;
+		_begin = sptr->begin();
+		_end = sptr->end();
+	}
+
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::natural_number;
 	}
@@ -374,6 +385,13 @@ public:
 
 	virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::identifier;
+	}
+
+	void modify_string(const std::string& new_name) {
+		const auto sptr = std::make_shared<std::string>(new_name);
+		_file_content = sptr;
+		_begin = sptr->begin();
+		_end = sptr->end();
 	}
 
 	std::shared_ptr<int> int_value(const std::map<std::string, int>& const_table) {
@@ -873,8 +891,13 @@ public:
 
 	using token::token;
 
+	/** Needs manually initialisation */
+	condition_token(type _the_type, std::shared_ptr<std::string> dummy) : token(dummy, dummy->begin(), dummy->end()), _type(_the_type)
+	{}
+
 	condition_token(const condition_token& another) :
 		token(another),
+		_type(another._type),
 		_equation(copy_shared_ptr(another._equation))
 	{
 		for (const auto& ltoken : another._leading_tokens) {
