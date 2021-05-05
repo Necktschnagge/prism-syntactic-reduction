@@ -506,7 +506,7 @@ again_while:
 
 	const auto top_level_children_72954 = reduced_file.children();
 
-	const std::function<void(token::token_list&)> apply_coloring = [&](token::token_list children_list) {
+	const std::function<void(token::token_list)> apply_coloring = [&](token::token_list children_list) {
 		while (!children_list.empty()) {
 			const std::shared_ptr<token> current_child = children_list.front();
 			children_list.pop_front();
