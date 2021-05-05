@@ -125,7 +125,10 @@ jobs:
     - script: .\build\test\Debug\TEST-Syntactic-Reducer.exe
       displayName: "Run Tests on Windows"
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
-    - script: |
+    - script: ls ./build/
+      displayName: "Run on Linux / Mac OS"
+      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+- script: |
         ls /usr/lib/jvm/
         javac -version
         cd prism-sttt17/prism/
@@ -138,4 +141,12 @@ jobs:
         chmod +x ./prism
         ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
       displayName: 'Check original in_family.prism'
-      condition: succeeded()   
+      condition: succeeded()
+    - script: |
+        cd prism-sttt17/prism/bin/
+        ls -la
+        chmod +x ./prism
+        ./prism '../../../build/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
+      displayName: 'Check original in_family.prism'
+      condition: succeeded()
+      
