@@ -126,36 +126,32 @@ jobs:
     - script: .\build\test\Debug\TEST-Syntactic-Reducer.exe
       displayName: "Run Tests on Windows"
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
-    - script: chmod +x ./build/src/Syntactic-Reducer
-      displayName: "chmod +x"
-      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+#    - script: chmod +x ./build/src/Syntactic-Reducer
+#      displayName: "chmod +x"
+#      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
     - script: ./build/src/Syntactic-Reducer
       displayName: "Run on Linux / Mac OS"
       condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
-    - script: ls ./build/bin
-      displayName: "Run on Linux / Mac OS"
-      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
     - script: ls
-      displayName: "Run on Linux / Mac OS"
+      displayName: "Debug ls"
       condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
     - script: |
         ls /usr/lib/jvm/
         javac -version
         cd prism-sttt17/prism/
         make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
+        chmod +x ./bin/prism
       displayName: 'make prism'
       condition: succeeded()
     - script: |
         cd prism-sttt17/prism/bin/
         ls -la
-        chmod +x ./prism
-        ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
-      displayName: 'Check original in_family.prism'
+        ./prism '../../../reduced_model.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
+      displayName: 'Check reduced in_family.prism'
       condition: succeeded()
     - script: |
         cd prism-sttt17/prism/bin/
         ls -la
-        chmod +x ./prism
         ./prism '../../../build/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
       displayName: 'Check original in_family.prism'
       condition: succeeded()
