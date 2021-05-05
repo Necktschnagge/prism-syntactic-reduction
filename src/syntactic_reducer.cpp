@@ -450,8 +450,8 @@ again_while:
 		std::shared_ptr<condition_token> cf_state = std::make_shared<condition_token>(equation_text, equation_text->begin(), equation_text->end());
 		cf_state->parse();
 		std::shared_ptr<condition_token> appended_state = std::make_shared<condition_token>(condition_token::type::AND, std::make_shared<std::string>());
-		const auto and = std::make_shared<std::string>("&");
-		appended_state->_sub_conditions.push_back(std::make_pair(cf_state, std::make_shared<and_token>(and, and ->begin(), and ->end())));
+		const auto and_symbol = std::make_shared<std::string>("&");
+		appended_state->_sub_conditions.push_back(std::make_pair(cf_state, std::make_shared<and_token>(and_symbol, and_symbol->begin(), and_symbol->end())));
 		appended_state->_sub_conditions.push_back(std::make_pair(embrace_condition, nullptr));
 		// remove all not live conditions:
 		const auto& vector_of_live_vars = current_of_liveness_tuple(live_vars[pair.second]);
@@ -492,8 +492,8 @@ again_while:
 	else {
 		std::shared_ptr<condition_token> new_condition = std::make_shared<condition_token>(condition_token::type::OR, std::make_shared<std::string>("dummy"));
 		for (auto& pair : new_conditions) {
-			const auto or = std::make_shared<std::string>("|");
-			new_condition->_sub_conditions.push_back(std::make_pair(pair.first, std::make_shared<or_token>(or , or ->begin(), or ->end())));
+			const auto or_symbol = std::make_shared<std::string>("|");
+			new_condition->_sub_conditions.push_back(std::make_pair(pair.first, std::make_shared<or_token>(or_symbol, or_symbol->begin(), or_symbol->end())));
 		}
 		new_condition->_sub_conditions.back().second = nullptr; // remove trailing |
 		list_of_init_defs.front()->_start_condition = new_condition;
