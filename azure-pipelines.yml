@@ -10,6 +10,7 @@ trigger:
     exclude:
     - artifacts
 
+
 jobs:
  - job: Cloud
    strategy:
@@ -125,7 +126,10 @@ jobs:
     - script: .\build\test\Debug\TEST-Syntactic-Reducer.exe
       displayName: "Run Tests on Windows"
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
-    - script: ls ./build/
+    - script: ls ./build/bin
+      displayName: "Run on Linux / Mac OS"
+      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+    - script: ls ./build/src
       displayName: "Run on Linux / Mac OS"
       condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
     - script: |
@@ -149,4 +153,5 @@ jobs:
         ./prism '../../../build/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
       displayName: 'Check original in_family.prism'
       condition: succeeded()
+      
       
