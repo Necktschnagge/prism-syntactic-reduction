@@ -146,6 +146,12 @@ jobs:
     - script: |
         cd prism-sttt17/prism/bin/
         ls -la
+        ./prism '../../../Examples/debug/bsp.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
+      displayName: 'Check original bsp.prism'
+      condition: succeeded()
+    - script: |
+        cd prism-sttt17/prism/bin/
+        ls -la
         ./prism '../../../reduced_model.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
       displayName: 'Check reduced in_family.prism'
       condition: succeeded()
