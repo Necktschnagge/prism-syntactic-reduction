@@ -135,7 +135,7 @@ jobs:
     - script: cat reduced_model.prism
       displayName: "Show reduced file"
       condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
-    - script: mi reduced_model.prism artifacts/reduced_in_family.prism
+    - script: mv reduced_model.prism artifacts/reduced_in_family.prism
       displayName: "Move in_family artifact"
     - script: ./build/src/Syntactic-Reducer /Examples/debug/bsp.prsim
       displayName: "Run on Linux / Mac OS"
@@ -143,7 +143,7 @@ jobs:
     - script: cat reduced_model.prism
       displayName: "Show reduced file"
       condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
-    - script: mi reduced_model.prism artifacts/reduced_bsp.prism
+    - script: mv reduced_model.prism artifacts/reduced_bsp.prism
       displayName: "Move bsp artifact"
     - script: |
         ls /usr/lib/jvm/
