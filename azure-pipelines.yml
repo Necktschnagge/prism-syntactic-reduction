@@ -135,6 +135,16 @@ jobs:
     - script: cat reduced_model.prism
       displayName: "Show reduced file"
       condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+    - script: mi reduced_model.prism artifacts/reduced_in_family.prism
+      displayName: "Move in_family artifact"
+    - script: ./build/src/Syntactic-Reducer /Examples/debug/bsp.prsim
+      displayName: "Run on Linux / Mac OS"
+      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+    - script: cat reduced_model.prism
+      displayName: "Show reduced file"
+      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+    - script: mi reduced_model.prism artifacts/reduced_bsp.prism
+      displayName: "Move bsp artifact"
     - script: |
         ls /usr/lib/jvm/
         javac -version
@@ -146,13 +156,19 @@ jobs:
     - script: |
         cd prism-sttt17/prism/bin/
         ls -la
+        ./prism '../../../artifacts/reduced_bsp.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
+      displayName: 'Check reduced bsp.prism'
+      condition: succeeded()
+    - script: |
+        cd prism-sttt17/prism/bin/
+        ls -la
         ./prism '../../../Examples/debug/bsp.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
       displayName: 'Check original bsp.prism'
       condition: succeeded()
     - script: |
         cd prism-sttt17/prism/bin/
         ls -la
-        ./prism '../../../reduced_model.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
+        ./prism '../../../artifacts/reduced_in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
       displayName: 'Check reduced in_family.prism'
       condition: succeeded()
     - script: |

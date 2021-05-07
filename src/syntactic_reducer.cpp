@@ -369,57 +369,6 @@ again_while:
 
 	file_token reduced_file(ftoken);
 
-#if false
-	//Output in prism Format:
-	standard_logger().info("prism format output\n");
-
-	auto& top_level_children = ftoken.children();
-
-	std::set<int> already_declared;
-
-	const std::function<void(token::token_list&)> print_model = [&](token::token_list& children_list) {
-		bool omit_newline{ false };
-		for (auto& child : children_list) {
-			if (omit_newline) {
-				auto is_space = dynamic_cast<space_token*>(child.get());
-				if (is_space) {
-					omit_newline = false;
-					continue;
-				}
-			}
-			omit_newline = false;
-			auto global_def = dynamic_cast<global_definition_token*>(child.get());
-			if (global_def) {
-				auto [iter, inserted] = already_declared.insert(color(graph[global_def->_global_identifier->str()]));
-				if (!inserted) {
-					omit_newline = true;
-					continue;
-				};
-			}
-			if (child->is_primitive()) {
-				if (dynamic_cast<identifier_token*>(child.get())) {
-					const auto entry = graph.find(child->str());
-					if (entry != graph.end())
-						std::cout << "colored_" << color(entry->second);
-					else {
-						const auto entry = graph.find(child->str().substr(0, child->str().length() - 1));
-						if (entry != graph.end())
-							std::cout << "colored_" << color(entry->second) << "'";
-						else std::cout << child->str();
-					}
-				}
-				else std::cout << child->str();
-			}
-			else {
-				auto got_children = child->children();
-				print_model(got_children);
-			}
-		}
-	};
-
-	print_model(top_level_children);
-#endif
-
 
 	// transform the init condition:
 	std::list<std::shared_ptr<init_definition_token>> list_of_init_defs = reduced_file._dtmc_body_component->init_definitions();
