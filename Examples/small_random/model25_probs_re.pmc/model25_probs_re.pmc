@@ -1,0 +1,111 @@
+dtmc
+
+const int cfblk5_Output_1 = 0;
+
+const int cfblk1_Output_2 = 1;
+
+const int cfblk2_Output_3 = 2;
+
+const int cfblk4_Output_4 = 3;
+
+const int cfblk3_Output_5 = 4;
+
+const int cfblk5_Update_6 = 5;
+
+const int check_redandancy1 = 6;
+
+const int cfblk2_Output_3_2 = 7;
+
+const int cfblk2_Output_3_3 = 8;
+
+const int compare1 = 9;
+
+const int stop_system = 10;
+
+const int check_redandancy2 = 11;
+
+const int cfblk4_Output_4_2 = 12;
+
+const int cfblk4_Output_4_3 = 13;
+
+const int compare2 = 14;
+
+const int check_redandancy3 = 15;
+
+const int cfblk3_Output_5_2 = 16;
+
+const int cfblk3_Output_5_3 = 17;
+
+const int compare3 = 18;
+
+const int v = 0;
+
+const int ok = 1;
+
+const int no = 2;
+
+const int error = 3;
+
+const int c = 4;
+
+module control_flowerror_propagation
+    cf : [0 .. 19] init cfblk5_Output_1;
+    y_cfblk2_880075981 : [0 .. 4] init ok;
+    y_cfblk3_919211374 : [0 .. 4] init ok;
+    y_cfblk4_958346767 : [0 .. 4] init ok;
+    y_cfblk5_997482160 : [0 .. 4] init ok;
+    x_cfblk5_1_80151913 : [0 .. 4] init ok;
+    redundancy_model25_cfblk2_1 : [0 .. 4] init v;
+    y_cfblk2_880075981_2 : [0 .. 4] init ok;
+    redundancy_model25_cfblk4_2 : [0 .. 4] init v;
+    y_cfblk4_958346767_2 : [0 .. 4] init ok;
+    redundancy_model25_cfblk3_3 : [0 .. 4] init no;
+    y_cfblk3_919211374_2 : [0 .. 4] init ok;
+    
+    [cfblk5_Output_1] cf = cfblk5_Output_1 & (y_cfblk3_919211374 = ok & x_cfblk5_1_80151913 = ok) -> 0.9800000000000001:(cf' = cfblk1_Output_2) & (y_cfblk5_997482160' = ok) + 2.0e-2:(cf' = cfblk1_Output_2) & (y_cfblk5_997482160' = error);
+    [cfblk5_Output_1] cf = cfblk5_Output_1 & (y_cfblk3_919211374 != ok | x_cfblk5_1_80151913 != ok) -> 1.0:(cf' = cfblk1_Output_2) & (y_cfblk5_997482160' = error);
+    [cfblk1_Output_2] cf = cfblk1_Output_2 -> 1.0:(cf' = cfblk2_Output_3);
+    [cfblk2_Output_3] cf = cfblk2_Output_3 -> 1.0:(cf' = check_redandancy1) & (y_cfblk2_880075981' = ok);
+    [cfblk4_Output_4] cf = cfblk4_Output_4 & y_cfblk2_880075981 = ok -> 0.9690030399039999:(cf' = check_redandancy2) & (y_cfblk4_958346767' = ok) + 3.0996960095999997e-2:(cf' = check_redandancy2) & (y_cfblk4_958346767' = error);
+    [cfblk4_Output_4] cf = cfblk4_Output_4 & y_cfblk2_880075981 != ok -> 1.0:(cf' = check_redandancy2) & (y_cfblk4_958346767' = error);
+    [cfblk3_Output_5] cf = cfblk3_Output_5 & (y_cfblk2_880075981 = ok & y_cfblk4_958346767 = ok) -> 0.9740022399360001:(cf' = check_redandancy3) & (y_cfblk3_919211374' = ok) + 2.5997760063999998e-2:(cf' = check_redandancy3) & (y_cfblk3_919211374' = error);
+    [cfblk3_Output_5] cf = cfblk3_Output_5 & (y_cfblk2_880075981 != ok | y_cfblk4_958346767 != ok) -> 1.0:(cf' = check_redandancy3) & (y_cfblk3_919211374' = error);
+    [cfblk5_Update_6] cf = cfblk5_Update_6 & (y_cfblk3_919211374 = ok & x_cfblk5_1_80151913 = ok) -> 0.9800000000000001:(cf' = cfblk5_Output_1) & (x_cfblk5_1_80151913' = ok) + 2.0e-2:(cf' = cfblk5_Output_1) & (x_cfblk5_1_80151913' = error);
+    [cfblk5_Update_6] cf = cfblk5_Update_6 & (y_cfblk3_919211374 != ok | x_cfblk5_1_80151913 != ok) -> 1.0:(cf' = cfblk5_Output_1) & (x_cfblk5_1_80151913' = error);
+    [check_redandancy1] cf = check_redandancy1 & redundancy_model25_cfblk2_1 = no -> (cf' = cfblk4_Output_4);
+    [check_redandancy1] cf = check_redandancy1 & (redundancy_model25_cfblk2_1 = v | redundancy_model25_cfblk2_1 = c) -> (cf' = cfblk2_Output_3_2);
+    [cfblk2_Output_3_2] cf = cfblk2_Output_3_2 -> 1.0:(cf' = compare1) & (y_cfblk2_880075981_2' = ok);
+    [cfblk2_Output_3_3] cf = cfblk2_Output_3_3 -> 1.0:(cf' = cfblk4_Output_4) & (y_cfblk2_880075981' = ok);
+    [compare1] ((cf = compare1 & redundancy_model25_cfblk2_1 = c) & y_cfblk2_880075981 = ok) & y_cfblk2_880075981_2 = ok -> (cf' = cfblk4_Output_4);
+    [compare1] (cf = compare1 & redundancy_model25_cfblk2_1 = c) & (y_cfblk2_880075981 = error | y_cfblk2_880075981_2 = error) -> (cf' = stop_system);
+    [compare1] ((cf = compare1 & redundancy_model25_cfblk2_1 = v) & y_cfblk2_880075981 = ok) & y_cfblk2_880075981_2 = ok -> (cf' = cfblk4_Output_4);
+    [compare1] (cf = compare1 & redundancy_model25_cfblk2_1 = v) & (y_cfblk2_880075981 = error | y_cfblk2_880075981_2 = error) -> (cf' = cfblk2_Output_3_3);
+    [stop_system] cf = stop_system -> 1.0:(cf' = cfblk5_Output_1);
+    [check_redandancy2] cf = check_redandancy2 & redundancy_model25_cfblk4_2 = no -> (cf' = cfblk3_Output_5);
+    [check_redandancy2] cf = check_redandancy2 & (redundancy_model25_cfblk4_2 = v | redundancy_model25_cfblk4_2 = c) -> (cf' = cfblk4_Output_4_2);
+    [cfblk4_Output_4_2] cf = cfblk4_Output_4_2 & y_cfblk2_880075981 = ok -> 0.9690030399039999:(cf' = compare2) & (y_cfblk4_958346767_2' = ok) + 3.0996960095999997e-2:(cf' = compare2) & (y_cfblk4_958346767_2' = error);
+    [cfblk4_Output_4_2] cf = cfblk4_Output_4_2 & y_cfblk2_880075981 != ok -> 1.0:(cf' = compare2) & (y_cfblk4_958346767_2' = error);
+    [cfblk4_Output_4_3] cf = cfblk4_Output_4_3 & y_cfblk2_880075981 = ok -> 0.9690030399039999:(cf' = cfblk3_Output_5) & (y_cfblk4_958346767' = ok) + 3.0996960095999997e-2:(cf' = cfblk3_Output_5) & (y_cfblk4_958346767' = error);
+    [cfblk4_Output_4_3] cf = cfblk4_Output_4_3 & y_cfblk2_880075981 != ok -> 1.0:(cf' = cfblk3_Output_5) & (y_cfblk4_958346767' = error);
+    [compare2] ((cf = compare2 & redundancy_model25_cfblk4_2 = c) & y_cfblk4_958346767 = ok) & y_cfblk4_958346767_2 = ok -> (cf' = cfblk3_Output_5);
+    [compare2] (cf = compare2 & redundancy_model25_cfblk4_2 = c) & (y_cfblk4_958346767 = error | y_cfblk4_958346767_2 = error) -> (cf' = stop_system);
+    [compare2] ((cf = compare2 & redundancy_model25_cfblk4_2 = v) & y_cfblk4_958346767 = ok) & y_cfblk4_958346767_2 = ok -> (cf' = cfblk3_Output_5);
+    [compare2] (cf = compare2 & redundancy_model25_cfblk4_2 = v) & (y_cfblk4_958346767 = error | y_cfblk4_958346767_2 = error) -> (cf' = cfblk4_Output_4_3);
+    [check_redandancy3] cf = check_redandancy3 & redundancy_model25_cfblk3_3 = no -> (cf' = cfblk5_Update_6);
+    [check_redandancy3] cf = check_redandancy3 & (redundancy_model25_cfblk3_3 = v | redundancy_model25_cfblk3_3 = c) -> (cf' = cfblk3_Output_5_2);
+    [cfblk3_Output_5_2] cf = cfblk3_Output_5_2 & (y_cfblk2_880075981 = ok & y_cfblk4_958346767 = ok) -> 0.9740022399360001:(cf' = compare3) & (y_cfblk3_919211374_2' = ok) + 2.5997760063999998e-2:(cf' = compare3) & (y_cfblk3_919211374_2' = error);
+    [cfblk3_Output_5_2] cf = cfblk3_Output_5_2 & (y_cfblk2_880075981 != ok | y_cfblk4_958346767 != ok) -> 1.0:(cf' = compare3) & (y_cfblk3_919211374_2' = error);
+    [cfblk3_Output_5_3] cf = cfblk3_Output_5_3 & (y_cfblk2_880075981 = ok & y_cfblk4_958346767 = ok) -> 0.9740022399360001:(cf' = cfblk5_Update_6) & (y_cfblk3_919211374' = ok) + 2.5997760063999998e-2:(cf' = cfblk5_Update_6) & (y_cfblk3_919211374' = error);
+    [cfblk3_Output_5_3] cf = cfblk3_Output_5_3 & (y_cfblk2_880075981 != ok | y_cfblk4_958346767 != ok) -> 1.0:(cf' = cfblk5_Update_6) & (y_cfblk3_919211374' = error);
+    [compare3] ((cf = compare3 & redundancy_model25_cfblk3_3 = c) & y_cfblk3_919211374 = ok) & y_cfblk3_919211374_2 = ok -> (cf' = cfblk5_Update_6);
+    [compare3] (cf = compare3 & redundancy_model25_cfblk3_3 = c) & (y_cfblk3_919211374 = error | y_cfblk3_919211374_2 = error) -> (cf' = stop_system);
+    [compare3] ((cf = compare3 & redundancy_model25_cfblk3_3 = v) & y_cfblk3_919211374 = ok) & y_cfblk3_919211374_2 = ok -> (cf' = cfblk5_Update_6);
+    [compare3] (cf = compare3 & redundancy_model25_cfblk3_3 = v) & (y_cfblk3_919211374 = error | y_cfblk3_919211374_2 = error) -> (cf' = cfblk3_Output_5_3);
+endmodule
+
+formula failure = x_cfblk5_1_80151913 = error;
+
+rewards "time"
+    true : 1;
+endrewards
+
