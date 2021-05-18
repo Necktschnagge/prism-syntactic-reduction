@@ -181,6 +181,12 @@ jobs:
         ./prism '../../../Examples/rewrite_model1_probs_re.pmc' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
       displayName: 'Check original rewrite_model1_probs_re.pmc'
       condition: succeeded()
+    - script: |
+        cd prism-sttt17/prism/bin/
+        ls -la
+        ./prism '../../../Examples/manually_fixed_reduced_rewrite_model1_probs_re.pmc' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
+      displayName: 'Check manually fixed reduced rewrite_model1_probs_re.pmc'
+      condition: succeeded()
       
     - script: |
         cd prism-sttt17/prism/bin/

@@ -1,0 +1,55 @@
+dtmc
+
+const int cfblk4_Output_1 = 0;
+
+    [cfblk4_Update_6_2] colored_7= cfblk4_Update_6_2& (colored_3!= ok| colored_2!= ok) -> 1.0:(colored_7'= compare4) & (colored_1'= error);
+    [cfblk4_Update_6_3] colored_7= cfblk4_Update_6_3& (colored_3= ok& colored_2= ok) -> 0.9800000000000001:(colored_7'= cfblk1_Update_7) & (colored_2'= ok) + 2.0e-2:(colored_7'= cfblk1_Update_7) & (colored_2'= error);
+    [cfblk4_Update_6_3] colored_7= cfblk4_Update_6_3& (colored_3!= ok| colored_2!= ok) -> 1.0:(colored_7'= cfblk1_Update_7) & (colored_2'= error);
+    [compare4] ((colored_7= compare4& colored_4= c) & colored_2= ok) & colored_1= ok-> (colored_7'= cfblk1_Update_7);
+    [compare4] (colored_7= compare4& colored_4= c) & (colored_2= error| colored_1= error) -> (colored_7'= stop_system);
+    [compare4] ((colored_7= compare4& colored_4= v) & colored_2= ok) & colored_1= ok-> (colored_7'= cfblk1_Update_7);
+    [compare4] (colored_7= compare4& colored_4= v) & (colored_2= error| colored_1= error) -> (colored_7'= cfblk4_Update_6_3);
+    [check_redandancy5] colored_7= check_redandancy5& colored_6= no-> (colored_7'= cfblk5_Update_8);
+    [check_redandancy5] colored_7= check_redandancy5& (colored_6= v| colored_6= c) -> (colored_7'= cfblk1_Update_7_2);
+    [cfblk1_Update_7_2] colored_7= cfblk1_Update_7_2& (colored_0= ok& colored_5= ok) -> 0.9800000000000001:(colored_7'= compare5) & (colored_2'= ok) + 2.0e-2:(colored_7'= compare5) & (colored_2'= error);
+    [cfblk1_Update_7_2] colored_7= cfblk1_Update_7_2& (colored_0!= ok| colored_5!= ok) -> 1.0:(colored_7'= compare5) & (colored_2'= error);
+    [cfblk1_Update_7_3] colored_7= cfblk1_Update_7_3& (colored_0= ok& colored_5= ok) -> 0.9800000000000001:(colored_7'= cfblk5_Update_8) & (colored_5'= ok) + 2.0e-2:(colored_7'= cfblk5_Update_8) & (colored_5'= error);
+    [cfblk1_Update_7_3] colored_7= cfblk1_Update_7_3& (colored_0!= ok| colored_5!= ok) -> 1.0:(colored_7'= cfblk5_Update_8) & (colored_5'= error);
+    [compare5] ((colored_7= compare5& colored_6= c) & colored_5= ok) & colored_2= ok-> (colored_7'= cfblk5_Update_8);
+    [compare5] (colored_7= compare5& colored_6= c) & (colored_5= error| colored_2= error) -> (colored_7'= stop_system);
+    [compare5] ((colored_7= compare5& colored_6= v) & colored_5= ok) & colored_2= ok-> (colored_7'= cfblk5_Update_8);
+    [compare5] (colored_7= compare5& colored_6= v) & (colored_5= error| colored_2= error) -> (colored_7'= cfblk1_Update_7_3);
+endmodule
+
+global colored_7 : [0 .. 29];
+global colored_3 : [0 .. 4];
+global colored_1 : [0 .. 4];
+
+global colored_0 : [0 .. 4];
+global colored_2 : [0 .. 4];
+global colored_5 : [0 .. 4];
+global colored_4 : [0 .. 4];
+
+
+global colored_6 : [0 .. 4];
+
+
+
+
+
+
+init (colored_7=0) & (
+	(colored_7=cfblk4_Output_1) & (colored_3= ok) & (1=1) &
+	(1=1) & (1=1) & (colored_2= ok) & 
+	(1=1) & (1=1) & (colored_4= no) &
+	(1=1) & (1=1) & (1=1) &
+	(1=1) & (1=1) & (1=1) &
+	(1=1) & (colored_0 = 0) & (colored_5 = 0) & (colored_6 = 0)
+	
+)endinit
+
+formula failure = colored_4 = error;
+
+rewards"time"
+    1=1: 1;
+endrewards
