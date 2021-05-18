@@ -130,7 +130,7 @@ jobs:
 #      displayName: "chmod +x"
 #      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
 
-    - script: ./build/src/Syntactic-Reducer ./Examples/debug/in_family.prism
+    - script: ./build/src/Syntactic-Reducer ./Examples/ireduce/in_family.prism
       displayName: "Run on Linux / Mac OS"
       condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
     - script: cat reduced_model.prism
