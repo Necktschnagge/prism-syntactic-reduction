@@ -157,7 +157,7 @@ init (colored_7=0) & (
 	(1=1) & (1=1) & (colored_4= no) &
 	(1=1) & (1=1) & (1=1) &
 	(1=1) & (1=1) & (1=1) &
-	(1=1) & (colored_0 = 0) & (colored_5 = 0) & (colored_6 = 0)
+	(1=1) & (colored_0 = 0) & (colored_1 = 0) & (colored_5 = 0) & (colored_6 = 0)
 	
 )endinit
 
