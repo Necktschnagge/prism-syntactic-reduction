@@ -246,7 +246,8 @@ again_while:
 				// propagate changes from #value_tuple to the predecessor on this #egde...
 				auto& from_state_liveness{ live_vars[edge_from(edge)] };
 				std::vector<std::string> propagate = int_vector_set_minus(changes, kill_sets[concrete_transition_identifier_of_program_graph_item(edge)]);
-				std::vector<std::string> real_additives = int_vector_set_minus(propagate, changes_of_liveness_tuple(from_state_liveness));
+				auto minus = current_of_liveness_tuple(from_state_liveness); //### delete this local variable!!!
+				std::vector<std::string> real_additives = int_vector_set_minus(propagate, minus);
 				if (real_additives.empty()) continue;
 				current_of_liveness_tuple(from_state_liveness) = int_vector_union(current_of_liveness_tuple(from_state_liveness), real_additives);
 				changes_of_liveness_tuple(from_state_liveness) = int_vector_union(changes_of_liveness_tuple(from_state_liveness), real_additives);
