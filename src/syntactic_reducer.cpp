@@ -168,7 +168,7 @@ int cli(int argc, char** argv) {
 
 	const auto flag_of_liveness_tuple = [](liveness_tuple& tup) -> bool& { return std::get<0>(tup); };
 	const auto current_of_liveness_tuple = [](liveness_tuple& tup) -> std::vector<std::string>&{ return std::get<1>(tup); };
-	const auto changes_of_liveness_tuple = [](liveness_tuple& tup) { return std::get<2>(tup); };
+	const auto changes_of_liveness_tuple = [](liveness_tuple& tup) -> std::vector<std::string>&{ return std::get<2>(tup); };
 
 	// init live var sets from union of incident gen sets
 	for (const auto& p : program_graph) {
