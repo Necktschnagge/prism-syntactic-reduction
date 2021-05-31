@@ -204,26 +204,30 @@ jobs:
     - script: |
         cd prism-sttt17/prism/bin/
         ls -la
-        ./prism '../../../artifacts/reduced_in_family.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
+        ./prism '../../../artifacts/reduced_in_family.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g > ../../../artifacts/reduced_in_family.prism.log
+        cat ../../../artifacts/reduced_in_family.prism.log
       displayName: 'Check reduced in_family.prism'
       condition: succeeded()
     - script: |
         cd prism-sttt17/prism/bin/
         ls -la
-        ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
+        ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g > ../../../artifacts/in_family.prism.log
+        cat ../../../artifacts/in_family.prism.log
       displayName: 'Check original in_family.prism'
       condition: succeeded()
       
     - script: |
         cd prism-sttt17/prism/bin/
         ls -la
-        ./prism '../../../artifacts/reduced_in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
+        ./prism '../../../artifacts/reduced_in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g > ../../../artifacts/reduced_in_family.prism.rounds.log
+        cat ../../../artifacts/reduced_in_family.prism.rounds.log
       displayName: 'Check reduced in_family.prism'
       condition: succeeded()
     - script: |
         cd prism-sttt17/prism/bin/
         ls -la
-        ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g
+        ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 10g > ../../../artifacts/in_family.prism.rounds.log
+        cat ../../../artifacts/in_family.prism.rounds.log
       displayName: 'Check original in_family.prism'
       condition: succeeded()
       
