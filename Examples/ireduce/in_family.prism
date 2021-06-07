@@ -571,8 +571,8 @@ global x_Memory_1_2804971516_2 : [0 .. 4];
 global x_Integrator_1_340641100_2 : [0 .. 4];
 
 init
-	( redundancy_aircraft_Sum3_12=v) & 
-	( redundancy_aircraft_Signal_Builder_1=no) & 
+	( redundancy_aircraft_Sum3_12=no) & 
+	( redundancy_aircraft_Signal_Builder_1=c) & 
 	( redundancy_aircraft_Fuel_Mass_0=no ) & 
 	( redundancy_aircraft_Vehicle_Mass_11=no ) & 
 	( redundancy_aircraft_Sum_10=no) & 
