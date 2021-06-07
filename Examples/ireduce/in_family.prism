@@ -572,8 +572,8 @@ global x_Integrator_1_340641100_2 : [0 .. 4];
 
 init
 	( redundancy_aircraft_Sum3_12=no) & 
-	( redundancy_aircraft_Signal_Builder_1=v) & 
-	( redundancy_aircraft_Fuel_Mass_0=no ) & 
+	( redundancy_aircraft_Signal_Builder_1=no) & 
+	( redundancy_aircraft_Fuel_Mass_0=c ) & 
 	( redundancy_aircraft_Vehicle_Mass_11=no ) & 
 	( redundancy_aircraft_Sum_10=no) & 
 	( redundancy_aircraft_Engine_thrust_13=no | redundancy_aircraft_Engine_thrust_13=c | redundancy_aircraft_Engine_thrust_13=v ) & 
