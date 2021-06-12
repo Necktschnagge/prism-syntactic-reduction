@@ -139,8 +139,8 @@ jobs:
     - script: git push https://$(USER_NAME):$(PERSONAL_ACCESS_TOKEN)@github.com/${user_repo_id} ${git_branch_artifacts} 
       displayName: "git: push binaries."
       condition: succeeded()
-
-	   
+   
+   
    
  - job: Self_Hosted
    strategy:
