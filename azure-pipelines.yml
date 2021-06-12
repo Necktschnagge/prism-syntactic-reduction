@@ -114,6 +114,9 @@ jobs:
    #condition: false
    
    steps:
+    - script: ls /usr/lib/jvm/
+      displayName: "check Java install directory"
+      condition: succeeded()
     - script: sudo apt-get install -y openjdk-8-jdk
       displayName: "Install custom Java version"
       condition: succeeded()
