@@ -135,7 +135,7 @@ jobs:
     - script: git add artifacts/* 
       displayName: "git: Stage changes"
       condition: succeeded()
-    - script: git status && git checkout artifacts && git status
+    - script: git status && git checkout artifacts -- && git status
       displayName: "git: status && checkout artifacts"
       condition: succeeded()
     - script: git -c user.name="CI Agent" -c user.email="ci-agent@example.org" commit -m "prism binaries"
