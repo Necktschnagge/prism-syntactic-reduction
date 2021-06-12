@@ -129,7 +129,7 @@ jobs:
     - script: cd prism-sttt17/prism/ && make JAVA_DIR=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64
       displayName: "Build prism"
       condition: succeeded()
-    - script: mv prism-sttt17/prism/bin/ artifacts/prism/ ### override existing files or not?
+    - script: mv prism-sttt17/ artifacts/prism-sttt17/ ### override existing files or not?
       displayName: "Move binaries"
       condition: succeeded()
     - script: git add artifacts/* 
