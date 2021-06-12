@@ -138,7 +138,7 @@ jobs:
     - script: git status 
       displayName: "git: status"
       condition: succeeded()
-    - script: git commit -m "prism binaries"
+    - script: git -c user.name="CI Agent" -c user.email="ci-agent@example.org" commit -m "prism binaries"
       displayName: "Commit binaries"
       condition: succeeded()
     - script: git_repo_url=$(git remote get-url origin) && user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//')
