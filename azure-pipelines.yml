@@ -48,7 +48,7 @@ jobs:
    pool:
      vmImage: $(imageName)
      name: $(the_name)
-   
+   condition: false
    steps:
     - script: git submodule update --init --recursive
       displayName: "Init Git Submodules"
@@ -111,7 +111,7 @@ jobs:
      vmImage: $(imageName)
      name: $(the_name)
    
-   condition: false
+   #condition: false
    
    steps:
     - script: javac -version
