@@ -129,22 +129,24 @@ jobs:
     - script: cd prism-sttt17/prism/ && make JAVA_DIR=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64
       displayName: "Build prism"
       condition: succeeded()
-    - script: mv prism-sttt17/ artifacts/prism-sttt17/ ### override existing files or not?
+    - script: mv prism-sttt17/ ../dumped ### override existing files or not?
+      displayName: "Move binaries"
+      condition: succeeded()
+    - script: git checkout artifacts --
+      displayName: "git: checkout artifacts"
+      condition: succeeded()
+    - script: mv ../dumped artifacts/prism-sttt17/ ### override existing files or not?
       displayName: "Move binaries"
       condition: succeeded()
     - script: git add artifacts/* 
       displayName: "git: Stage changes"
       condition: succeeded()
-    - script: git status && git checkout artifacts -- && git status
-      displayName: "git: status && checkout artifacts"
+    - script: git status
+      displayName: "git: status"
       condition: succeeded()
     - script: git -c user.name="CI Agent" -c user.email="ci-agent@example.org" commit -m "prism binaries"
       displayName: "Commit binaries"
       condition: succeeded()
-#    - script: git_repo_url= && user_repo_id=
-#      displayName: "git: get name of remote repository"
-#      condition: succeeded()
-#    - script: echo "${user_repo_id}"
     - script: git push https://$(USER_NAME):$(PERSONAL_ACCESS_TOKEN)@github.com/$(echo "$(git remote get-url origin)" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//') ${git_branch_artifacts} 
       displayName: "git: push binaries."
       condition: succeeded()
