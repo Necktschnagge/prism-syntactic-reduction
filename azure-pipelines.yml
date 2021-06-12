@@ -100,6 +100,48 @@ jobs:
    #     ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 2g
    #   displayName: 'Check original in_family.prism'
    #   condition: succeeded()
+   
+ - job: Prism_Cloud
+   strategy:
+     matrix:
+       ubuntu_20_04:
+         imageName: 'ubuntu-20.04'
+         the_name: 'Azure Pipelines'
+   pool:
+     vmImage: $(imageName)
+     name: $(the_name)
+   
+   condition: false
+   
+   steps:
+    - script: javac -version
+      displayName: "Check Java version"
+      condition: succeeded()
+    - script: cd prism-sttt17/prism/ && make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
+      displayName: "Build prism"
+      condition: succeeded()
+    - script: mv prism-sttt17/prism/bin/ artifacts/prism/ ### override existing files or not?
+      displayName: "Move binaries"
+      condition: succeeded()
+    - script: git add artifacts/* 
+      displayName: "git: Stage changes"
+      condition: succeeded()
+    - script: git status 
+      displayName: "git: status"
+      condition: succeeded()
+    - script: git commit -m "prism binaries"
+      displayName: "Commit binaries"
+      condition: succeeded()
+    - script: git_repo_url=$(git remote get-url origin) && user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//')
+      displayName: "git: get name of remote repository"
+      condition: succeeded()
+    - script: echo "${user_repo_id}"
+    - script: git push https://$(USER_NAME):$(PERSONAL_ACCESS_TOKEN)@github.com/${user_repo_id} ${git_branch_artifacts} 
+      displayName: "git: push binaries."
+      condition: succeeded()
+
+	   
+   
  - job: Self_Hosted
    strategy:
      matrix:
