@@ -117,6 +117,9 @@ jobs:
     - script: ls /usr/lib/jvm/
       displayName: "check Java install directory"
       condition: succeeded()
+    - script: sudo rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+      displayName: "Remove Java 11"
+      condition: succeeded()
     - script: sudo apt-get install -y openjdk-8-jdk
       displayName: "Install custom Java version"
       condition: succeeded()
