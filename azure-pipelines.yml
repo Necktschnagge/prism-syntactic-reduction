@@ -114,6 +114,9 @@ jobs:
    #condition: false
    
    steps:
+    - script: sudo apt-get install -y java-8-openjdk-amd64
+      displayName: "Install custom Java version"
+      condition: succeeded()
     - script: javac -version
       displayName: "Check Java version"
       condition: succeeded()
