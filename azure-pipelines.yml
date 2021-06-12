@@ -135,17 +135,17 @@ jobs:
     - script: git add artifacts/* 
       displayName: "git: Stage changes"
       condition: succeeded()
-    - script: git status 
-      displayName: "git: status"
+    - script: git status && git checkout artifacts && git status
+      displayName: "git: status && checkout artifacts"
       condition: succeeded()
     - script: git -c user.name="CI Agent" -c user.email="ci-agent@example.org" commit -m "prism binaries"
       displayName: "Commit binaries"
       condition: succeeded()
-    - script: git_repo_url=$(git remote get-url origin) && user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//')
-      displayName: "git: get name of remote repository"
-      condition: succeeded()
-    - script: echo "${user_repo_id}"
-    - script: git push https://$(USER_NAME):$(PERSONAL_ACCESS_TOKEN)@github.com/${user_repo_id} ${git_branch_artifacts} 
+#    - script: git_repo_url= && user_repo_id=
+#      displayName: "git: get name of remote repository"
+#      condition: succeeded()
+#    - script: echo "${user_repo_id}"
+    - script: git push https://$(USER_NAME):$(PERSONAL_ACCESS_TOKEN)@github.com/$(echo "$(git remote get-url origin)" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//') ${git_branch_artifacts} 
       displayName: "git: push binaries."
       condition: succeeded()
    
