@@ -123,7 +123,7 @@ jobs:
     - script: javac -version
       displayName: "Check Java version"
       condition: succeeded()
-    - script: cd prism-sttt17/prism/ && make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
+    - script: cd prism-sttt17/prism/ && make JAVA_DIR=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64
       displayName: "Build prism"
       condition: succeeded()
     - script: mv prism-sttt17/prism/bin/ artifacts/prism/ ### override existing files or not?
