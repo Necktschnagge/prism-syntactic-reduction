@@ -38,9 +38,9 @@ jobs:
    #      imageName: 'macos-10.14'
    #      the_name: 'Azure Pipelines'
    
-#       windows_2019:
-#         imageName: 'windows-2019'
-#         the_name: 'Azure Pipelines'
+       windows_2019:
+         imageName: 'windows-2019'
+         the_name: 'Azure Pipelines'
    #    windows_2016:
    #      imageName: 'vs2017-win2016'
    #      the_name: 'Azure Pipelines'
