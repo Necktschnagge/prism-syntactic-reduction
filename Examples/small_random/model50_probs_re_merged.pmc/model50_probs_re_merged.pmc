@@ -1,0 +1,159 @@
+dtmc
+
+const int cfblk4_Output_1 = 0;
+
+const int cfblk2_Output_2 = 1;
+
+const int cfblk1_Output_3 = 2;
+
+const int cfblk5_Output_4 = 3;
+
+const int cfblk3_Output_5 = 4;
+
+const int cfblk4_Update_6 = 5;
+
+const int cfblk5_Update_7 = 6;
+
+const int check_redandancy0 = 7;
+
+const int cfblk4_Output_1_2 = 8;
+
+const int cfblk4_Output_1_3 = 9;
+
+const int compare0 = 10;
+
+const int stop_system = 11;
+
+const int check_redandancy1 = 12;
+
+const int cfblk2_Output_2_2 = 13;
+
+const int cfblk2_Output_2_3 = 14;
+
+const int compare1 = 15;
+
+const int check_redandancy2 = 16;
+
+const int cfblk1_Output_3_2 = 17;
+
+const int cfblk1_Output_3_3 = 18;
+
+const int compare2 = 19;
+
+const int check_redandancy3 = 20;
+
+const int cfblk3_Output_5_2 = 21;
+
+const int cfblk3_Output_5_3 = 22;
+
+const int compare3 = 23;
+
+const int check_redandancy4 = 24;
+
+const int cfblk4_Update_6_2 = 25;
+
+const int cfblk4_Update_6_3 = 26;
+
+const int compare4 = 27;
+
+const int v = 0;
+
+const int prop_2 = 1;
+
+const int prop_1 = 2;
+
+const int ok = 3;
+
+const int no = 4;
+
+const int error = 5;
+
+const int c = 6;
+
+module control_flowerror_propagation
+    cf : [0 .. 28] init cfblk4_Output_1;
+    y_cfblk3_3682056823 : [0 .. 6] init ok;
+    x_cfblk4_1_4063237861 : [0 .. 6] init ok;
+    x_cfblk5_1_1059738535 : [0 .. 6] init ok;
+    redundancy_model50_cfblk4_0 : [0 .. 6] init v;
+    redundancy_model50_cfblk2_1 : [0 .. 6] init no;
+    redundancy_model50_cfblk1_2 : [0 .. 6] init no;
+    y_cfblk1_3603786037_2 : [0 .. 6] init ok;
+    redundancy_model50_cfblk3_3 : [0 .. 6] init c;
+    y_cfblk3_3682056823_2_y_cfblk2_3642921430 : [0 .. 6] init prop_1;
+    y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 : [0 .. 6] init prop_1;
+    x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 : [0 .. 6] init prop_1;
+    
+    [cfblk4_Output_1] cf = cfblk4_Output_1 & (y_cfblk3_3682056823 = ok & x_cfblk4_1_4063237861 = ok) -> 0.9800000000000001:(cf' = check_redandancy0) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_1) + 2.0e-2:(cf' = check_redandancy0) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_2);
+    [cfblk4_Output_1] cf = cfblk4_Output_1 & (y_cfblk3_3682056823 != ok | x_cfblk4_1_4063237861 != ok) -> 1.0:(cf' = check_redandancy0) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_2);
+    [cfblk2_Output_2] cf = cfblk2_Output_2 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1 -> 0.9740022399360001:(cf' = check_redandancy1) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430' = prop_1) + 2.5997760063999998e-2:(cf' = check_redandancy1) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430' = prop_2);
+    [cfblk2_Output_2] cf = cfblk2_Output_2 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 != prop_1 -> 1.0:(cf' = check_redandancy1) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430' = prop_2);
+    [cfblk1_Output_3] cf = cfblk1_Output_3 & (y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_1 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1) -> 0.9740022399360001:(cf' = check_redandancy2) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_1) + 2.5997760063999998e-2:(cf' = check_redandancy2) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_2);
+    [cfblk1_Output_3] cf = cfblk1_Output_3 & (y_cfblk3_3682056823_2_y_cfblk2_3642921430 != prop_1 | x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 != prop_1) -> 1.0:(cf' = check_redandancy2) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_2);
+    [cfblk5_Output_4] cf = cfblk5_Output_4 & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_1 & x_cfblk5_1_1059738535 = ok) -> 0.9800000000000001:(cf' = cfblk3_Output_5) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_1) + 2.0e-2:(cf' = cfblk3_Output_5) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_2);
+    [cfblk5_Output_4] cf = cfblk5_Output_4 & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 != prop_1 | x_cfblk5_1_1059738535 != ok) -> 1.0:(cf' = cfblk3_Output_5) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_2);
+    [cfblk3_Output_5] cf = cfblk3_Output_5 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1 -> 0.9740022399360001:(cf' = check_redandancy3) & (y_cfblk3_3682056823' = ok) + 2.5997760063999998e-2:(cf' = check_redandancy3) & (y_cfblk3_3682056823' = error);
+    [cfblk3_Output_5] cf = cfblk3_Output_5 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 != prop_1 -> 1.0:(cf' = check_redandancy3) & (y_cfblk3_3682056823' = error);
+    [cfblk4_Update_6] cf = cfblk4_Update_6 & (y_cfblk3_3682056823 = ok & x_cfblk4_1_4063237861 = ok) -> 0.9800000000000001:(cf' = check_redandancy4) & (x_cfblk4_1_4063237861' = ok) + 2.0e-2:(cf' = check_redandancy4) & (x_cfblk4_1_4063237861' = error);
+    [cfblk4_Update_6] cf = cfblk4_Update_6 & (y_cfblk3_3682056823 != ok | x_cfblk4_1_4063237861 != ok) -> 1.0:(cf' = check_redandancy4) & (x_cfblk4_1_4063237861' = error);
+    [cfblk5_Update_7] cf = cfblk5_Update_7 & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_1 & x_cfblk5_1_1059738535 = ok) -> 0.9800000000000001:(cf' = cfblk4_Output_1) & (x_cfblk5_1_1059738535' = ok) + 2.0e-2:(cf' = cfblk4_Output_1) & (x_cfblk5_1_1059738535' = error);
+    [cfblk5_Update_7] cf = cfblk5_Update_7 & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 != prop_1 | x_cfblk5_1_1059738535 != ok) -> 1.0:(cf' = cfblk4_Output_1) & (x_cfblk5_1_1059738535' = error);
+    [check_redandancy0] cf = check_redandancy0 & redundancy_model50_cfblk4_0 = no -> (cf' = cfblk2_Output_2);
+    [check_redandancy0] cf = check_redandancy0 & (redundancy_model50_cfblk4_0 = v | redundancy_model50_cfblk4_0 = c) -> (cf' = cfblk4_Output_1_2);
+    [cfblk4_Output_1_2] cf = cfblk4_Output_1_2 & (y_cfblk3_3682056823 = ok & x_cfblk4_1_4063237861 = ok) -> 0.9800000000000001:(cf' = compare0) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_1) + 2.0e-2:(cf' = compare0) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_2);
+    [cfblk4_Output_1_2] cf = cfblk4_Output_1_2 & (y_cfblk3_3682056823 != ok | x_cfblk4_1_4063237861 != ok) -> 1.0:(cf' = compare0) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_2);
+    [cfblk4_Output_1_3] cf = cfblk4_Output_1_3 & (y_cfblk3_3682056823 = ok & x_cfblk4_1_4063237861 = ok) -> 0.9800000000000001:(cf' = cfblk2_Output_2) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_1) + 2.0e-2:(cf' = cfblk2_Output_2) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_2);
+    [cfblk4_Output_1_3] cf = cfblk4_Output_1_3 & (y_cfblk3_3682056823 != ok | x_cfblk4_1_4063237861 != ok) -> 1.0:(cf' = cfblk2_Output_2) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_2);
+    [compare0] ((cf = compare0 & redundancy_model50_cfblk4_0 = c) & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1) & y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_1 -> (cf' = cfblk2_Output_2);
+    [compare0] (cf = compare0 & redundancy_model50_cfblk4_0 = c) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_2 | y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_2) -> (cf' = stop_system);
+    [compare0] ((cf = compare0 & redundancy_model50_cfblk4_0 = v) & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1) & y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_1 -> (cf' = cfblk2_Output_2);
+    [compare0] (cf = compare0 & redundancy_model50_cfblk4_0 = v) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_2 | y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_2) -> (cf' = cfblk4_Output_1_3);
+    [stop_system] cf = stop_system -> 1.0:(cf' = cfblk4_Output_1);
+    [check_redandancy1] cf = check_redandancy1 & redundancy_model50_cfblk2_1 = no -> (cf' = cfblk1_Output_3);
+    [check_redandancy1] cf = check_redandancy1 & (redundancy_model50_cfblk2_1 = v | redundancy_model50_cfblk2_1 = c) -> (cf' = cfblk2_Output_2_2);
+    [cfblk2_Output_2_2] cf = cfblk2_Output_2_2 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1 -> 0.9740022399360001:(cf' = compare1) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_1) + 2.5997760063999998e-2:(cf' = compare1) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_2);
+    [cfblk2_Output_2_2] cf = cfblk2_Output_2_2 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 != prop_1 -> 1.0:(cf' = compare1) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_2);
+    [cfblk2_Output_2_3] cf = cfblk2_Output_2_3 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1 -> 0.9740022399360001:(cf' = cfblk1_Output_3) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430' = prop_1) + 2.5997760063999998e-2:(cf' = cfblk1_Output_3) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430' = prop_2);
+    [cfblk2_Output_2_3] cf = cfblk2_Output_2_3 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 != prop_1 -> 1.0:(cf' = cfblk1_Output_3) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430' = prop_2);
+    [compare1] ((cf = compare1 & redundancy_model50_cfblk2_1 = c) & y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_1) & y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_1 -> (cf' = cfblk1_Output_3);
+    [compare1] (cf = compare1 & redundancy_model50_cfblk2_1 = c) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_2 | y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_2) -> (cf' = stop_system);
+    [compare1] ((cf = compare1 & redundancy_model50_cfblk2_1 = v) & y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_1) & y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_1 -> (cf' = cfblk1_Output_3);
+    [compare1] (cf = compare1 & redundancy_model50_cfblk2_1 = v) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_2 | y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_2) -> (cf' = cfblk2_Output_2_3);
+    [check_redandancy2] cf = check_redandancy2 & redundancy_model50_cfblk1_2 = no -> (cf' = cfblk5_Output_4);
+    [check_redandancy2] cf = check_redandancy2 & (redundancy_model50_cfblk1_2 = v | redundancy_model50_cfblk1_2 = c) -> (cf' = cfblk1_Output_3_2);
+    [cfblk1_Output_3_2] cf = cfblk1_Output_3_2 & (y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_1 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1) -> 0.9740022399360001:(cf' = compare2) & (y_cfblk1_3603786037_2' = ok) + 2.5997760063999998e-2:(cf' = compare2) & (y_cfblk1_3603786037_2' = error);
+    [cfblk1_Output_3_2] cf = cfblk1_Output_3_2 & (y_cfblk3_3682056823_2_y_cfblk2_3642921430 != prop_1 | x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 != prop_1) -> 1.0:(cf' = compare2) & (y_cfblk1_3603786037_2' = error);
+    [cfblk1_Output_3_3] cf = cfblk1_Output_3_3 & (y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_1 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1) -> 0.9740022399360001:(cf' = cfblk5_Output_4) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_1) + 2.5997760063999998e-2:(cf' = cfblk5_Output_4) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_2);
+    [cfblk1_Output_3_3] cf = cfblk1_Output_3_3 & (y_cfblk3_3682056823_2_y_cfblk2_3642921430 != prop_1 | x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 != prop_1) -> 1.0:(cf' = cfblk5_Output_4) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037' = prop_2);
+    [compare2] ((cf = compare2 & redundancy_model50_cfblk1_2 = c) & y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_1) & y_cfblk1_3603786037_2 = ok -> (cf' = cfblk5_Output_4);
+    [compare2] (cf = compare2 & redundancy_model50_cfblk1_2 = c) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_2 | y_cfblk1_3603786037_2 = error) -> (cf' = stop_system);
+    [compare2] ((cf = compare2 & redundancy_model50_cfblk1_2 = v) & y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_1) & y_cfblk1_3603786037_2 = ok -> (cf' = cfblk5_Output_4);
+    [compare2] (cf = compare2 & redundancy_model50_cfblk1_2 = v) & (y_cfblk4_3721192216_2_y_cfblk2_3642921430_2_y_cfblk1_3603786037 = prop_2 | y_cfblk1_3603786037_2 = error) -> (cf' = cfblk1_Output_3_3);
+    [check_redandancy3] cf = check_redandancy3 & redundancy_model50_cfblk3_3 = no -> (cf' = cfblk4_Update_6);
+    [check_redandancy3] cf = check_redandancy3 & (redundancy_model50_cfblk3_3 = v | redundancy_model50_cfblk3_3 = c) -> (cf' = cfblk3_Output_5_2);
+    [cfblk3_Output_5_2] cf = cfblk3_Output_5_2 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1 -> 0.9740022399360001:(cf' = compare3) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430' = prop_1) + 2.5997760063999998e-2:(cf' = compare3) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430' = prop_2);
+    [cfblk3_Output_5_2] cf = cfblk3_Output_5_2 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 != prop_1 -> 1.0:(cf' = compare3) & (y_cfblk3_3682056823_2_y_cfblk2_3642921430' = prop_2);
+    [cfblk3_Output_5_3] cf = cfblk3_Output_5_3 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1 -> 0.9740022399360001:(cf' = cfblk4_Update_6) & (y_cfblk3_3682056823' = ok) + 2.5997760063999998e-2:(cf' = cfblk4_Update_6) & (y_cfblk3_3682056823' = error);
+    [cfblk3_Output_5_3] cf = cfblk3_Output_5_3 & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 != prop_1 -> 1.0:(cf' = cfblk4_Update_6) & (y_cfblk3_3682056823' = error);
+    [compare3] ((cf = compare3 & redundancy_model50_cfblk3_3 = c) & y_cfblk3_3682056823 = ok) & y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_1 -> (cf' = cfblk4_Update_6);
+    [compare3] (cf = compare3 & redundancy_model50_cfblk3_3 = c) & (y_cfblk3_3682056823 = error | y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_2) -> (cf' = stop_system);
+    [compare3] ((cf = compare3 & redundancy_model50_cfblk3_3 = v) & y_cfblk3_3682056823 = ok) & y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_1 -> (cf' = cfblk4_Update_6);
+    [compare3] (cf = compare3 & redundancy_model50_cfblk3_3 = v) & (y_cfblk3_3682056823 = error | y_cfblk3_3682056823_2_y_cfblk2_3642921430 = prop_2) -> (cf' = cfblk3_Output_5_3);
+    [check_redandancy4] cf = check_redandancy4 & redundancy_model50_cfblk4_0 = no -> (cf' = cfblk5_Update_7);
+    [check_redandancy4] cf = check_redandancy4 & (redundancy_model50_cfblk4_0 = v | redundancy_model50_cfblk4_0 = c) -> (cf' = cfblk4_Update_6_2);
+    [cfblk4_Update_6_2] cf = cfblk4_Update_6_2 & (y_cfblk3_3682056823 = ok & x_cfblk4_1_4063237861 = ok) -> 0.9800000000000001:(cf' = compare4) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_1) + 2.0e-2:(cf' = compare4) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_2);
+    [cfblk4_Update_6_2] cf = cfblk4_Update_6_2 & (y_cfblk3_3682056823 != ok | x_cfblk4_1_4063237861 != ok) -> 1.0:(cf' = compare4) & (x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216' = prop_2);
+    [cfblk4_Update_6_3] cf = cfblk4_Update_6_3 & (y_cfblk3_3682056823 = ok & x_cfblk4_1_4063237861 = ok) -> 0.9800000000000001:(cf' = cfblk5_Update_7) & (x_cfblk4_1_4063237861' = ok) + 2.0e-2:(cf' = cfblk5_Update_7) & (x_cfblk4_1_4063237861' = error);
+    [cfblk4_Update_6_3] cf = cfblk4_Update_6_3 & (y_cfblk3_3682056823 != ok | x_cfblk4_1_4063237861 != ok) -> 1.0:(cf' = cfblk5_Update_7) & (x_cfblk4_1_4063237861' = error);
+    [compare4] ((cf = compare4 & redundancy_model50_cfblk4_0 = c) & x_cfblk4_1_4063237861 = ok) & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1 -> (cf' = cfblk5_Update_7);
+    [compare4] (cf = compare4 & redundancy_model50_cfblk4_0 = c) & (x_cfblk4_1_4063237861 = error | x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_2) -> (cf' = stop_system);
+    [compare4] ((cf = compare4 & redundancy_model50_cfblk4_0 = v) & x_cfblk4_1_4063237861 = ok) & x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_1 -> (cf' = cfblk5_Update_7);
+    [compare4] (cf = compare4 & redundancy_model50_cfblk4_0 = v) & (x_cfblk4_1_4063237861 = error | x_cfblk4_1_4063237861_2_y_cfblk5_3760327609_y_cfblk4_3721192216 = prop_2) -> (cf' = cfblk4_Update_6_3);
+endmodule
+
+formula failure = x_cfblk5_1_1059738535 = error;
+
+rewards "time"
+    true : 1;
+endrewards
+

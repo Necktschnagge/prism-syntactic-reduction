@@ -1,10 +1,10 @@
 Repo for the implementation of syntactic reduction methods on Prism models
 
-Go to `script/` and execute
+### How to build
 
-`unix-create-project.sh`
+Depending on your platform choose `*.sh ` or `*.ps1` scripts. Here is the example for Mac and Linux:
 
-and
-
-`unix-build.sh`
-
+* `$ ./clean_init.sh` _(You may skip this in most cases if done previously.)_
+* `$ cd script`
+* `$ ./unix-create-project.sh`
+* `$ ./unix-build.sh`

@@ -782,7 +782,6 @@ public:
 	virtual void parse_non_primitive() final override {
 		iterator rest_begin{ cbegin() };
 		iterator rest_end{ cend() };
-		standard_logger().info(std::string(rest_begin, rest_end));
 
 		std::vector<std::string> comparison_operators{ "!=", "<=", ">=", "=", "<", ">" };
 
