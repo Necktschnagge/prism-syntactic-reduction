@@ -12,7 +12,34 @@
 const auto is_active = [](std::tuple<bool, int, std::set<std::string>, int>& t) -> bool& { return std::get<0>(t); };
 const auto count_active_neighbours = [](std::tuple<bool, int, std::set<std::string>, int>& t) -> int& { return std::get<1>(t); };
 const auto neighbours = [](std::tuple<bool, int, std::set<std::string>, int>& t) -> std::set<std::string>&{ return std::get<2>(t); };
-const auto color = [](std::tuple<bool, int, std::set<std::string>, int>& t) -> int& { return std::get<3>(t); };
+//const auto color = [](std::tuple<bool, int, std::set<std::string>, int>& t) -> int& { return std::get<3>(t); };
+auto color(std::tuple<bool, int, std::set<std::string>, int>& t) -> int& {
+	return std::get<3>(t);
+}
+auto color(const std::tuple<bool, int, std::set<std::string>, int>& t) -> int {
+	return std::get<3>(t);
+}
+
+
+void print_coloring_from_graph_with_color_annotations(const std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph, std::ostream& out) {
+	// output result:
+	out << "// ::::: color map :::::\n//\n//  ** var -> color **\n//\n";
+	for (auto& graph_pair : graph) {
+		out << "// Color " << color(graph_pair.second) << " for var " << graph_pair.first << std::endl;
+	}
+	out << "//\n//  ** color -> set of variables **\n//\n";
+	for (int i{ 0 }; i < std::numeric_limits<int>::max(); ++i) {
+		std::vector<std::string> var_names;
+		for (auto& graph_pair : graph) {
+			if (color(graph_pair.second) == i) var_names.push_back(graph_pair.first);
+		}
+		if (var_names.empty()) break;
+		out << "// Variables for color " << i << " :\n//\t";
+		for (const auto& s : var_names) out << s << ", ";
+		out << "\n";
+	}
+
+}
 
 
 void starke_coloring(std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph) {
@@ -479,21 +506,8 @@ again_while:
 
 	starke_coloring(graph);
 
-	// output result:
-	std::cout << "\n\n::::: color map :::::\n\n";
-	for (auto& graph_pair : graph) {
-		std::cout << "Color " << color(graph_pair.second) << " for var " << graph_pair.first << std::endl;
-	}
-	for (int i{ 0 }; i < std::numeric_limits<int>::max(); ++i) {
-		std::vector<std::string> var_names;
-		for (auto& graph_pair : graph) {
-			if (color(graph_pair.second) == i) var_names.push_back(graph_pair.first);
-		}
-		if (var_names.empty()) break;
-		std::cout << "Variables for color " << i << " :\n\t";
-		for (const auto& s : var_names) std::cout << s << ", ";
-		std::cout << "\n";
-	}
+	print_coloring_from_graph_with_color_annotations(graph, std::cout);
+
 
 	// copy the whole parse tree
 
