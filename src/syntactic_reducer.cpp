@@ -9,6 +9,16 @@
 #include <iostream>
 #include <fstream>
 
+
+// state of cf variables |-> (must be recalculated, variables that are live there (current state), changes since last calculation)
+using liveness_tuple = std::tuple<bool, std::vector<std::string>, std::vector<std::string>>;
+using live_var_map = std::map<int, liveness_tuple>;
+const auto flag_of_liveness_tuple = [](liveness_tuple& tup) -> bool& { return std::get<0>(tup); };
+const auto current_of_liveness_tuple = [](liveness_tuple& tup) -> std::vector<std::string>&{ return std::get<1>(tup); };
+const auto changes_of_liveness_tuple = [](liveness_tuple& tup) -> std::vector<std::string>&{ return std::get<2>(tup); };
+
+
+
 const auto is_active = [](std::tuple<bool, int, std::set<std::string>, int>& t) -> bool& { return std::get<0>(t); };
 const auto count_active_neighbours = [](std::tuple<bool, int, std::set<std::string>, int>& t) -> int& { return std::get<1>(t); };
 const auto neighbours = [](std::tuple<bool, int, std::set<std::string>, int>& t) -> std::set<std::string>&{ return std::get<2>(t); };
@@ -19,6 +29,164 @@ auto color(std::tuple<bool, int, std::set<std::string>, int>& t) -> int& {
 auto color(const std::tuple<bool, int, std::set<std::string>, int>& t) -> int {
 	return std::get<3>(t);
 }
+
+void apply_coloring_to_file_token(file_token& reduced_file, const std::string& var_name, const std::map<std::string, int>& const_table, live_var_map& live_vars, const std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph) {
+
+	// transform the init condition:
+	std::list<std::shared_ptr<init_definition_token>> list_of_init_defs = reduced_file._dtmc_body_component->init_definitions();
+	// should be size 1
+	std::shared_ptr<init_definition_token> the_init_def = list_of_init_defs.front();
+
+	std::shared_ptr<std::vector<int>> all_cf_init_states = the_init_def->_start_condition->get_values(var_name, const_table);
+
+	std::vector<int> all_init_cf_values = *all_cf_init_states;
+
+	std::vector<std::pair<std::shared_ptr<condition_token>, int>> new_conditions;
+
+	for (const auto& value : all_init_cf_values) {
+		new_conditions.push_back(std::make_pair(copy_shared_ptr(the_init_def->_start_condition), value));
+	}
+
+	for (auto& pair : new_conditions) {
+		// f |-> (cf=XXX) & f 
+		std::shared_ptr<condition_token> embrace_condition = std::make_shared<condition_token>(condition_token::type::SUB_CONDITION, std::make_shared<std::string>());
+		const auto brace_l = std::make_shared<std::string>("(");
+		const auto brace_r = std::make_shared<std::string>(")");
+		const auto space = std::make_shared<std::string>(" ");
+		embrace_condition->_leading_tokens.push_back(std::make_shared<space_token>(space, space->begin(), space->end()));
+		embrace_condition->_leading_tokens.push_back(std::make_shared<left_brace_token>(brace_l, brace_l->begin(), brace_l->end()));
+		embrace_condition->_sub_conditions.push_back(std::make_pair(pair.first, nullptr));
+		embrace_condition->_trailing_tokens.push_back(std::make_shared<right_brace_token>(brace_r, brace_r->begin(), brace_r->end()));
+		const auto equation_text = std::make_shared<std::string>(std::string(" (") + var_name + "=" + std::to_string(pair.second) + ") ");
+		std::shared_ptr<condition_token> cf_state = std::make_shared<condition_token>(equation_text, equation_text->begin(), equation_text->end());
+		cf_state->parse();
+		std::shared_ptr<condition_token> appended_state = std::make_shared<condition_token>(condition_token::type::AND, std::make_shared<std::string>());
+		const auto and_symbol = std::make_shared<std::string>("&");
+		appended_state->_sub_conditions.push_back(std::make_pair(cf_state, std::make_shared<and_token>(and_symbol, and_symbol->begin(), and_symbol->end())));
+		appended_state->_sub_conditions.push_back(std::make_pair(embrace_condition, nullptr));
+		// remove all not live conditions:
+		const auto& vector_of_live_vars = current_of_liveness_tuple(live_vars[pair.second]);
+		const auto recursively_remove_deads = [&](std::shared_ptr<condition_token> token) -> std::list<std::shared_ptr<condition_token>> {
+			std::list<std::shared_ptr<condition_token>> remaining;
+			if (token->_type == condition_token::type::EQUATION) {
+				std::vector<std::string> vars = token->_equation->all_variables(const_table);
+				if (vars.size() > 0) { //ignored case of more than  variable
+					auto search = std::find(vector_of_live_vars.cbegin(), vector_of_live_vars.cend(), vars[0]);
+					if (search == vector_of_live_vars.cend()) {
+						std::shared_ptr<std::string> true_equation = std::make_shared<std::string>("1=1");
+						token->_equation = std::make_shared<equation_token>(true_equation, true_equation->begin(), true_equation->end());
+						token->_equation->parse();
+					}
+				}
+			}
+			else {
+				for (const auto& sub_pair : token->_sub_conditions) {
+					remaining.push_back(sub_pair.first);
+				}
+			}
+			return remaining;
+		};
+
+		std::list<std::shared_ptr<condition_token>> remaining;
+		remaining.push_back(appended_state);
+		while (!remaining.empty()) {
+			const auto subs = recursively_remove_deads(remaining.front());
+			remaining.pop_front();
+			remaining.insert(remaining.end(), subs.begin(), subs.end());
+		}
+
+		pair.first = appended_state;
+	}
+	if (new_conditions.size() == 1) {
+		list_of_init_defs.front()->_start_condition = new_conditions.front().first;
+	}
+	else {
+		std::shared_ptr<condition_token> new_condition = std::make_shared<condition_token>(condition_token::type::OR, std::make_shared<std::string>("dummy"));
+		for (auto& pair : new_conditions) {
+			const auto or_symbol = std::make_shared<std::string>("|");
+			new_condition->_sub_conditions.push_back(std::make_pair(pair.first, std::make_shared<or_token>(or_symbol, or_symbol->begin(), or_symbol->end())));
+		}
+		new_condition->_sub_conditions.back().second = nullptr; // remove trailing |
+		list_of_init_defs.front()->_start_condition = new_condition;
+	}
+
+	//#if false
+	// replace colored things:
+
+	standard_logger().info("apply coloring to var names");
+
+	const auto top_level_children_72954 = reduced_file.children();
+
+	const std::function<void(token::token_list)> apply_coloring = [&](token::token_list children_list) {
+		while (!children_list.empty()) {
+			const std::shared_ptr<token> current_child = children_list.front();
+			children_list.pop_front();
+
+			if (current_child->is_primitive()) {
+				if (dynamic_cast<identifier_token*>(current_child.get())) {
+					auto tokenptr = dynamic_cast<identifier_token*>(current_child.get());
+					const auto entry = graph.find(current_child->str());
+					if (entry != graph.end()) {
+						std::string new_name = std::string("colored_") + std::to_string(color(entry->second));
+						tokenptr->modify_string(new_name);
+					}
+					else {
+						const auto entry = graph.find(current_child->str().substr(0, current_child->str().length() - 1));
+						if (entry != graph.end()) {
+							std::string new_name = std::string("colored_") + std::to_string(color(entry->second)) + "'";
+							tokenptr->modify_string(new_name);
+						}
+					}
+				}
+			}
+			else {
+				auto got_children = current_child->children();
+				children_list.insert(children_list.end(), got_children.begin(), got_children.end());
+			}
+
+		}
+	};
+	apply_coloring(top_level_children_72954);
+
+	// remove multiple declarations:
+	auto& got_children = reduced_file._dtmc_body_component->local_children;
+
+	std::list<token::token_list::iterator> global_definition_tokens;
+	for (auto iter = got_children.begin(); iter != got_children.end(); ++iter) {
+		if (std::dynamic_pointer_cast<global_definition_token>(*iter)) {
+			global_definition_tokens.push_back(iter);
+		}
+	}
+	for (
+		auto i_iterator = global_definition_tokens.begin();
+		i_iterator != global_definition_tokens.end() /*&& std::next(i_iterator) != global_definition_tokens.end()*/;
+		++i_iterator
+		) {
+		std::shared_ptr<global_definition_token> gdef = std::dynamic_pointer_cast<global_definition_token>(**i_iterator);
+		std::string var_name = gdef->_global_identifier->str();
+		for (auto jter = std::next(i_iterator); jter != global_definition_tokens.end();) {
+			std::shared_ptr<global_definition_token> compare = std::dynamic_pointer_cast<global_definition_token>(**jter);
+			if (compare->_global_identifier->str() == var_name) {
+				if (compare->_lower_bound->get_ll() < gdef->_lower_bound->get_ll()) {
+					gdef->_lower_bound->modify(compare->_lower_bound->str());
+				}
+				if (compare->_upper_bound->get_ll() > gdef->_upper_bound->get_ll()) {
+					gdef->_upper_bound->modify(compare->_upper_bound->str());
+				}
+				got_children.erase(*jter); // remove the token from the parse tree
+				auto del = jter;
+				++jter;
+				global_definition_tokens.erase(del); // remove entry from our todo list
+			}
+			else {
+				++jter;
+			}
+		}
+	}
+	//#endif
+
+}
+
 
 
 void print_coloring_from_graph_with_color_annotations(const std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph, std::ostream& out) {
@@ -152,7 +320,7 @@ found_merging_9876542834:
 	std::list<collapse_graph_t::iterator> relink_to_set2_on_rollback_and_delete_set1_link;
 	std::list<collapse_graph_t::iterator> relink_to_set2_on_rollback_and_keep_set1_link;
 
-		set1->first->insert(deleted_set->cbegin(), deleted_set->cend()); //join sets itself %01
+	set1->first->insert(deleted_set->cbegin(), deleted_set->cend()); //join sets itself %01
 	set1->second.insert(deleted_set_neighbours.cbegin(), deleted_set_neighbours.cend()); //link neighbours of deleted set2 to set1 %02
 
 
@@ -336,14 +504,8 @@ int cli(int argc, char** argv) {
 		return copy;
 	};
 
-	// state of cf variables |-> (must be recalculated, variables that are live there (current state), changes since last calculation)
-	using liveness_tuple = std::tuple<bool, std::vector<std::string>, std::vector<std::string>>;
-	using live_var_map = std::map<int, liveness_tuple>;
 	live_var_map live_vars;
 
-	const auto flag_of_liveness_tuple = [](liveness_tuple& tup) -> bool& { return std::get<0>(tup); };
-	const auto current_of_liveness_tuple = [](liveness_tuple& tup) -> std::vector<std::string>&{ return std::get<1>(tup); };
-	const auto changes_of_liveness_tuple = [](liveness_tuple& tup) -> std::vector<std::string>&{ return std::get<2>(tup); };
 
 	// init live var sets from union of incident gen sets
 	for (const auto& p : program_graph) {
@@ -500,7 +662,7 @@ again_while:
 
 	process_sub_colorings(all_colorings, collapse_graph, false);
 
-
+	//### all colorings still unused here.
 	/*+++++++++++++++++++++++++++++*/
 
 
@@ -510,163 +672,12 @@ again_while:
 
 
 	// copy the whole parse tree
-
 	file_token reduced_file(ftoken);
+	const_table;
 
+	apply_coloring_to_file_token(reduced_file, var_name, const_table, live_vars, graph);
 
-	// transform the init condition:
-	std::list<std::shared_ptr<init_definition_token>> list_of_init_defs = reduced_file._dtmc_body_component->init_definitions();
-	// should be size 1
-	std::shared_ptr<init_definition_token> the_init_def = list_of_init_defs.front();
-
-	std::shared_ptr<std::vector<int>> all_cf_init_states = the_init_def->_start_condition->get_values(var_name, const_table);
-
-	std::vector<int> all_init_cf_values = *all_cf_init_states;
-
-	std::vector<std::pair<std::shared_ptr<condition_token>, int>> new_conditions;
-
-	for (const auto& value : all_init_cf_values) {
-		new_conditions.push_back(std::make_pair(copy_shared_ptr(the_init_def->_start_condition), value));
-	}
-
-	for (auto& pair : new_conditions) {
-		// f |-> (cf=XXX) & f 
-		std::shared_ptr<condition_token> embrace_condition = std::make_shared<condition_token>(condition_token::type::SUB_CONDITION, std::make_shared<std::string>());
-		const auto brace_l = std::make_shared<std::string>("(");
-		const auto brace_r = std::make_shared<std::string>(")");
-		const auto space = std::make_shared<std::string>(" ");
-		embrace_condition->_leading_tokens.push_back(std::make_shared<space_token>(space, space->begin(), space->end()));
-		embrace_condition->_leading_tokens.push_back(std::make_shared<left_brace_token>(brace_l, brace_l->begin(), brace_l->end()));
-		embrace_condition->_sub_conditions.push_back(std::make_pair(pair.first, nullptr));
-		embrace_condition->_trailing_tokens.push_back(std::make_shared<right_brace_token>(brace_r, brace_r->begin(), brace_r->end()));
-		const auto equation_text = std::make_shared<std::string>(std::string(" (") + var_name + "=" + std::to_string(pair.second) + ") ");
-		std::shared_ptr<condition_token> cf_state = std::make_shared<condition_token>(equation_text, equation_text->begin(), equation_text->end());
-		cf_state->parse();
-		std::shared_ptr<condition_token> appended_state = std::make_shared<condition_token>(condition_token::type::AND, std::make_shared<std::string>());
-		const auto and_symbol = std::make_shared<std::string>("&");
-		appended_state->_sub_conditions.push_back(std::make_pair(cf_state, std::make_shared<and_token>(and_symbol, and_symbol->begin(), and_symbol->end())));
-		appended_state->_sub_conditions.push_back(std::make_pair(embrace_condition, nullptr));
-		// remove all not live conditions:
-		const auto& vector_of_live_vars = current_of_liveness_tuple(live_vars[pair.second]);
-		const auto recursively_remove_deads = [&](std::shared_ptr<condition_token> token) -> std::list<std::shared_ptr<condition_token>> {
-			std::list<std::shared_ptr<condition_token>> remaining;
-			if (token->_type == condition_token::type::EQUATION) {
-				std::vector<std::string> vars = token->_equation->all_variables(const_table);
-				if (vars.size() > 0) { //ignored case of more than  variable
-					auto search = std::find(vector_of_live_vars.cbegin(), vector_of_live_vars.cend(), vars[0]);
-					if (search == vector_of_live_vars.cend()) {
-						std::shared_ptr<std::string> true_equation = std::make_shared<std::string>("1=1");
-						token->_equation = std::make_shared<equation_token>(true_equation, true_equation->begin(), true_equation->end());
-						token->_equation->parse();
-					}
-				}
-			}
-			else {
-				for (const auto& sub_pair : token->_sub_conditions) {
-					remaining.push_back(sub_pair.first);
-				}
-			}
-			return remaining;
-		};
-
-		std::list<std::shared_ptr<condition_token>> remaining;
-		remaining.push_back(appended_state);
-		while (!remaining.empty()) {
-			const auto subs = recursively_remove_deads(remaining.front());
-			remaining.pop_front();
-			remaining.insert(remaining.end(), subs.begin(), subs.end());
-		}
-
-		pair.first = appended_state;
-	}
-	if (new_conditions.size() == 1) {
-		list_of_init_defs.front()->_start_condition = new_conditions.front().first;
-	}
-	else {
-		std::shared_ptr<condition_token> new_condition = std::make_shared<condition_token>(condition_token::type::OR, std::make_shared<std::string>("dummy"));
-		for (auto& pair : new_conditions) {
-			const auto or_symbol = std::make_shared<std::string>("|");
-			new_condition->_sub_conditions.push_back(std::make_pair(pair.first, std::make_shared<or_token>(or_symbol, or_symbol->begin(), or_symbol->end())));
-		}
-		new_condition->_sub_conditions.back().second = nullptr; // remove trailing |
-		list_of_init_defs.front()->_start_condition = new_condition;
-	}
-
-	//#if false
-	// replace colored things:
-
-	standard_logger().info("apply coloring to var names");
-
-	const auto top_level_children_72954 = reduced_file.children();
-
-	const std::function<void(token::token_list)> apply_coloring = [&](token::token_list children_list) {
-		while (!children_list.empty()) {
-			const std::shared_ptr<token> current_child = children_list.front();
-			children_list.pop_front();
-
-			if (current_child->is_primitive()) {
-				if (dynamic_cast<identifier_token*>(current_child.get())) {
-					auto tokenptr = dynamic_cast<identifier_token*>(current_child.get());
-					const auto entry = graph.find(current_child->str());
-					if (entry != graph.end()) {
-						std::string new_name = std::string("colored_") + std::to_string(color(entry->second));
-						tokenptr->modify_string(new_name);
-					}
-					else {
-						const auto entry = graph.find(current_child->str().substr(0, current_child->str().length() - 1));
-						if (entry != graph.end()) {
-							std::string new_name = std::string("colored_") + std::to_string(color(entry->second)) + "'";
-							tokenptr->modify_string(new_name);
-						}
-					}
-				}
-			}
-			else {
-				auto got_children = current_child->children();
-				children_list.insert(children_list.end(), got_children.begin(), got_children.end());
-			}
-
-		}
-	};
-	apply_coloring(top_level_children_72954);
-
-	// remove multiple declarations:
-	auto& got_children = reduced_file._dtmc_body_component->local_children;
-
-	std::list<token::token_list::iterator> global_definition_tokens;
-	for (auto iter = got_children.begin(); iter != got_children.end(); ++iter) {
-		if (std::dynamic_pointer_cast<global_definition_token>(*iter)) {
-			global_definition_tokens.push_back(iter);
-		}
-	}
-	for (
-		auto i_iterator = global_definition_tokens.begin();
-		i_iterator != global_definition_tokens.end() /*&& std::next(i_iterator) != global_definition_tokens.end()*/;
-		++i_iterator
-		) {
-		std::shared_ptr<global_definition_token> gdef = std::dynamic_pointer_cast<global_definition_token>(**i_iterator);
-		std::string var_name = gdef->_global_identifier->str();
-		for (auto jter = std::next(i_iterator); jter != global_definition_tokens.end();) {
-			std::shared_ptr<global_definition_token> compare = std::dynamic_pointer_cast<global_definition_token>(**jter);
-			if (compare->_global_identifier->str() == var_name) {
-				if (compare->_lower_bound->get_ll() < gdef->_lower_bound->get_ll()) {
-					gdef->_lower_bound->modify(compare->_lower_bound->str());
-				}
-				if (compare->_upper_bound->get_ll() > gdef->_upper_bound->get_ll()) {
-					gdef->_upper_bound->modify(compare->_upper_bound->str());
-				}
-				got_children.erase(*jter); // remove the token from the parse tree
-				auto del = jter;
-				++jter;
-				global_definition_tokens.erase(del); // remove entry from our todo list
-			}
-			else {
-				++jter;
-			}
-		}
-	}
-	//#endif
-		// print reduced model:
+	// print reduced model:
 	auto ofile = std::ofstream("reduced_model.prism");
 	token::token_list to_be_printed = reduced_file.children();
 	//token::token_list to_be_printed = list_of_init_defs.front()->children();
