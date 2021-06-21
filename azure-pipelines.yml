@@ -25,8 +25,8 @@ stages:
         vmImage: $(imageName)
         name: $(the_name)
       
-      #condition: false
-      
+      condition: false
+      timeoutInMinutes: 30
       steps:
        - script: ls /usr/lib/jvm/
          displayName: "check Java install directory"
@@ -120,6 +120,7 @@ stages:
         vmImage: $(imageName)
         name: $(the_name)
       #condition: false
+      timeoutInMinutes: 30
       steps:
        - script: git submodule update --init --recursive
          displayName: "Init Git Submodules"
@@ -183,6 +184,7 @@ stages:
         vmImage: $(imageName)
         name: $(the_name)
       #condition: false
+      timeoutInMinutes: 180
       steps:
        #Boost
        - script: sudo apt-get update && sudo apt-get install libboost-all-dev
