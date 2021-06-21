@@ -9,6 +9,21 @@
 #include <iostream>
 #include <fstream>
 
+void print_model_to_stream(const file_token& reduced_file, std::ostream& ofile) {
+	token::token_list to_be_printed = reduced_file.children();
+	while (!to_be_printed.empty()) {
+		const auto element = to_be_printed.front();
+		to_be_printed.pop_front();
+		if (element->is_primitive()) {
+			ofile << element->str();
+		}
+		else {
+			const auto got_children = element->children();
+			to_be_printed.insert(to_be_printed.begin(), got_children.begin(), got_children.end());
+		}
+	}
+}
+
 
 // state of cf variables |-> (must be recalculated, variables that are live there (current state), changes since last calculation)
 using liveness_tuple = std::tuple<bool, std::vector<std::string>, std::vector<std::string>>;
@@ -16,7 +31,6 @@ using live_var_map = std::map<int, liveness_tuple>;
 const auto flag_of_liveness_tuple = [](liveness_tuple& tup) -> bool& { return std::get<0>(tup); };
 const auto current_of_liveness_tuple = [](liveness_tuple& tup) -> std::vector<std::string>&{ return std::get<1>(tup); };
 const auto changes_of_liveness_tuple = [](liveness_tuple& tup) -> std::vector<std::string>&{ return std::get<2>(tup); };
-
 
 
 const auto is_active = [](std::tuple<bool, int, std::set<std::string>, int>& t) -> bool& { return std::get<0>(t); };
@@ -673,25 +687,12 @@ again_while:
 
 	// copy the whole parse tree
 	file_token reduced_file(ftoken);
-	const_table;
 
 	apply_coloring_to_file_token(reduced_file, var_name, const_table, live_vars, graph);
 
 	// print reduced model:
 	auto ofile = std::ofstream("reduced_model.prism");
-	token::token_list to_be_printed = reduced_file.children();
-	//token::token_list to_be_printed = list_of_init_defs.front()->children();
-	while (!to_be_printed.empty()) {
-		const auto element = to_be_printed.front();
-		to_be_printed.pop_front();
-		if (element->is_primitive()) {
-			ofile << element->str();
-		}
-		else {
-			const auto got_children = element->children();
-			to_be_printed.insert(to_be_printed.begin(), got_children.begin(), got_children.end());
-		}
-	}
+	print_model_to_stream(reduced_file, ofile);
 
 	return 0;
 }
