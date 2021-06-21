@@ -63,9 +63,9 @@ jobs:
 #       dir C:\hostedtoolcache\windows\Boost\
 #       echo %BOOST_ROOT%
 #      displayName: "Debug"
-#    - script: vcpkg install boost:x86-windows
-#      displayName: "Windows: Install Boost"
-#      condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
+    - script: Install-Package boost -Version 1.76.0
+      displayName: "Windows: Install Boost"
+      condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
     - script: .\extern\boost-ci\ci\azure-pipelines\install.bat
       displayName: "Windows: Install Boost"
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
