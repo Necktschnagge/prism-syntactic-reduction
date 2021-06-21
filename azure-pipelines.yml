@@ -138,13 +138,16 @@ jobs:
     - script: git checkout artifacts --
       displayName: "git: checkout artifacts"
       condition: succeeded()
+    - script: rm -R artifacts/prism-sttt17/ || echo "Nothing to remove." ### override existing files or not?
+      displayName: "Remove old build"
+      condition: succeeded()
     - script: mv ../dumped artifacts/prism-sttt17/ ### override existing files or not?
       displayName: "Move binaries"
       condition: succeeded()
     - script: ls -R artifacts/prism-sttt17/ ### override existing files or not?
       displayName: "What has been moved?"
       condition: succeeded()
-    - script: ri artifacts/prism-sttt17/.gitignore ### override existing files or not?
+    - script: rm artifacts/prism-sttt17/.gitignore ### override existing files or not?
       displayName: "remove .gitignore in prism-sttt17"
       condition: succeeded()
     - script: git add artifacts/* 
