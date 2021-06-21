@@ -111,7 +111,7 @@ jobs:
      vmImage: $(imageName)
      name: $(the_name)
    
-   condition: false
+   #condition: false
    
    steps:
     - script: ls /usr/lib/jvm/
@@ -160,11 +160,12 @@ jobs:
    pool:
      vmImage: $(imageName)
      name: $(the_name)
+   condition: false
    steps:
     - script: sudo apt-get update && sudo apt-get install libboost-all-dev
       displayName: "Linux: Install Boost"
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
-    - script: git checkout artifacts --
+    - script: git checkout artifacts -- && git pull
       displayName: "Checkout artifacts branch"
       condition: succeeded()
     - script: git submodule update --init --recursive
