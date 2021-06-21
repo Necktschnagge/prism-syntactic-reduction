@@ -1,0 +1,11 @@
+set(TOOL-PROJECT-NAME Prism-Log-Extractor)
+
+file(GLOB_RECURSE TOOL_SOURCE LIST_DIRECTORIES false *.h *.cpp)
+
+set(SOURCES ${TOOL_SOURCE})
+
+add_executable(${TOOL-PROJECT-NAME} ${TOOL_SOURCE})
+
+add_test(NAME ${TOOL-PROJECT-NAME} COMMAND ${TOOL-PROJECT-NAME})
+
+#target_link_libraries(${TOOL-PROJECT-NAME} PUBLIC ${CMAKE_PROJECT_NAME}_lib gtest)
