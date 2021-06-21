@@ -111,7 +111,7 @@ jobs:
      vmImage: $(imageName)
      name: $(the_name)
    
-   condition: false
+   #condition: false
    
    steps:
     - script: ls /usr/lib/jvm/
@@ -144,6 +144,9 @@ jobs:
     - script: mv ../dumped artifacts/prism-sttt17/ ### override existing files or not?
       displayName: "Move binaries"
       condition: succeeded()
+    - script: sed 's/PRISM_DIR="/home/vsts/work/1/s/prism-sttt17/prism"/PRISM_DIR="/home/vsts/work/1/s/artifacts/prism-sttt17/prism"/g' artifacts/prism-sttt17/prism/bin/prism
+      displayName: "adapt PRISM_DIR directory"
+      condition: succeeded()
     - script: ls -R artifacts/prism-sttt17/ ### override existing files or not?
       displayName: "What has been moved?"
       condition: succeeded()
@@ -172,7 +175,7 @@ jobs:
    pool:
      vmImage: $(imageName)
      name: $(the_name)
-   #condition: false
+   condition: false
    steps:
     #Boost
     - script: sudo apt-get update && sudo apt-get install libboost-all-dev
