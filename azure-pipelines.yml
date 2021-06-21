@@ -48,7 +48,7 @@ jobs:
    pool:
      vmImage: $(imageName)
      name: $(the_name)
-   
+   condition: false
    steps:
     - script: git submodule update --init --recursive
       displayName: "Init Git Submodules"
@@ -132,11 +132,17 @@ jobs:
     - script: mv prism-sttt17/ ../dumped ### override existing files or not?
       displayName: "Move binaries"
       condition: succeeded()
+    - script: ls -R ../dumped ### override existing files or not?
+      displayName: "What has been moved?"
+      condition: succeeded()
     - script: git checkout artifacts --
       displayName: "git: checkout artifacts"
       condition: succeeded()
     - script: mv ../dumped artifacts/prism-sttt17/ ### override existing files or not?
       displayName: "Move binaries"
+      condition: succeeded()
+    - script: ls -R artifacts/prism-sttt17/ ### override existing files or not?
+      displayName: "What has been moved?"
       condition: succeeded()
     - script: git add artifacts/* 
       displayName: "git: Stage changes"
