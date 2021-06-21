@@ -1,7 +1,7 @@
 
 #include <boost/regex.hpp>
 
-#include <nlohmann/json>
+#include <nlohmann/json.hpp>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/ostream_sink.h>
@@ -56,12 +56,12 @@ int main(int argc, char** argv)
 	standard_logger().info("Creating file objects...");
 
 	auto prism_log_file = std::ifstream(prism_log_file_path);
-	std::ofstream(output_file_path);
+	auto extracted_output_file = std::ofstream(output_file_path);
 //## check if files could be opened here
 
 	standard_logger().info("Reading prism log...");
 
-	std::string prism_log_content(std::istreambuf_iterator<char>(prism_log_file), std::istreambuf_iterator<char>());
+	const auto prism_log_content{ std::string(std::istreambuf_iterator<char>(prism_log_file), std::istreambuf_iterator<char>()) };
 
 	standard_logger().info("Searching result definition...");
 
