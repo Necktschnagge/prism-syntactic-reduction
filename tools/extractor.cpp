@@ -1,8 +1,10 @@
 
 #include <boost/regex.hpp>
 
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/ostream_sink.h"
+#include <nlohmann/json>
+
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/ostream_sink.h>
 
 #include <string>
 #include <iostream>
@@ -18,7 +20,7 @@ namespace {
 
 using regex_iterator = boost::regex_iterator<std::string::const_iterator>;
 
-const auto R_RESULT_DEFINITION{ boost::regex("Result:(\[,\]|)") };
+const auto R_RESULT_DEFINITION{ boost::regex(R"x(Result: (\[[0-9.]*,[0-9.]*\]|[0-9.]*))x") };
 
 
 spdlog::logger& standard_logger() {
@@ -53,16 +55,20 @@ int main(int argc, char** argv)
 
 	standard_logger().info("Creating file objects...");
 
-	std::ifstream(prism_log_file_path);
+	auto prism_log_file = std::ifstream(prism_log_file_path);
 	std::ofstream(output_file_path);
+//## check if files could be opened here
 
 	standard_logger().info("Reading prism log...");
 
-	std::string log_content(std::istreambuf_iterator<char>(prism_log_file_path), std::istreambuf_iterator<char>());
+	std::string prism_log_content(std::istreambuf_iterator<char>(prism_log_file), std::istreambuf_iterator<char>());
 
 	standard_logger().info("Searching result definition...");
 
-	auto search_result = regex_iterator(log_content.cbegin(), log_content.cend(), boost::regex(R_RESULT_DEFINITION));
+	auto search_result = regex_iterator(prism_log_content.cbegin(), prism_log_content.cend(), boost::regex(R_RESULT_DEFINITION));
+
+	"Result: [0.6219940210224283,0.9984310374949624] (range of values over initial states)";
+	"Result: 0.9978124110783552 (value in the initial state)";
 
 	standard_logger().info("Searching number of nodes...");
 

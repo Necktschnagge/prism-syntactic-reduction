@@ -33,9 +33,9 @@ FIND_PACKAGE(Boost 1.54.0 COMPONENTS regex REQUIRED )
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR} )
 
 
-include_directories(SYSTEM extern/spdlog/include)
+include_directories(SYSTEM extern/json/include)
 
-#include_directories(SYSTEM extern/json/include)
+include_directories(SYSTEM extern/spdlog/include)
 
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
