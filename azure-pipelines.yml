@@ -72,6 +72,12 @@ jobs:
 #    - script: .\extern\boost-ci\ci\azure-pipelines\install.bat
 #      displayName: "Windows: Install Boost"
 #      condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
+    - script: dir D:\a\1\s
+      displayName: "check dir"
+      condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
+
+
+
     - script: cmake -S . -B ./build/ 
       displayName: "CMake: Create Project"
       condition: succeeded()
