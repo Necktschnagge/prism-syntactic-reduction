@@ -177,7 +177,7 @@ jobs:
     - script: sudo apt-get update && sudo apt-get install libboost-all-dev
       displayName: "Linux: Install Boost"
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
-    - script: git checkout artifacts -- && git pull
+    - script: git checkout artifacts --
       displayName: "Checkout artifacts branch"
       condition: succeeded()
     - script: git submodule update --init --recursive
