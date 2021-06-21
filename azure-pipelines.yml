@@ -111,7 +111,7 @@ jobs:
      vmImage: $(imageName)
      name: $(the_name)
    
-   #condition: false
+   condition: false
    
    steps:
     - script: ls /usr/lib/jvm/
@@ -175,7 +175,7 @@ jobs:
    pool:
      vmImage: $(imageName)
      name: $(the_name)
-   condition: false
+   #condition: false
    steps:
     #Boost
     - script: sudo apt-get update && sudo apt-get install libboost-all-dev
