@@ -150,7 +150,132 @@ jobs:
     - script: git push https://$(USER_NAME):$(PERSONAL_ACCESS_TOKEN)@github.com/$(echo "$(git remote get-url origin)" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//') ${git_branch_artifacts} 
       displayName: "git: push binaries."
       condition: succeeded()
-   
+
+ - job: Test_using_binaries_artifacts
+   strategy:
+     matrix:
+       ubuntu_20_04:
+         imageName: 'ubuntu-20.04'
+         the_name: 'Azure Pipelines'
+   pool:
+     vmImage: $(imageName)
+     name: $(the_name)
+   steps:
+    - script: git checkout artifacts --
+      displayName: "Checkout artifacts branch"
+      condition: succeeded()
+    - script: git submodule update --init --recursive
+      displayName: "Init Git Submodules"
+      condition: succeeded()
+    - script: cmake -S . -B ./build/ 
+      displayName: "CMake: Create Project"
+      condition: succeeded()
+    - script: cmake --build ./build
+      displayName: "CMake: Compile and Link"
+      condition: succeeded()
+    - script: ./build/test/TEST-Syntactic-Reducer
+      displayName: "Run Tests on Linux / Mac OS"
+      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+    - script: .\build\test\Debug\TEST-Syntactic-Reducer.exe
+      displayName: "Run Tests on Windows"
+      condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+    
+#    - script: ./build/src/Syntactic-Reducer ./Examples/ireduce/in_family.prism
+#      displayName: "Reduce in_family.prism"
+#      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+#    - script: cat reduced_model.prism
+#      displayName: "Show reduced in_family.prism"
+#      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+#    - script: mv reduced_model.prism artifacts/reduced_in_family.prism
+#      displayName: "Move in_family artifact"
+#      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+#    
+#    - script: ./build/src/Syntactic-Reducer ./Examples/debug/bsp.prism
+#      displayName: "Reduce bsp.prism"
+#      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+#    - script: cat reduced_model.prism
+#      displayName: "Show reduced bsp.prism"
+#      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+#    - script: mv reduced_model.prism artifacts/reduced_bsp.prism
+#      displayName: "Move bsp artifact"
+#      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+#    
+    - script: ./build/src/Syntactic-Reducer ./Examples/rewrite_model1_probs_re.pmc
+      displayName: "Reduce rewrite_model1_probs_re.pmc"
+      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+    - script: cat reduced_model.prism
+      displayName: "Show reduced rewrite_model1_probs_re.pmc"
+      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+    - script: mv reduced_model.prism artifacts/reduced_rewrite_model1_probs_re.pmc
+      displayName: "Move rewrite_model1_probs_re artifact"
+      condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+    
+#    - script: |
+#        ls /usr/lib/jvm/
+#        javac -version
+#        cd prism-sttt17/prism/
+#        make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
+#        chmod +x ./bin/prism
+#      displayName: 'make prism'
+#      condition: succeeded()
+#      
+    - script: |
+        cd artifacts/prism-sttt17/prism/bin/
+        ls -la
+        ./prism '../../../../artifacts/reduced_rewrite_model1_probs_re.pmc' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
+      displayName: 'Check reduced rewrite_model1_probs_re.pmc'
+      condition: succeeded()
+    - script: |
+        cd artifacts/prism-sttt17/prism/bin/
+        ls -la
+        ./prism '../../../../Examples/rewrite_model1_probs_re.pmc' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
+      displayName: 'Check original rewrite_model1_probs_re.pmc'
+      condition: succeeded()
+    
+#    - script: |
+#        cd prism-sttt17/prism/bin/
+#        ls -la
+#        ./prism '../../../artifacts/reduced_bsp.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
+#      displayName: 'Check reduced bsp.prism'
+#      condition: succeeded()
+#    - script: |
+#        cd prism-sttt17/prism/bin/
+#        ls -la
+#        ./prism '../../../Examples/debug/bsp.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g
+#      displayName: 'Check original bsp.prism'
+#      condition: succeeded()
+      
+#    - script: |
+#        cd prism-sttt17/prism/bin/
+#        ls -la
+#        ./prism '../../../artifacts/reduced_in_family.prism' -pf 'Pmax=? [ F<25 "deadlock" ]' -mtbdd -cuddmaxmem 10g > ../../../artifacts/reduced_in_family.prism.log
+#        cat ../../../artifacts/reduced_in_family.prism.log
+#      displayName: 'Check reduced in_family.prism'
+#      condition: succeeded()
+#    - script: |
+#        cd prism-sttt17/prism/bin/
+#        ls -la
+#        ./prism '../../../Examples/ireduce/in_family.prism' -pf 'Pmax=? [ F<25 "deadlock" ]' -mtbdd -cuddmaxmem 10g > ../../../artifacts/in_family.prism.log
+#        cat ../../../artifacts/in_family.prism.log
+#      displayName: 'Check original in_family.prism'
+#      condition: succeeded()
+#      
+#    - script: |
+#        cd prism-sttt17/prism/bin/
+#        ls -la
+#        ./prism '../../../artifacts/reduced_in_family.prism' -pf 'Pmax=? [ F{reward{"rounds"}<=10} (failure) ]' -mtbdd -cuddmaxmem 10g > ../../../artifacts/reduced_in_family.prism.rounds.log
+#        cat ../../../artifacts/reduced_in_family.prism.rounds.log
+#      displayName: 'Check reduced in_family.prism'
+#      condition: succeeded()
+#    - script: |
+#        cd prism-sttt17/prism/bin/
+#        ls -la
+#        ./prism '../../../Examples/ireduce/in_family.prism' -pf 'Pmax=? [ F{reward{"rounds"}<=10} (failure) ]' -mtbdd -cuddmaxmem 10g > ../../../artifacts/in_family.prism.rounds.log
+#        cat ../../../artifacts/in_family.prism.rounds.log
+#      displayName: 'Check original in_family.prism'
+#      condition: succeeded()
+      
+      
    
    
  - job: Self_Hosted
