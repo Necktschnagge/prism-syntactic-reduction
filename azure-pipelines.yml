@@ -66,7 +66,7 @@ jobs:
     - script: #Install-Package boost -Version 1.76.0
       displayName: "Windows: Install Boost"
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
-    - powershell:  nuget install boost boost_regex-vc141 -Version 1.76.0
+    - powershell:  nuget install boost_regex-vc141 -Version 1.76.0
       displayName: "Windows: Install Boost"#
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
     - script: .\extern\boost-ci\ci\azure-pipelines\install.bat
