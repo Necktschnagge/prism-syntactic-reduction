@@ -48,6 +48,7 @@ jobs:
    pool:
      vmImage: $(imageName)
      name: $(the_name)
+   dependsOn: Prism_Cloud
    condition: false
    steps:
     - script: git submodule update --init --recursive
@@ -111,7 +112,7 @@ jobs:
      vmImage: $(imageName)
      name: $(the_name)
    
-   condition: false
+   #condition: false
    
    steps:
     - script: ls /usr/lib/jvm/
@@ -144,7 +145,7 @@ jobs:
     - script: mv ../dumped artifacts/prism-sttt17/ ### override existing files or not?
       displayName: "Move binaries"
       condition: succeeded()
-    - script: sed 's/PRISM_DIR="/home/vsts/work/1/s/prism-sttt17/prism"/PRISM_DIR="/home/vsts/work/1/s/artifacts/prism-sttt17/prism"/g' artifacts/prism-sttt17/prism/bin/prism
+    - script: sed 's#PRISM_DIR="/home/vsts/work/1/s/prism-sttt17/prism"#PRISM_DIR="/home/vsts/work/1/s/artifacts/prism-sttt17/prism"#g' artifacts/prism-sttt17/prism/bin/prism
       displayName: "adapt PRISM_DIR directory"
       condition: succeeded()
     - script: ls -R artifacts/prism-sttt17/ ### override existing files or not?
