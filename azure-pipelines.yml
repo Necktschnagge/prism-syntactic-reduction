@@ -25,7 +25,7 @@ stages:
         vmImage: $(imageName)
         name: $(the_name)
       
-      condition: false
+      #condition: false
       
       steps:
        - script: ls /usr/lib/jvm/
@@ -58,7 +58,7 @@ stages:
        - script: mv ../dumped artifacts/prism-sttt17/ ### override existing files or not?
          displayName: "Move binaries"
          condition: succeeded()
-       - script: sed 's#PRISM_DIR="/home/vsts/work/1/s/prism-sttt17/prism"#PRISM_DIR="/home/vsts/work/1/s/artifacts/prism-sttt17/prism"#g' artifacts/prism-sttt17/prism/bin/prism > artifacts/prism-sttt17/prism/bin/prism
+       - script: sed -i.bak 's#PRISM_DIR="/home/vsts/work/1/s/prism-sttt17/prism"#PRISM_DIR="/home/vsts/work/1/s/artifacts/prism-sttt17/prism"#g' artifacts/prism-sttt17/prism/bin/prism
          displayName: "adapt PRISM_DIR directory"
          condition: succeeded()
        - script: ls -R artifacts/prism-sttt17/ ### override existing files or not?
