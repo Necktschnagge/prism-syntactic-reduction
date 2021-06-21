@@ -81,6 +81,7 @@ stages:
          condition: succeeded()
 
  - stage: build
+   dependsOn: prebuild_artifacts
    jobs:
     - job: Cloud
       strategy:
@@ -182,7 +183,6 @@ stages:
         vmImage: $(imageName)
         name: $(the_name)
       #condition: false
-      dependsOn: prebuild_artifacts
       steps:
        #Boost
        - script: sudo apt-get update && sudo apt-get install libboost-all-dev
