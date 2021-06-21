@@ -78,7 +78,7 @@ jobs:
 
 
 
-    - script: cmake -DBOOST_ROOT=.\boost.1.76.0.0 -S . -B ./build/ 
+    - script: cmake -S . -B ./build/ 
       displayName: "CMake: Create Project"
       condition: succeeded()
     - script: cmake --build ./build
