@@ -21,6 +21,13 @@ namespace {
 using regex_iterator = boost::regex_iterator<std::string::const_iterator>;
 
 const auto R_RESULT_DEFINITION{ boost::regex(R"x(Result: (\[[0-9.]*,[0-9.]*\]|[0-9.]*))x") };
+const auto R_RESULT_RANGE_DEFINITION{ boost::regex(R"x(Result: \[([0-9.]*),([0-9.]*)\])x") };
+const auto R_RESULT_VALUE_DEFINITION{ boost::regex(R"x(Result: ([0-9.]*))x") };
+/* two formats are:
+Result: [0.6219940210224283,0.9984310374949624] (range of values over initial states)
+Result: 0.9978124110783552 (value in the initial state)
+*/
+
 
 
 spdlog::logger& standard_logger() {
@@ -57,7 +64,7 @@ int main(int argc, char** argv)
 
 	auto prism_log_file = std::ifstream(prism_log_file_path);
 	auto extracted_output_file = std::ofstream(output_file_path);
-//## check if files could be opened here
+	//## check if files could be opened here
 
 	standard_logger().info("Reading prism log...");
 
@@ -65,10 +72,17 @@ int main(int argc, char** argv)
 
 	standard_logger().info("Searching result definition...");
 
+	std::list<std::pair<std::string::const_iterator, std::string::const_iterator>> result_locations;
+
 	auto search_result = regex_iterator(prism_log_content.cbegin(), prism_log_content.cend(), boost::regex(R_RESULT_DEFINITION));
 
-	"Result: [0.6219940210224283,0.9984310374949624] (range of values over initial states)";
-	"Result: 0.9978124110783552 (value in the initial state)";
+	while (search_result != regex_iterator()) {
+		result_locations.push_back(std::make_pair(search_result->prefix().end(), search_result->suffix().begin()));
+		++search_result;
+	}
+
+	standard_logger().info(std::string("Found ") + std::to_string(result_locations.size()) + " result definitions.");
+
 
 	standard_logger().info("Searching number of nodes...");
 
