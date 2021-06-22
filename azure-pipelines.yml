@@ -182,6 +182,9 @@ stages:
        - script: ./build/tools/collect-data-controller/Collect-Data-Controller ./Examples/ireduce/in_family.prism ./build/src/Syntactic-Reducer ./artifacts/
          displayName: "Collect Data Controller"
          condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+       - script: ls ./artifacts/ && ls ./artifacts/collect-data/
+         displayName: "Check directory content"
+         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
 #       - script: cat reduced_model.prism
 #         displayName: "Show reduced in_family.prism"
 #         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
