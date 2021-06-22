@@ -138,11 +138,13 @@ nlohmann::json analyze(const std::string& prism_log_content) {
 class log_enumerator {
 	unsigned long long i{ 0 };
 	std::filesystem::path base_path;
+
+	std::filesystem::path log_file_path(unsigned long long i) { return base_path / (std::to_string(i) + ".log"); };
 public:
 	log_enumerator(const std::filesystem::path& base_path) : base_path(base_path) {}
 
-	inline std::string write_next() { return std::string(" > ") + std::to_string(++i) + ".log"; }
-	inline std::filesystem::path last() { return base_path / (std::to_string(i) + ".log"); }
+	inline std::string write_next() { return std::string(" > ") + log_file_path(++i).string(); }
+	inline std::filesystem::path last() { return log_file_path(i); }
 	inline void print_last_log() { std::cout << std::ifstream(last().string()).rdbuf(); }
 };
 
