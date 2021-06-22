@@ -135,6 +135,17 @@ nlohmann::json analyze(const std::string& prism_log_content) {
 	return result;
 }
 
+class log_enumerator {
+	unsigned long long i{ 0 };
+	std::filesystem::path base_path;
+public:
+	log_enumerator(const std::filesystem::path& base_path) : base_path(base_path) {}
+
+	inline std::string write_next() { return std::string(" > ") + std::to_string(++i) + ".log"; }
+	inline std::filesystem::path last() { return base_path / (std::to_string(i) + ".log"); }
+	inline void print_last_log() { std::cout << std::ifstream(last().string()).rdbuf(); }
+};
+
 int main(int argc, char** argv)
 {
 	init_logger();
@@ -154,22 +165,29 @@ int main(int argc, char** argv)
 	std::string artifact_path_string{ argv[3] };
 
 	auto original_model_path = std::filesystem::path(original_model_path_string);
+	auto syntactic_reducer_path = std::filesystem::path(syntactic_reducer_path_string);
 	auto artifact_path = std::filesystem::path(artifact_path_string) / "collect_data";
+
+	log_enumerator logs(artifact_path);
 
 	/*
 	copy original model into artifact path
 	*/
 
 	standard_logger().info("Copying original model...");
-	std::string command = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string());
-	system(command.c_str());
-	system((std::string("ls ") + artifact_path.string()).c_str());
+	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string() + logs.write_next());
+	system(command_copy_model.c_str());
+	logs.print_last_log();
+	system((std::string("ls ") + artifact_path.string() + logs.write_next()).c_str());
+	logs.print_last_log();
 
 	/*
 	call synctactic reducer
 	in : modle path, artifact output path
 	out: json path containing all information about created files.
 	*/
+	std::string command_call_syntactic_reducer = syntactic_reducer_path.string() + " ";
+
 
 	/*
 	call prism on all models
