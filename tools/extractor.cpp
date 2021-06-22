@@ -10,7 +10,8 @@
 #include <iostream>
 #include <exception>
 #include <fstream>
-//#include <iterator>
+
+//#define debug_local
 
 namespace {
 
@@ -32,7 +33,7 @@ Result: 0.9978124110783552 (value in the initial state)
 
 spdlog::logger& standard_logger() {
 	auto raw_ptr = spdlog::get(STANDARD_LOGGER_NAME).get();
-	if (raw_ptr != nullptr) {
+	if (raw_ptr == nullptr) {
 		const char* error_message{ "The standard logger has not been registered." };
 		std::cerr << error_message << std::endl;
 		throw std::system_error(std::error_code(), error_message);
@@ -47,28 +48,9 @@ void init_logger() {
 	spdlog::register_logger(standard_logger);
 }
 
-int main(int argc, char** argv)
-{
-	init_logger();
-
-	if (argc != 3) {
-		const char* error_message{ R"x(Wrong number of arguments. You need to pass exactly two arguments, the file name of prism log and the file where to output the extracted information.\n Type Prism-Log-Extractor path/to/prism.log path/to/extracted_information.json)x" };
-		std::cerr << error_message << std::endl;
-		throw std::logic_error(error_message);
-	}
-
-	std::string prism_log_file_path{ argv[1] };
-	std::string output_file_path{ argv[2] };
-
-	standard_logger().info("Creating file objects...");
-
-	auto prism_log_file = std::ifstream(prism_log_file_path);
-	auto extracted_output_file = std::ofstream(output_file_path);
-	//## check if files could be opened here
-
-	standard_logger().info("Reading prism log...");
-
-	const auto prism_log_content{ std::string(std::istreambuf_iterator<char>(prism_log_file), std::istreambuf_iterator<char>()) };
+std::tuple<long double, long double> extract_result(const std::string& prism_log_content) {
+	long double min{ 0 };
+	long double max{ 0 };
 
 	standard_logger().info("Searching result definition...");
 
@@ -82,8 +64,103 @@ int main(int argc, char** argv)
 	}
 
 	standard_logger().info(std::string("Found ") + std::to_string(result_locations.size()) + " result definitions.");
+	if (result_locations.size() != 1) {
+		auto error_message = std::string("Expected 1 but found ") + std::to_string(result_locations.size()) + " result definitions";
+		throw std::logic_error(error_message);
+	}
+	standard_logger().info("Reading values...");
+	boost::match_results<std::string::const_iterator> m; // boost::smatch
+
+	if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_RESULT_VALUE_DEFINITION))) {
+		standard_logger().info("Found single value definition.");
+		max = min = std::stold(m[1]);
+	}
+	else if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_RESULT_RANGE_DEFINITION))) {
+		standard_logger().info("Found range definition.");
+		min = std::stold(m[1]);
+		max = std::stold(m[2]);
+	}
+	else {
+		throw std::logic_error("Internal software error.");
+	}
+	standard_logger().info(std::string("Recognized min=") + std::to_string(min) + "  and  max=" + std::to_string(max));
+
+	return std::make_tuple(min, max);
+}
+
+void prepare_files(int argc, char** argv, std::string& prism_log_content, std::ofstream& extracted_output_file) {
+#ifdef debug_local
+	std::string prism_log_file_path{ R"(C:\Users\F-NET-ADMIN\Desktop\some_prism_log.txt)" };
+	std::string output_file_path{ R"(C:\Users\F-NET-ADMIN\Desktop\extracted.json)" };
+
+#else
+	if (argc != 3) {
+		const char* error_message{ R"x(Wrong number of arguments. You need to pass exactly two arguments, the file name of prism log and the file where to output the extracted information.\n Type Prism-Log-Extractor path/to/prism.log path/to/extracted_information.json)x" };
+		throw std::logic_error(error_message);
+	}
+
+	std::string prism_log_file_path{  argv[1] };
+	std::string output_file_path{ argv[2] };
+#endif
+
+	standard_logger().info("Creating file objects...");
+
+	auto prism_log_file = std::ifstream(prism_log_file_path);
+	extracted_output_file = std::ofstream(output_file_path);
+	//## check if files could be opened here
+
+	standard_logger().info("Reading prism log...");
+
+	prism_log_content = std::string(std::istreambuf_iterator<char>(prism_log_file), std::istreambuf_iterator<char>());
+}
+
+nlohmann::json analyze(const std::string& prism_log_content) {
+
+	auto [min, max] = extract_result(prism_log_content);
+
+	standard_logger().info("Searching number of nodes...  SKIPPED");
 
 
-	standard_logger().info("Searching number of nodes...");
+	standard_logger().info("Building json...");
 
+	nlohmann::json result;
+	result["result"] = { {"min", min}, {"max", max} };
+
+	standard_logger().info("Built up the following json:");
+	std::cout << "\n\n" << result.dump(3) << "\n\n";
+
+	return result;
+}
+
+int main(int argc, char** argv)
+{
+	init_logger();
+
+	try {
+		std::string prism_log_content;
+		std::ofstream extracted_output_file;
+
+		standard_logger().info("Preparing files...");
+
+		prepare_files(argc, argv, prism_log_content, extracted_output_file);
+
+		standard_logger().info("Extracting information...");
+
+		nlohmann::json result{ analyze(prism_log_content) };
+
+		standard_logger().info("Writing extracted json file...");
+
+		extracted_output_file << result.dump(3);
+
+	}
+	catch (const std::system_error& e) {
+
+	}
+	catch (const std::exception& e) {
+		standard_logger().error(e.what());
+		throw e;
+	}
+
+	standard_logger().info("");
+	standard_logger().info("Finished.");
 }
