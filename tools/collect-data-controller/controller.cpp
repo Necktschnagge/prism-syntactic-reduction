@@ -139,6 +139,9 @@ int main(int argc, char** argv)
 {
 
 	init_logger();
+	standard_logger().info("Hello world!");
+	for (int i = 0; i < argc; ++i) std::cout << i << "   " << argv[i] << "\n";
+	return 0;
 
 	const std::string ORIGINAL_MODEL_FILE_NAME{ "model_original.prism" };
 
