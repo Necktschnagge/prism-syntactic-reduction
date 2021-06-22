@@ -38,9 +38,9 @@ jobs:
    #      imageName: 'macos-10.14'
    #      the_name: 'Azure Pipelines'
    
-#       windows_2019:
-#         imageName: 'windows-2019'
-#         the_name: 'Azure Pipelines'
+       windows_2019:
+         imageName: 'windows-2019'
+         the_name: 'Azure Pipelines'
    #    windows_2016:
    #      imageName: 'vs2017-win2016'
    #      the_name: 'Azure Pipelines'
@@ -59,15 +59,8 @@ jobs:
     - script: brew install boost
       displayName: "Mac: Install Boost"
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Darwin' ))
-#    - script: |
-#       dir C:\hostedtoolcache\windows\Boost\
-#       echo %BOOST_ROOT%
-#      displayName: "Debug"
-#    - script: vcpkg install boost:x86-windows
-#      displayName: "Windows: Install Boost"
-#      condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
-    - script: .\extern\boost-ci\ci\azure-pipelines\install.bat
-      displayName: "Windows: Install Boost"
+    - script:  choco install boost-msvc-14.2 #nuget install boost_regex-vc142 -Version 1.76.0
+      displayName: "Windows: Install Boost"#
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
     - script: cmake -S . -B ./build/ 
       displayName: "CMake: Create Project"
@@ -81,25 +74,7 @@ jobs:
     - script: .\build\test\Debug\TEST-Syntactic-Reducer.exe
       displayName: "Run Tests on Windows"
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
-   # - script: |
-   #     rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-   #     sudo apt-get install openjdk-8-jdk-headless
-   #   displayName: 'Linux: Install Java and uninstall old versions'
-   #   condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
-   # - script: |
-   #     ls /usr/lib/jvm/
-   #     javac -version
-   #     cd prism-sttt17/prism/
-   #     make JAVA_DIR=/usr/lib/jvm/java-8-openjdk-amd64
-   #   displayName: 'make prism'
-   #   condition: succeeded()
-   # - script: |
-   #     cd prism-sttt17/prism/bin/
-   #     ls -la
-   #     chmod +x ./prism
-   #     ./prism '../../../Examples/ireduce/in_family.prism' -pf 'filter(printall, Pmax=? [ F{reward{"rounds"}<=10} (failure) ], "init")' -mtbdd -cuddmaxmem 2g
-   #   displayName: 'Check original in_family.prism'
-   #   condition: succeeded()
+
  - job: Self_Hosted
    strategy:
      matrix:
