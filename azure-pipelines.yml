@@ -147,6 +147,9 @@ stages:
          displayName: "Run Tests on Windows"
          condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
 
+ - stage: test_and_analyze
+   
+   dependsOn: build
    
     - job: Test_using_binaries_artifacts
       strategy:
