@@ -137,11 +137,15 @@ nlohmann::json analyze(const std::string& prism_log_content) {
 
 int main(int argc, char** argv)
 {
-
 	init_logger();
-	standard_logger().info("Hello world!");
+
+	standard_logger().info("Listing arguments...");
 	for (int i = 0; i < argc; ++i) std::cout << i << "   " << argv[i] << "\n";
-	return 0;
+
+	if (argc != 4) {
+		standard_logger().error("Expected 1 application path and 3 arguments.");
+		return 1;
+	}
 
 	const std::string ORIGINAL_MODEL_FILE_NAME{ "model_original.prism" };
 
@@ -159,6 +163,7 @@ int main(int argc, char** argv)
 	standard_logger().info("Copying original model...");
 	std::string command = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string());
 	system(command.c_str());
+	system((std::string("ls ") + artifact_path.string()).c_str());
 
 	/*
 	call synctactic reducer
