@@ -82,7 +82,6 @@ stages:
 
  - stage: build
    dependsOn: prebuild_artifacts
-   condition: false
    jobs:
     - job: Cloud
       strategy:
@@ -120,7 +119,7 @@ stages:
       pool:
         vmImage: $(imageName)
         name: $(the_name)
-      #condition: false
+      condition: false
       timeoutInMinutes: 30
       steps:
        - script: git submodule update --init --recursive
