@@ -82,6 +82,7 @@ stages:
 
  - stage: build
    dependsOn: prebuild_artifacts
+   condition: false
    jobs:
     - job: Cloud
       strategy:
