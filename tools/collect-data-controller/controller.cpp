@@ -11,6 +11,9 @@
 #include <exception>
 #include <fstream>
 
+#include <stdlib.h>
+#include <filesystem>
+
 //#define debug_local
 
 namespace {
@@ -99,7 +102,7 @@ void prepare_files(int argc, char** argv, std::string& prism_log_content, std::o
 		throw std::logic_error(error_message);
 	}
 
-	std::string prism_log_file_path{  argv[1] };
+	std::string prism_log_file_path{ argv[1] };
 	std::string output_file_path{ argv[2] };
 #endif
 
@@ -134,8 +137,47 @@ nlohmann::json analyze(const std::string& prism_log_content) {
 
 int main(int argc, char** argv)
 {
+
 	init_logger();
 
+	const std::string ORIGINAL_MODEL_FILE_NAME{ "model_original.prism" };
+
+	std::string original_model_path_string{ argv[1] };
+	std::string syntactic_reducer_path_string{ argv[2] };
+	std::string artifact_path_string{ argv[3] };
+
+	auto original_model_path = std::filesystem::path(original_model_path_string);
+	auto artifact_path = std::filesystem::path(artifact_path_string) / "collect_data";
+
+	/*
+	copy original model into artifact path
+	*/
+
+	standard_logger().info("Copying original model...");
+	std::string command = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string());
+	system(command.c_str());
+
+	/*
+	call synctactic reducer
+	in : modle path, artifact output path
+	out: json path containing all information about created files.
+	*/
+
+	/*
+	call prism on all models
+	*/
+
+	/*
+	call data extractor on all models
+	*/
+
+	/*
+	collect data, output data
+	*/
+
+
+
+	/*
 	try {
 		std::string prism_log_content;
 		std::ofstream extracted_output_file;
@@ -160,7 +202,7 @@ int main(int argc, char** argv)
 		standard_logger().error(e.what());
 		throw e;
 	}
-
+	*/
 	standard_logger().info("");
 	standard_logger().info("Finished.");
 }
