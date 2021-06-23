@@ -143,7 +143,7 @@ class log_enumerator {
 public:
 	log_enumerator(const std::filesystem::path& base_path) : base_path(base_path) {}
 
-	inline std::string write_next() { return std::string(" > ") + log_file_path(++i).string(); }
+	inline std::string write_next() { return std::string(" >") + log_file_path(++i).string(); }
 	inline std::filesystem::path last() { return log_file_path(i); }
 	inline void print_last_log() { 
 		auto file = std::ifstream(last().string());
@@ -197,6 +197,7 @@ int main(int argc, char** argv)
 	system((std::string("ls -la ") + artifact_path.string() + logs.write_next()).c_str());
 	logs.print_last_log();
 	std::cout << "number i : " << logs.ii();
+	logs.print_last_log();
 
 	/*
 	call synctactic reducer
@@ -248,4 +249,6 @@ int main(int argc, char** argv)
 	*/
 	standard_logger().info("");
 	standard_logger().info("Finished.");
+	logs.print_last_log();
+
 }
