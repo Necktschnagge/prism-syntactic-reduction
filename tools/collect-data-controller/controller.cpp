@@ -145,13 +145,12 @@ public:
 
 	inline std::string write_next() { return std::string(" > ") + log_file_path(++i).string(); }
 	inline std::filesystem::path last() { return log_file_path(i); }
-	inline void print_last_log() { std::cout << std::ifstream(last().string()).rdbuf(); }
+	inline void print_last_log() { std::cout << "read file from path   " << last().string() << " here:\n\n" << std::ifstream(last().string()).rdbuf(); }
 };
 
 int main(int argc, char** argv)
 {
 	init_logger();
-
 	standard_logger().info("Listing arguments...");
 	for (int i = 0; i < argc; ++i) std::cout << i << "   " << argv[i] << "\n";
 
