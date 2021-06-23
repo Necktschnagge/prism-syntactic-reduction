@@ -34,7 +34,6 @@ Result: 0.9978124110783552 (value in the initial state)
 
 
 
-/*
 spdlog::logger& standard_logger() {
 	auto raw_ptr = spdlog::get(STANDARD_LOGGER_NAME).get();
 	if (raw_ptr == nullptr) {
@@ -44,7 +43,6 @@ spdlog::logger& standard_logger() {
 	}
 	return *raw_ptr;
 }
-*/
 
 void init_logger() {
 	auto sink_std_cout = std::make_shared<spdlog::sinks::ostream_sink_mt>(std::cout);
@@ -52,7 +50,7 @@ void init_logger() {
 	standard_logger->set_level(spdlog::level::debug);
 	spdlog::register_logger(standard_logger);
 }
-/*
+
 std::tuple<long double, long double> extract_result(const std::string& prism_log_content) {
 	long double min{ 0 };
 	long double max{ 0 };
@@ -136,7 +134,7 @@ nlohmann::json analyze(const std::string& prism_log_content) {
 
 	return result;
 }
-*/
+
 class log_enumerator {
 	unsigned long long i{ 0 };
 	std::filesystem::path base_path;
@@ -151,7 +149,7 @@ public:
 		auto path = last().string();
 		auto file_stream = std::ifstream(path);
 		bool ok = file_stream.is_open();
-		std::cout << (std::string("read file from path \"") + path + "\" here:\n" + (ok ? std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>()) : "error: file not opened"));
+		standard_logger().info(std::string("read file from path \"") + path + "\" here:\n" + (ok ? std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>()) : "error: file not opened"));
 	}
 	decltype(i) ii() { return i; }
 };
@@ -162,11 +160,11 @@ int main(int argc, char** argv)
 	std::cout << std::ifstream("test.txt").rdbuf();
 
 	init_logger();
-	std::cout <<"Listing arguments...";
+	standard_logger().info("Listing arguments...");
 	for (int i = 0; i < argc; ++i) std::cout << i << "   " << argv[i] << "\n";
 
 	if (argc != 4) {
-		std::cout << "Expected 1 application path and 3 arguments.";
+		standard_logger().error("Expected 1 application path and 3 arguments.");
 		return 1;
 	}
 
@@ -186,17 +184,17 @@ int main(int argc, char** argv)
 	copy original model into artifact path
 	*/
 
-	std::cout <<"Creating directory...";
+	standard_logger().info("Creating directory...");
 	system((std::string("mkdir ") + artifact_path.string()).c_str());
-	std::cout <<"Copying original model...";
+	standard_logger().info("Copying original model...");
 	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string() + logs.write_next());
-	std::cout <<"#1...";
+	standard_logger().info("#1...");
 	system(command_copy_model.c_str());
-	std::cout <<"#2...";
+	standard_logger().info("#2...");
 	logs.print_last_log();
-	std::cout <<"#3...";
+	standard_logger().info("#3...");
 	//std::cout << "number i : " << logs.ii();
-	std::cout <<"Check directory content...";
+	standard_logger().info("Check directory content...");
 	system((std::string("ls -la ") + artifact_path.string() + logs.write_next()).c_str());
 	logs.print_last_log();
 	//std::cout << "number i : " << logs.ii();
@@ -250,8 +248,8 @@ int main(int argc, char** argv)
 		throw e;
 	}
 	*/
-	std::cout <<"";
-	std::cout <<"Finished.";
+	standard_logger().info("");
+	standard_logger().info("Finished.");
 	logs.print_last_log();
 
 }
