@@ -189,7 +189,6 @@ int main(int argc, char** argv)
 	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string() + logs.write_next());
 	system(command_copy_model.c_str());
 	logs.print_last_log();
-	system((std::string("ls ") + artifact_path.string() + logs.write_next()).c_str());
 	standard_logger().info("Check directory content...");
 	system((std::string("ls -la ") + artifact_path.string() + logs.write_next()).c_str());
 	logs.print_last_log();
