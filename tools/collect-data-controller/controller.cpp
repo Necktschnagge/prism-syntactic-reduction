@@ -145,7 +145,13 @@ public:
 
 	inline std::string write_next() { return std::string(" >") + log_file_path(++i).string(); }
 	inline std::filesystem::path last() { return log_file_path(i); }
-	inline void print_last_log() { std::cout << std::ifstream(last().string()).rdbuf(); }
+	inline void print_last_log() {
+		auto path = last().string();
+		auto file_stream = std::ifstream(path);
+		bool ok = file_stream.is_open();
+		standard_logger().info(std::string("print: \"") + path + "\":\n" + (ok ? std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>()) : "ERROR: file not opened"));
+		if (!ok) standard_logger().error("Could not open file");
+	}
 	decltype(i) ii() { return i; }
 };
 
