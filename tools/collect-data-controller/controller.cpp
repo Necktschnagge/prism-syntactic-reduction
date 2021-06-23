@@ -11,7 +11,7 @@
 #include <exception>
 #include <fstream>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <filesystem>
 
 //#define debug_local
@@ -149,7 +149,7 @@ public:
 		auto path = last().string();
 		auto file_stream = std::ifstream(path);
 		bool ok = file_stream.is_open();
-		standard_logger().info("read file from path \"" << path << "\" here:\n" << ok ? std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>()) : "error: file not opened");
+		standard_logger().info(std::string("read file from path \"") + path + "\" here:\n" + (ok ? std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>()) : "error: file not opened"));
 	}
 	decltype(i) ii() { return i; }
 };
