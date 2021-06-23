@@ -155,6 +155,9 @@ public:
 
 int main(int argc, char** argv)
 {
+	std::system("ls -l >test.txt"); // execute the UNIX command "ls -l >test.txt"
+	std::cout << std::ifstream("test.txt").rdbuf();
+
 	init_logger();
 	standard_logger().info("Listing arguments...");
 	for (int i = 0; i < argc; ++i) std::cout << i << "   " << argv[i] << "\n";
@@ -191,7 +194,7 @@ int main(int argc, char** argv)
 	standard_logger().info("#3...");
 	std::cout << "number i : " << logs.ii();
 	standard_logger().info("Check directory content...");
-	system((std::string("ls ") + artifact_path.string() + logs.write_next()).c_str());
+	system((std::string("ls -la ") + artifact_path.string() + logs.write_next()).c_str());
 	logs.print_last_log();
 	std::cout << "number i : " << logs.ii();
 
