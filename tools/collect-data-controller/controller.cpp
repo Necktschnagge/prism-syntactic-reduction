@@ -143,7 +143,7 @@ class log_enumerator {
 public:
 	log_enumerator(const std::filesystem::path& base_path) : base_path(base_path) {}
 
-	inline std::string write_next() { return std::string(" > ") + log_file_path(++i).string(); }
+	inline std::string write_next() { return std::string(" >") + log_file_path(++i).string(); }
 	inline std::filesystem::path last() { return log_file_path(i); }
 	inline void print_last_log() { std::cout << std::ifstream(last().string()).rdbuf(); }
 };
