@@ -368,61 +368,9 @@ found_merging_9876542834:
 
 };
 
-int cli(int argc, char** argv) {
-
-	standard_logger().info(std::string("Running: ") + argv[0]);
-
-	std::shared_ptr<std::string> model_string_ptr;
-
-	if (argc >= 2) {
-		std::ifstream model_ifstream;
-		model_ifstream.open(argv[1]);
-		model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
-	}
-
-	if (argc >= 3) {
-		std::ifstream prop_ifstream;
-		prop_ifstream.open(argv[2]);
-		auto property_list = std::make_shared<std::string>(std::istreambuf_iterator<char>(prop_ifstream), std::istreambuf_iterator<char>());
-	}
-
-	if (!model_string_ptr) {
-		model_string_ptr = std::make_shared<std::string>(example_family());
-	}
-
-	// debug code:
-	//std::ifstream model_ifstream;
-	//model_ifstream.open(R"(..\..\Examples\bsp.prism)");
-	//model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
-
-
-	// when here then all live set were computed.
-	std::vector<std::string> excluded_vars{ "y_Integrator_44480461" };
-
-	standard_logger().info("Start Parsing example...");
-	auto ftoken = file_token(model_string_ptr);
-
-	ftoken.parse();
-
-	bool check = ftoken.is_sound_recursive();
-
-
-	// values of const symbols:
-	const std::map<std::string, int> const_table{ [&] {
-		std::map<std::string, int> const_table;
-		auto const_def_container = ftoken._dtmc_body_component->const_definitions();
-		for (const auto& const_def : const_def_container) {
-			const_table[const_def->_constant_identifier->str()] = *const_def->_expression->get_value(const_table); // check nullptr?
-		}
-		return const_table;
-	}() };
-
-
-
-
+void live_range_analysis(const file_token& ftoken, const std::map<std::string, int>& const_table, const std::string& var_name, std::vector<std::string>& excluded_vars, std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph, live_var_map& live_vars) {
 	// live range analysis:
 	// calculate program graph:
-	std::string var_name{ "cf" };
 	std::string var_name_next{ var_name + "'" };
 
 	using value_type = int;
@@ -518,9 +466,6 @@ int cli(int argc, char** argv) {
 		return copy;
 	};
 
-	live_var_map live_vars;
-
-
 	// init live var sets from union of incident gen sets
 	for (const auto& p : program_graph) {
 		auto key = std::get<0>(p);
@@ -612,7 +557,7 @@ again_while:
 	}
 
 	// build graph for collapsing variables:
-	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>> graph;
+	// std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>> graph;
 	// node "var_name" |-> (!removed during coloring phase, count neighbours during coloring phrase, active and inactive neighbours, color)
 
 
@@ -648,6 +593,64 @@ again_while:
 		count_active_neighbours(graph_pair.second) = neighbours(graph_pair.second).size();
 		color(graph_pair.second) = -1;
 	}
+}
+
+int cli(int argc, char** argv) {
+
+	standard_logger().info(std::string("Running: ") + argv[0]);
+
+	std::shared_ptr<std::string> model_string_ptr;
+
+	if (argc >= 2) {
+		std::ifstream model_ifstream;
+		model_ifstream.open(argv[1]);
+		model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
+	}
+
+	if (argc >= 3) {
+		std::ifstream prop_ifstream;
+		prop_ifstream.open(argv[2]);
+		auto property_list = std::make_shared<std::string>(std::istreambuf_iterator<char>(prop_ifstream), std::istreambuf_iterator<char>());
+	}
+
+	if (!model_string_ptr) {
+		model_string_ptr = std::make_shared<std::string>(example_family());
+	}
+
+	// debug code:
+	//std::ifstream model_ifstream;
+	//model_ifstream.open(R"(..\..\Examples\bsp.prism)");
+	//model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
+
+
+	// when here then all live set were computed.
+	std::vector<std::string> excluded_vars{ "y_Integrator_44480461" };
+
+	standard_logger().info("Start Parsing example...");
+	auto ftoken = file_token(model_string_ptr);
+
+	ftoken.parse();
+
+	bool check = ftoken.is_sound_recursive();
+
+
+	// values of const symbols:
+	const std::map<std::string, int> const_table{ [&] {
+		std::map<std::string, int> const_table;
+		auto const_def_container = ftoken._dtmc_body_component->const_definitions();
+		for (const auto& const_def : const_def_container) {
+			const_table[const_def->_constant_identifier->str()] = *const_def->_expression->get_value(const_table); // check nullptr?
+		}
+		return const_table;
+	}() };
+
+	std::string var_name{ "cf" };
+	
+	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>> graph;
+	live_var_map live_vars;
+
+
+	live_range_analysis(ftoken, const_table, var_name, excluded_vars, graph, live_vars);
 
 	/*+++++++++++++++++++++++++++++*/
 

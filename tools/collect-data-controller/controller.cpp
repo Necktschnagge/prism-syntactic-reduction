@@ -168,7 +168,7 @@ int main(int argc, char** argv)
 
 	auto original_model_path = std::filesystem::path(original_model_path_string);
 	auto syntactic_reducer_path = std::filesystem::path(syntactic_reducer_path_string);
-	auto artifact_path = std::filesystem::path(artifact_path_string) / "collect_data";
+	auto artifact_path = std::filesystem::path(artifact_path_string) / "collect-data";
 
 	log_enumerator logs(artifact_path);
 
