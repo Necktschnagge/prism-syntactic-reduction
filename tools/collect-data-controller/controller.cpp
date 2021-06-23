@@ -145,10 +145,11 @@ public:
 
 	inline std::string write_next() { return std::string(" >") + log_file_path(++i).string(); }
 	inline std::filesystem::path last() { return log_file_path(i); }
-	inline void print_last_log() { 
-		auto file = std::ifstream(last().string());
-		bool ok = file.is_open();
-		std::cout << "read file from path   " << last().string() << " here:\n\n" << ok ? std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()) : "error: file not open";
+	inline void print_last_log() {
+		auto path = last().string();
+		auto file_stream = std::ifstream(path);
+		bool ok = file_stream.is_open();
+		std::cout << "read file from path \"" << path << "\" here:\n" << ok ? std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>()) : "error: file not opened";
 	}
 	decltype(i) ii() { return i; }
 };
@@ -188,9 +189,9 @@ int main(int argc, char** argv)
 	standard_logger().info("Copying original model...");
 	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string() + logs.write_next());
 	standard_logger().info("#1...");
-	system(command_copy_model.c_str());
+	//system(command_copy_model.c_str());
 	standard_logger().info("#2...");
-	logs.print_last_log();
+	//logs.print_last_log();
 	standard_logger().info("#3...");
 	std::cout << "number i : " << logs.ii();
 	standard_logger().info("Check directory content...");
