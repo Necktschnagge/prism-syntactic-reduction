@@ -146,6 +146,7 @@ public:
 	inline std::string write_next() { return std::string(" > ") + log_file_path(++i).string(); }
 	inline std::filesystem::path last() { return log_file_path(i); }
 	inline void print_last_log() { std::cout << "read file from path   " << last().string() << " here:\n\n" << std::ifstream(last().string()).rdbuf(); }
+	decltype(i) ii() { return i; }
 };
 
 int main(int argc, char** argv)
@@ -181,9 +182,11 @@ int main(int argc, char** argv)
 	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string() + logs.write_next());
 	system(command_copy_model.c_str());
 	logs.print_last_log();
+	std::cout << "number i : " << logs.ii();
 	standard_logger().info("Check directory content...");
 	system((std::string("ls ") + artifact_path.string() + logs.write_next()).c_str());
 	logs.print_last_log();
+	std::cout << "number i : " << logs.ii();
 
 	/*
 	call synctactic reducer
