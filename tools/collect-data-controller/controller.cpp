@@ -168,7 +168,7 @@ int main(int argc, char** argv)
 
 	auto original_model_path = std::filesystem::path(original_model_path_string);
 	auto syntactic_reducer_path = std::filesystem::path(syntactic_reducer_path_string);
-	auto artifact_path = std::filesystem::path(artifact_path_string) / "collect_data";
+	auto artifact_path = std::filesystem::path(artifact_path_string) / "collect-data";
 
 	log_enumerator logs(artifact_path);
 
@@ -176,12 +176,15 @@ int main(int argc, char** argv)
 	copy original model into artifact path
 	*/
 
+	standard_logger().info("Creating directory...");
+	system((std::string("mkdir ") + artifact_path.string()).c_str());
 	standard_logger().info("Copying original model...");
 	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string() + logs.write_next());
-	system((std::string("mkdir ") + artifact_path.string()).c_str());
 	system(command_copy_model.c_str());
 	logs.print_last_log();
 	system((std::string("ls ") + artifact_path.string() + logs.write_next()).c_str());
+	standard_logger().info("Check directory content...");
+	system((std::string("ls -la ") + artifact_path.string() + logs.write_next()).c_str());
 	logs.print_last_log();
 
 	/*
