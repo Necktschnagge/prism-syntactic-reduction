@@ -11,7 +11,7 @@
 #include <exception>
 #include <fstream>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <filesystem>
 
 //#define debug_local
