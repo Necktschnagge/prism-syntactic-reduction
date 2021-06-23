@@ -147,7 +147,8 @@ public:
 	inline std::filesystem::path last() { return log_file_path(i); }
 	inline void print_last_log() { 
 		auto file = std::ifstream(last().string());
-		std::cout << "read file from path   " << last().string() << " here:\n\n" << std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+		bool ok = file.is_open();
+		std::cout << "read file from path   " << last().string() << " here:\n\n" << ok ? std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()) : "error: file not open";
 	}
 	decltype(i) ii() { return i; }
 };
