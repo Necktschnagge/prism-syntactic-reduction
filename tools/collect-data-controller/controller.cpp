@@ -146,6 +146,7 @@ public:
 	inline std::string write_next() { return std::string(" >") + log_file_path(++i).string(); }
 	inline std::filesystem::path last() { return log_file_path(i); }
 	inline void print_last_log() { std::cout << std::ifstream(last().string()).rdbuf(); }
+	decltype(i) ii() { return i; }
 };
 
 int main(int argc, char** argv)
