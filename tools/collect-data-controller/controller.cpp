@@ -176,6 +176,7 @@ int main(int argc, char** argv)
 	auto original_model_path = std::filesystem::path(original_model_path_string);
 	auto syntactic_reducer_path = std::filesystem::path(syntactic_reducer_path_string);
 	auto artifact_path = std::filesystem::path(artifact_path_string) / "collect-data";
+	auto copied_original_model_path = artifact_path / ORIGINAL_MODEL_FILE_NAME;
 
 	log_enumerator logs(artifact_path);
 
@@ -186,7 +187,7 @@ int main(int argc, char** argv)
 	standard_logger().info("Creating directory...");
 	system((std::string("mkdir ") + artifact_path.string()).c_str());
 	standard_logger().info("Copying original model...");
-	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + (artifact_path / ORIGINAL_MODEL_FILE_NAME).string() + logs.write_next());
+	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + copied_original_model_path.string() + logs.write_next());
 	system(command_copy_model.c_str());
 	logs.print_last_log();
 	standard_logger().info("Check directory content...");
@@ -198,8 +199,9 @@ int main(int argc, char** argv)
 	in : modle path, artifact output path
 	out: json path containing all information about created files.
 	*/
-	std::string command_call_syntactic_reducer = syntactic_reducer_path.string() + " ";
-
+	std::string command_call_syntactic_reducer = syntactic_reducer_path.string() + " " + copied_original_model_path.string() + " " + artifact_path.string() + logs.write_next() ;
+	system(command_call_syntactic_reducer.c_str());
+	logs.print_last_log();
 
 	/*
 	call prism on all models

@@ -4,10 +4,13 @@
 #include "parser.h"
 #include "debug_001.h"
 
+#include <nlohmann/json.hpp>
+
 #include <memory>
 #include <unordered_set>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 void print_model_to_stream(const file_token& reduced_file, std::ostream& ofile) {
 	token::token_list to_be_printed = reduced_file.children();
@@ -600,6 +603,7 @@ int cli(int argc, char** argv) {
 	standard_logger().info(std::string("Running: ") + argv[0]);
 
 	std::shared_ptr<std::string> model_string_ptr;
+	std::filesystem::path artifacts_path;
 
 	if (argc >= 2) {
 		std::ifstream model_ifstream;
@@ -608,9 +612,7 @@ int cli(int argc, char** argv) {
 	}
 
 	if (argc >= 3) {
-		std::ifstream prop_ifstream;
-		prop_ifstream.open(argv[2]);
-		auto property_list = std::make_shared<std::string>(std::istreambuf_iterator<char>(prop_ifstream), std::istreambuf_iterator<char>());
+		artifacts_path = argv[2];
 	}
 
 	if (!model_string_ptr) {
@@ -646,6 +648,7 @@ int cli(int argc, char** argv) {
 
 	std::string var_name{ "cf" };
 	
+	// node "var_name" |-> (!removed during coloring phase, count neighbours during coloring phrase, active and inactive neighbours, color)
 	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>> graph;
 	live_var_map live_vars;
 
@@ -681,8 +684,28 @@ int cli(int argc, char** argv) {
 
 	//### all colorings still unused here.
 	/*+++++++++++++++++++++++++++++*/
+	unsigned long long i{ 0 };
+	for (const std::map<std::string, int>& coloring : all_colorings) {
+		std::string reduced_model_file_name{ std::string("reduced_model") + std::to_string(i) +".prism" };
+
+		// for convenience: apply coloring into graph:
+		for (const auto& pair : coloring) {
+			color(graph[pair.first]) = pair.second;
+		}
+		std::ofstream output_model((artifacts_path / reduced_model_file_name).string());
+		file_token reduced_model_parse_tree(ftoken);
+		apply_coloring_to_file_token(reduced_model_parse_tree, var_name, const_table, live_vars, graph);
+		print_model_to_stream(reduced_model_parse_tree, output_model);
+		print_coloring_from_graph_with_color_annotations(graph, output_model);
+		++i;
+	}
+	nlohmann::json meta_results;
+	meta_results["count_models"] = i;
+	auto json_file = std::ofstream((artifacts_path / "meta.json").string());
+	json_file << meta_results.dump(3);
 
 
+	/*
 	starke_coloring(graph);
 
 	print_coloring_from_graph_with_color_annotations(graph, std::cout);
@@ -696,7 +719,7 @@ int cli(int argc, char** argv) {
 	// print reduced model:
 	auto ofile = std::ofstream("reduced_model.prism");
 	print_model_to_stream(reduced_file, ofile);
-
+	*/
 	return 0;
 }
 
