@@ -628,12 +628,13 @@ int cli(int argc, char** argv) {
 	// when here then all live set were computed.
 	std::vector<std::string> excluded_vars{ "y_Integrator_44480461" };
 
-	standard_logger().info("Start Parsing example...");
+	standard_logger().info("Start parsing...");
 	auto ftoken = file_token(model_string_ptr);
 
 	ftoken.parse();
 
 	bool check = ftoken.is_sound_recursive();
+	standard_logger().info("Finished parsing.");
 
 
 	// values of const symbols:
