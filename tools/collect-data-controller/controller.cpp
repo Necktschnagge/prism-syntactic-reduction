@@ -200,6 +200,8 @@ int main(int argc, char** argv)
 	out: json path containing all information about created files.
 	*/
 	std::string command_call_syntactic_reducer = syntactic_reducer_path.string() + " " + copied_original_model_path.string() + " " + artifact_path.string() + logs.write_next() ;
+	standard_logger().info("Call Syntactic-Reducer...");
+	standard_logger().info(command_call_syntactic_reducer);
 	system(command_call_syntactic_reducer.c_str());
 	logs.print_last_log();
 
