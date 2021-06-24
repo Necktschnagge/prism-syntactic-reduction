@@ -279,6 +279,12 @@ void starke_coloring(std::map<std::string, std::tuple<bool, int, std::set<std::s
 
 }
 
+std::string to_string(const std::set<std::string>& s) {
+	std::string result;
+	for (const auto& el : s) result += std::string("  ") + el;
+	return result;
+}
+
 void process_sub_colorings(
 	std::list<std::map<std::string, int>>& all_colorings,
 	std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>& collapse_graph,
@@ -319,10 +325,11 @@ void process_sub_colorings(
 
 		activation_record& ar{ chain.back() };
 
-		if (chain.size() > 3000) {
+/*		if (chain.size() > 3000) {
 			standard_logger().info("here");
 		}
-		standard_logger().info(std::string("run index ") + std::to_string(chain.size()) + "  at phase " + std::to_string(ar.phase));
+*/
+		standard_logger().info(std::string("rec-depth: ") + std::to_string(chain.size()) + "\t\tphase: " + std::to_string(ar.phase)+"\t\t#colorings: " + std::to_string(all_colorings.size()));
 
 		if (ar.phase == 0) {
 			// output the current coloring if !skip_output
@@ -354,12 +361,13 @@ void process_sub_colorings(
 				}
 			}
 		found_merging_9876542834:
-
 			// case 0: no possible collapse: just return.
 			if (!ar.temp_edge.can_be_joined) {
 				chain.pop_back();
 				continue;
 			};
+
+			standard_logger().info(std::string("Excluding possible merge found:\n") + to_string(*set1->first) + "\n" + to_string(*set2->first));
 
 			//case 1
 			// mark the joinable as not joinable and run subprocedure with skip = true
@@ -376,6 +384,8 @@ void process_sub_colorings(
 		if (ar.phase == 1) {
 			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1{collapse_graph.find(ar.temp_edge.key_set_ptr1) };
 			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set2{ collapse_graph.find(ar.temp_edge.key_set_ptr2) };
+			standard_logger().info(std::string("Forcing possible merge found:\n") + to_string(*set1->first) + "\n" + to_string(*set2->first));
+
 			//rollback
 			set1->second.erase(set2->first);
 			set2->second.erase(set1->first);
@@ -419,12 +429,15 @@ void process_sub_colorings(
 				collapse_graph[key].insert(ar.temp_join.deleted_set);
 			}
 			for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link) {
-				collapse_graph[key].erase(ar.temp_edge.key_set_ptr1);
+				collapse_graph[key].insert(ar.temp_edge.key_set_ptr1);
 			}
 
 			collapse_graph[ar.temp_edge.key_set_ptr1] = std::move(ar.temp_join.neighbours_of_set1_before); // %02
 
 			for (const std::string& var_name : *ar.temp_join.deleted_set) ar.temp_edge.key_set_ptr1->erase(var_name); // %01
+
+			standard_logger().info(std::string("unwind merge:\n") + to_string(*ar.temp_edge.key_set_ptr1) + "\n" + to_string(*ar.temp_edge.key_set_ptr2));
+
 			chain.pop_back();
 			continue;
 		}
