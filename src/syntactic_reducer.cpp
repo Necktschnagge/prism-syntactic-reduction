@@ -11,6 +11,27 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <limits>
+#include <future>
+
+bool __compare_helper__(std::map<std::string, int>& c1, std::map<std::string, int>& c2) {
+	std::map<int, int> homomorphism;
+	for (auto& pair : c1) {
+		auto right_value = c2[pair.first];
+		auto [iter, insert_took_place] = homomorphism.insert(std::make_pair(pair.second, right_value));
+		if (!insert_took_place) {
+			if (homomorphism[pair.second] != right_value) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool compare_colorings(std::map<std::string, int>& c1, std::map<std::string, int>& c2) {
+
+	return __compare_helper__(c1, c2) && __compare_helper__(c2, c1);
+}
 
 void print_model_to_stream(const file_token& reduced_file, std::ostream& ofile) {
 	token::token_list to_be_printed = reduced_file.children();
@@ -288,8 +309,15 @@ std::string to_string(const std::set<std::string>& s) {
 void process_sub_colorings(
 	std::list<std::map<std::string, int>>& all_colorings,
 	std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>& collapse_graph,
-	bool skip_output
+	bool skip_output,
+	std::mutex& mutex_all_colorings,
+	const std::size_t max_threads,
+	std::list<std::future<void>>& futures,
+	std::mutex& m_futures
 ) {
+
+
+
 	using collapse_graph_t = std::remove_reference<decltype(collapse_graph)>::type;
 
 	struct temporal_prohibiting_edge {
@@ -304,6 +332,9 @@ void process_sub_colorings(
 		std::set<std::shared_ptr<std::set<std::string>>> neighbours_of_set1_before;
 		std::list<std::shared_ptr<std::set<std::string>>> relink_to_set2_on_rollback_and_delete_set1_link;
 		std::list<std::shared_ptr<std::set<std::string>>> relink_to_set2_on_rollback_and_keep_set1_link;
+
+
+		//std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>> collapse_graph_debug_copy;
 	};
 
 	struct activation_record {
@@ -313,8 +344,8 @@ void process_sub_colorings(
 		int phase; /* 0 -> start at beginning
 					  1 -> rollback of temporal edge
 				   */
-
-		activation_record(bool skip_output, int phase = 0) : skip_output(skip_output), phase(phase) {}
+		bool kill_on_end;
+		activation_record(bool skip_output, int phase = 0) : skip_output(skip_output), phase(phase), kill_on_end(false) {}
 	};
 	/* do - undo - chain*/
 	std::vector<activation_record> chain;
@@ -325,13 +356,46 @@ void process_sub_colorings(
 
 		activation_record& ar{ chain.back() };
 
-/*		if (chain.size() > 3000) {
-			standard_logger().info("here");
-		}
-*/
-		standard_logger().info(std::string("rec-depth: ") + std::to_string(chain.size()) + "\t\tphase: " + std::to_string(ar.phase)+"\t\t#colorings: " + std::to_string(all_colorings.size()));
+		/*		if (chain.size() > 3000) {
+					standard_logger().info("here");
+				}
+		*/
+		if (chain.size() < 70)
+			standard_logger().info(std::string("rec-depth: ") + std::to_string(chain.size()) + "\t\tphase: " + std::to_string(ar.phase) + "\t\t#colorings: " + std::to_string(all_colorings.size()));
 
 		if (ar.phase == 0) {
+			/*
+			if (m_futures.try_lock()) {
+				for (auto iter = futures.begin(); iter != futures.end(); ++iter) {
+					auto status = iter->wait_for(std::chrono::milliseconds(0));
+					if (status == std::future_status::ready) {
+						futures.erase(iter);
+						break;
+					}
+				}
+				if (futures.size() < max_threads) {
+					ar.kill_on_end = true;
+					std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>> collapse_graph_copy = collapse_graph;
+					futures.push_back(
+						std::async(
+							std::launch::async, [] {
+								//std::this_thread::sleep_for(3s);
+								return process_sub_colorings(all_colorings,
+									collapse_graph_copy,
+									skip_output,
+									std::mutex & mutex_all_colorings,
+									const std::size_t max_threads,
+									std::list<std::future<void>>&futures,
+									std::mutex & m_futures
+								);
+							}
+						)
+					);
+				}
+				m_futures.unlock();
+			}*/
+
+
 			// output the current coloring if !skip_output
 			if (!ar.skip_output) {
 				int next_free_color{ 0 };
@@ -342,6 +406,13 @@ void process_sub_colorings(
 					}
 					++next_free_color;
 				}
+				auto lock = std::unique_lock(mutex_all_colorings);
+				/*for (auto& c : all_colorings) {
+					if (compare_colorings(c, the_extracted_coloring)) {
+						standard_logger().error("stop here");
+					}
+				}
+				*/
 				all_colorings.push_back(the_extracted_coloring);
 			}
 			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1;
@@ -367,7 +438,7 @@ void process_sub_colorings(
 				continue;
 			};
 
-			standard_logger().info(std::string("Excluding possible merge found:\n") + to_string(*set1->first) + "\n" + to_string(*set2->first));
+			//standard_logger().info(std::string("Excluding possible merge found:\n") + to_string(*set1->first) + "\n" + to_string(*set2->first));
 
 			//case 1
 			// mark the joinable as not joinable and run subprocedure with skip = true
@@ -382,13 +453,15 @@ void process_sub_colorings(
 		}
 		//process_sub_colorings(all_colorings, collapse_graph, /*var_mapped_to_color_class, */ true);
 		if (ar.phase == 1) {
-			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1{collapse_graph.find(ar.temp_edge.key_set_ptr1) };
+			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1{ collapse_graph.find(ar.temp_edge.key_set_ptr1) };
 			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set2{ collapse_graph.find(ar.temp_edge.key_set_ptr2) };
-			standard_logger().info(std::string("Forcing possible merge found:\n") + to_string(*set1->first) + "\n" + to_string(*set2->first));
+			//standard_logger().info(std::string("Forcing possible merge found:\n") + to_string(*set1->first) + "\n" + to_string(*set2->first));
 
 			//rollback
 			set1->second.erase(set2->first);
 			set2->second.erase(set1->first);
+
+			//ar.temp_join.collapse_graph_debug_copy = collapse_graph;
 
 			// case 2: collapse the two sets and propagate into collapse_graph and var_mapped_to_color_class,
 			// run sub_procedure with skip = false. 
@@ -429,15 +502,19 @@ void process_sub_colorings(
 				collapse_graph[key].insert(ar.temp_join.deleted_set);
 			}
 			for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link) {
-				collapse_graph[key].insert(ar.temp_edge.key_set_ptr1);
+				collapse_graph[key].insert(ar.temp_join.deleted_set);
 			}
 
 			collapse_graph[ar.temp_edge.key_set_ptr1] = std::move(ar.temp_join.neighbours_of_set1_before); // %02
 
 			for (const std::string& var_name : *ar.temp_join.deleted_set) ar.temp_edge.key_set_ptr1->erase(var_name); // %01
 
-			standard_logger().info(std::string("unwind merge:\n") + to_string(*ar.temp_edge.key_set_ptr1) + "\n" + to_string(*ar.temp_edge.key_set_ptr2));
-
+			//standard_logger().info(std::string("unwind merge:\n") + to_string(*ar.temp_edge.key_set_ptr1) + "\n" + to_string(*ar.temp_edge.key_set_ptr2));
+			/*
+			if (collapse_graph != ar.temp_join.collapse_graph_debug_copy) {
+				standard_logger().error("stop here");
+			}
+			*/
 			chain.pop_back();
 			continue;
 		}
@@ -671,6 +748,60 @@ again_while:
 	}
 }
 
+
+unsigned long long count_variables_of_coloring(const std::map<std::string, int>& coloring) {
+	std::set<int> values;
+	for (const auto& pair : coloring) values.insert(pair.second);
+	return values.size();
+}
+
+void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned long long>>& useful_colorings, std::list<std::map<std::string, int>>& all_colorings, std::mutex& m_all_colorings, bool& continue_running) {
+	unsigned long long TOLERANCE{ 2 };
+	unsigned long long min_var_count{ std::numeric_limits<unsigned long long>::max() - TOLERANCE };
+	unsigned long long i{ 0 };
+	bool shrink{ false };
+	while (continue_running) {
+		++i;
+		shrink = false;
+		std::list<std::map<std::string, int>> fetched_colorings;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		{
+			auto lock = std::unique_lock(m_all_colorings);
+			fetched_colorings = std::move(all_colorings);
+			all_colorings.clear();
+		}
+		standard_logger().info("fetched colorings size");
+		standard_logger().info(fetched_colorings.size());
+		for (auto& c : fetched_colorings) {
+			auto size = count_variables_of_coloring(c);
+			if (size < min_var_count + TOLERANCE) {
+				if (size < min_var_count) {
+					min_var_count = size;
+					shrink = true;
+				}
+				/*
+				//standard_logger().info("search duplicates in colorings:");
+				for (auto& uc : useful_colorings) {
+					if (compare_colorings(c, uc.first)) {
+						standard_logger().error("found duplicate!");
+					}
+				}
+				*/
+				useful_colorings.push_back(std::make_pair(std::move(c), size));
+			}
+		}
+		if (shrink) {
+			std::vector< std::list<std::pair<std::map<std::string, int>, unsigned long long>>::const_iterator> to_delete;
+			for (auto iter = useful_colorings.cbegin(); iter != useful_colorings.cend(); ++iter) {
+				if (!(iter->second < min_var_count + TOLERANCE)) to_delete.push_back(iter);
+			}
+			for (const auto& iter : to_delete) useful_colorings.erase(iter);
+		}
+		standard_logger().info(std::string("filter colorings:  iteration: ") + std::to_string(i) + "   useful colorings found: " + std::to_string(useful_colorings.size()));
+	}
+
+}
+
 int cli(int argc, char** argv) {
 
 	standard_logger().info(std::string("Running: ") + argv[0]);
@@ -751,10 +882,22 @@ int cli(int argc, char** argv) {
 		}
 	}
 
+	std::mutex mutex_all_colorings;
 	std::list<std::map<std::string, int>> all_colorings;
+	std::list<std::pair<std::map<std::string, int>, unsigned long long>> useful_colorings;
+	bool continue_running{ true };
 
+	auto filter_thread = std::thread(filter_colorings, std::ref(useful_colorings), std::ref(all_colorings), std::ref(mutex_all_colorings), std::ref(continue_running));
 
-	process_sub_colorings(all_colorings, collapse_graph, false);
+	const std::size_t max_threads{ 16 };
+	std::list<std::future<void>> futures;
+	std::mutex m_futures;
+
+	process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures);
+	continue_running = false;
+	filter_thread.join();
+	all_colorings.clear();
+	std::transform(useful_colorings.begin(), useful_colorings.end(), std::back_inserter(all_colorings), [](const std::pair<std::map<std::string, int>, unsigned long long>& x) { return x.first; });
 
 	//### all colorings still unused here.
 	/*+++++++++++++++++++++++++++++*/
