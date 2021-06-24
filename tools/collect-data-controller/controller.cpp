@@ -187,9 +187,10 @@ int main(int argc, char** argv)
 	standard_logger().info("Creating directory...");
 	system((std::string("mkdir ") + artifact_path.string()).c_str());
 	standard_logger().info("Copying original model...");
-	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + copied_original_model_path.string() + logs.write_next());
+	std::string command_copy_model = (std::string("cp ") + original_model_path.string() + " " + copied_original_model_path.string() /*+ logs.write_next()*/);
 	system(command_copy_model.c_str());
-	logs.print_last_log();
+	//logs.print_last_log();
+
 	standard_logger().info("Check directory content...");
 	system((std::string("ls -la ") + artifact_path.string() + logs.write_next()).c_str());
 	logs.print_last_log();
