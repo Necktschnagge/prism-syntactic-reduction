@@ -373,8 +373,135 @@ void helper_process_sub_colorings(
 	const std::size_t max_threads,
 	std::list<std::future<void>>& futures,
 	std::mutex& m_futures,
-	std::list<activation_record>& chain
+	std::list<activation_record>& chain,
+	const std::vector<std::string>& all_vars,
+	std::size_t ivar1,
+	std::size_t ivar2
 ) {
+	const auto iter_for_var_name = [&](const std::string& name) -> std::remove_reference_t<decltype(collapse_graph)>::iterator {
+		for (auto iter = collapse_graph.begin(); iter != collapse_graph.end(); ++iter) {
+			if (iter->first->find(name) != iter->first->end())
+				return iter;
+		}
+		return collapse_graph.end();
+	};
+
+	const auto can_merge = [&](std::size_t v1, std::size_t v2) -> bool {
+		auto set1_iter = iter_for_var_name(all_vars[v1]);
+		auto set2_iter = iter_for_var_name(all_vars[v2]);
+
+		if (set1_iter == set2_iter) return false; // already merged
+
+		if (set1_iter->second.find(set2_iter->first) != set1_iter->second.end()) return false; // merge forbidden
+
+		return true;
+	};
+
+	const auto increase_var_pair = [&](std::size_t& i1, std::size_t& i2) -> bool {
+		++i2;
+		if (!(i2 < all_vars.size())) {
+			++i1;
+			i2 = i1;
+		}
+		if (!(i1 < all_vars.size())) {
+			return false; // no valid increase possible
+		}
+		return true;
+	};
+
+	activation_record ar(false);
+
+	while (true) {
+
+		while (!can_merge(ivar1, ivar2)) {
+			bool can_increase = increase_var_pair(ivar1, ivar2);
+			if (!can_increase) {
+				//### GOTO output current merging, no merge possible., check if it maximal before outputting
+				std::size_t i1{ 0 }, i2{ 0 };
+				while (increase_var_pair(i1, i2)) {
+					if (can_merge(i1, i2)) return; // not maximal
+				}
+				// merging is maximal when here. add it to all_colorings:
+				int next_free_color{ 0 };
+				std::map<std::string, int> the_extracted_coloring;
+				for (auto iter = collapse_graph.cbegin(); iter != collapse_graph.cend(); ++iter) {
+					for (auto jter = iter->first->cbegin(); jter != iter->first->cend(); ++jter) {// all variables within one color equivalence class
+						the_extracted_coloring[*jter] = next_free_color;
+					}
+					++next_free_color;
+				}
+				auto lock = std::unique_lock(mutex_all_colorings);
+				all_colorings.push_back(the_extracted_coloring);
+				standard_logger().info(std::string("pushed coloring No ") + std::to_string(all_colorings.size()));
+				return;
+			}
+		}
+		// here we can merge ivar1 ivar2 or just don't do it.
+
+
+		//apply merging
+		std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1{
+			iter_for_var_name(all_vars[ivar1])
+		};
+		std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set2{
+			iter_for_var_name(all_vars[ivar2])
+		};
+
+		ar.temp_edge.key_set_ptr1 = set1->first;
+
+		ar.temp_join.deleted_set = set2->first;
+		ar.temp_join.deleted_set_neighbours = set2->second;
+		ar.temp_join.neighbours_of_set1_before = set1->second;
+
+
+		set1->first->insert(ar.temp_join.deleted_set->cbegin(), ar.temp_join.deleted_set->cend()); //join sets itself %01
+		set1->second.insert(ar.temp_join.deleted_set_neighbours.cbegin(), ar.temp_join.deleted_set_neighbours.cend()); //link neighbours of deleted set2 to set1 %02
+
+
+		for (auto iter = collapse_graph.begin(); iter != collapse_graph.end(); ++iter) { // replace shared_ptr to deleted set2 by shared_ptr to set1 where it can be found. %03
+			auto find_del_set_link = iter->second.find(ar.temp_join.deleted_set);
+			if (find_del_set_link != iter->second.end()) {
+				iter->second.erase(find_del_set_link);
+				auto [ignored_iterator, insert_took_place] = iter->second.insert(set1->first);
+				if (insert_took_place)
+					ar.temp_join.relink_to_set2_on_rollback_and_delete_set1_link.push_back(iter->first);
+				else
+					ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link.push_back(iter->first);
+			}
+		}
+		collapse_graph.erase(set2); // delete entry %04
+
+		// sub routine
+		helper_process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures, chain, all_vars, ivar1, ivar2);
+
+		// undo merge:
+
+		collapse_graph[ar.temp_join.deleted_set] = ar.temp_join.deleted_set_neighbours; // %04
+
+		// %03
+		for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_delete_set1_link) {
+			collapse_graph[key].erase(ar.temp_edge.key_set_ptr1);
+			collapse_graph[key].insert(ar.temp_join.deleted_set);
+		}
+		for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link) {
+			collapse_graph[key].insert(ar.temp_join.deleted_set);
+		}
+
+		collapse_graph[ar.temp_edge.key_set_ptr1] = std::move(ar.temp_join.neighbours_of_set1_before); // %02
+		auto cb = ar.temp_join.deleted_set->begin();
+		auto ce = ar.temp_join.deleted_set->end();
+		for (auto iter = cb;
+			iter != ce;
+			++iter) {
+			const std::string& var_name = *iter;
+			ar.temp_edge.key_set_ptr1->erase(var_name);
+		}// %01
+
+		auto can_increase = increase_var_pair(ivar1, ivar2);
+	}
+
+
+#if false
 	while (!chain.empty()) {
 
 		activation_record& ar{ chain.back() };
@@ -461,7 +588,7 @@ void helper_process_sub_colorings(
 				find_collapse_graph_iterator_by_set_representator(ar.searched_set2_representor)
 			};
 
-			
+
 			//standard_logger().info(std::string("forbid merge on depth  ") + std::to_string(chain.size()) + "  :  " + ar.searched_set1_representor + "  <--->  " + ar.searched_set2_representor);
 
 
@@ -570,6 +697,7 @@ void helper_process_sub_colorings(
 		}
 
 	}
+#endif
 }
 
 void process_sub_colorings(
@@ -579,7 +707,8 @@ void process_sub_colorings(
 	std::mutex& mutex_all_colorings,
 	const std::size_t max_threads,
 	std::list<std::future<void>>& futures,
-	std::mutex& m_futures
+	std::mutex& m_futures,
+	std::vector<std::string> all_vars
 ) {
 
 
@@ -604,7 +733,13 @@ void process_sub_colorings(
 	}
 	standard_logger().info(ss.str());
 
-	helper_process_sub_colorings(all_colorings, collapse_graph, skip_output, mutex_all_colorings, max_threads, futures, m_futures, chain);
+	std::size_t ivar1 = 0;
+	std::size_t ivar2 = 1;
+
+	if (all_vars.size() < 2)
+		throw 2;
+
+	helper_process_sub_colorings(all_colorings, collapse_graph, skip_output, mutex_all_colorings, max_threads, futures, m_futures, chain, all_vars, ivar1, ivar2);
 
 }
 
@@ -843,7 +978,7 @@ unsigned long long count_variables_of_coloring(const std::map<std::string, int>&
 }
 
 void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned long long>>& useful_colorings, std::list<std::map<std::string, int>>& all_colorings, std::mutex& m_all_colorings, bool& continue_running) {
-	unsigned long long TOLERANCE{ 0 };
+	unsigned long long TOLERANCE{ 500 };
 	unsigned long long min_var_count{ std::numeric_limits<unsigned long long>::max() - TOLERANCE };
 	unsigned long long i{ 0 };
 	bool shrink{ false };
@@ -980,7 +1115,11 @@ int cli(int argc, char** argv) {
 	std::list<std::future<void>> futures;
 	std::mutex m_futures;
 
-	process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures);
+	std::vector<std::string> all_var_names;
+	std::transform(graph.begin(), graph.end(), std::back_inserter(all_var_names), [](auto& pair) {return pair.first; });
+	std::sort(all_var_names.begin(), all_var_names.end());
+
+	process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures, all_var_names);
 	continue_running = false;
 	filter_thread.join();
 	all_colorings.clear();
