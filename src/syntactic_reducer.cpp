@@ -364,6 +364,35 @@ struct activation_record {
 	activation_record(bool skip_output, PHASE phase = PHASE::SEARCH_MERGING) : skip_output(skip_output), phase(phase), kill_on_end(false) {}
 };
 
+auto deep_copy_collapse_graph(const std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>& collapse_graph) 
+-> std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>> {
+	/*std::map<std::string, std::tuple<std::set<std::string>, std::set<std::string>>> without_shared_pointers;
+	for (const auto& pair : collapse_graph) {
+		std::get<0>(without_shared_pointers[*pair.first->begin()]) = std::set<std::string>(*pair.first);
+		for (const auto& s_ptr : pair.second) {
+			std::get<1>(without_shared_pointers[*pair.first->begin()]).insert(*s_ptr->begin());
+		}
+	}
+	*/
+
+	std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>> new_collapse_graph;
+
+	std::map< std::shared_ptr<std::set<std::string>>, std::shared_ptr<std::set<std::string>>> bijection;
+	for (const auto& pair : collapse_graph) {
+		bijection[pair.first] = std::make_shared<std::set<std::string>>(*pair.first);
+	}
+	// rebuild a collapse_graph;
+	for (const auto& pair : collapse_graph) {
+		new_collapse_graph[bijection[pair.first]] = [&]() {
+			std::set<std::shared_ptr<std::set<std::string>> > y;
+			for (const auto& neighbour : pair.second) y.insert(bijection[neighbour]);
+			return y;
+		}();
+	}
+
+	return new_collapse_graph;
+}
+
 
 void helper_process_sub_colorings(
 	std::list<std::map<std::string, int>>& all_colorings,
@@ -379,6 +408,8 @@ void helper_process_sub_colorings(
 	std::size_t ivar2,
 	std::size_t level
 ) {
+	
+
 	const auto iter_for_var_name = [&](const std::string& name) -> std::remove_reference_t<decltype(collapse_graph)>::iterator {
 		for (auto iter = collapse_graph.begin(); iter != collapse_graph.end(); ++iter) {
 			if (iter->first->find(name) != iter->first->end())
