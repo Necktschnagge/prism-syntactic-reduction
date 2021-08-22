@@ -373,10 +373,11 @@ void helper_process_sub_colorings(
 	const std::size_t max_threads,
 	std::list<std::future<void>>& futures,
 	std::mutex& m_futures,
-	std::list<activation_record>& chain,
+	//std::list<activation_record>& chain,
 	const std::vector<std::string>& all_vars,
 	std::size_t ivar1,
-	std::size_t ivar2
+	std::size_t ivar2,
+	std::size_t level
 ) {
 	const auto iter_for_var_name = [&](const std::string& name) -> std::remove_reference_t<decltype(collapse_graph)>::iterator {
 		for (auto iter = collapse_graph.begin(); iter != collapse_graph.end(); ++iter) {
@@ -412,30 +413,33 @@ void helper_process_sub_colorings(
 	activation_record ar(false);
 
 	while (true) {
+		if (level < 32 )
+			standard_logger().info(std::string("progress on level ") + std::to_string(level) + "  :  " + std::to_string((double(ivar1)* double(all_vars.size()) + double(ivar2)) / (double(all_vars.size())*double(all_vars.size()))));
 
-		while (!can_merge(ivar1, ivar2)) {
-			bool can_increase = increase_var_pair(ivar1, ivar2);
-			if (!can_increase) {
-				//### GOTO output current merging, no merge possible., check if it maximal before outputting
-				std::size_t i1{ 0 }, i2{ 0 };
-				while (increase_var_pair(i1, i2)) {
-					if (can_merge(i1, i2)) return; // not maximal
-				}
-				// merging is maximal when here. add it to all_colorings:
-				int next_free_color{ 0 };
-				std::map<std::string, int> the_extracted_coloring;
-				for (auto iter = collapse_graph.cbegin(); iter != collapse_graph.cend(); ++iter) {
-					for (auto jter = iter->first->cbegin(); jter != iter->first->cend(); ++jter) {// all variables within one color equivalence class
-						the_extracted_coloring[*jter] = next_free_color;
+				while (!can_merge(ivar1, ivar2)) {
+					bool can_increase = increase_var_pair(ivar1, ivar2);
+					if (!can_increase) {
+						//### GOTO output current merging, no merge possible., check if it maximal before outputting
+						std::size_t i1{ 0 }, i2{ 0 };
+						while (increase_var_pair(i1, i2)) {
+							if (can_merge(i1, i2)) return; // not maximal
+						}
+						// merging is maximal when here. add it to all_colorings:
+						int next_free_color{ 0 };
+						std::map<std::string, int> the_extracted_coloring;
+						for (auto iter = collapse_graph.cbegin(); iter != collapse_graph.cend(); ++iter) {
+							for (auto jter = iter->first->cbegin(); jter != iter->first->cend(); ++jter) {// all variables within one color equivalence class
+								the_extracted_coloring[*jter] = next_free_color;
+							}
+							++next_free_color;
+						}
+						auto lock = std::unique_lock(mutex_all_colorings);
+						all_colorings.push_back(the_extracted_coloring);
+						if constexpr (false)
+							standard_logger().info(std::string("pushed coloring No ") + std::to_string(all_colorings.size()));
+						return;
 					}
-					++next_free_color;
 				}
-				auto lock = std::unique_lock(mutex_all_colorings);
-				all_colorings.push_back(the_extracted_coloring);
-				standard_logger().info(std::string("pushed coloring No ") + std::to_string(all_colorings.size()));
-				return;
-			}
-		}
 		// here we can merge ivar1 ivar2 or just don't do it.
 
 
@@ -472,7 +476,7 @@ void helper_process_sub_colorings(
 		collapse_graph.erase(set2); // delete entry %04
 
 		// sub routine
-		helper_process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures, chain, all_vars, ivar1, ivar2);
+		helper_process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures, all_vars, ivar1, ivar2, level + 1);
 
 		// undo merge:
 
@@ -714,9 +718,9 @@ void process_sub_colorings(
 
 
 	/* do - undo - chain*/
-	std::list<activation_record> chain;
+	//std::list<activation_record> chain;
 
-	chain.emplace_back(skip_output);
+	//chain.emplace_back(skip_output);
 
 	std::stringstream ss;
 	ss << "initial collapse graph:\n\n";
@@ -739,7 +743,7 @@ void process_sub_colorings(
 	if (all_vars.size() < 2)
 		throw 2;
 
-	helper_process_sub_colorings(all_colorings, collapse_graph, skip_output, mutex_all_colorings, max_threads, futures, m_futures, chain, all_vars, ivar1, ivar2);
+	helper_process_sub_colorings(all_colorings, collapse_graph, skip_output, mutex_all_colorings, max_threads, futures, m_futures, all_vars, ivar1, ivar2, 0);
 
 }
 
