@@ -383,7 +383,7 @@ void helper_process_sub_colorings(
 					standard_logger().info("here");
 				}
 		*/
-		if constexpr (false)
+		if constexpr (true)
 			if (chain.size() < 50)
 				standard_logger().info(std::string("rec-depth: ") + std::to_string(chain.size()) + "\t\tphase: " + std::to_string(static_cast<int>(ar.phase)) + "\t\t#colorings: " + std::to_string(all_colorings.size()));
 
