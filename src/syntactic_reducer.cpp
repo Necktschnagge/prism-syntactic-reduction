@@ -14,6 +14,7 @@
 #include <limits>
 #include <future>
 #include <sstream>
+#include <sstream>
 
 bool __compare_helper__(std::map<std::string, int>& c1, std::map<std::string, int>& c2) {
 	std::map<int, int> homomorphism;
@@ -364,7 +365,7 @@ struct activation_record {
 	activation_record(bool skip_output, PHASE phase = PHASE::SEARCH_MERGING) : skip_output(skip_output), phase(phase), kill_on_end(false) {}
 };
 
-auto deep_copy_collapse_graph(const std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>& collapse_graph) 
+auto deep_copy_collapse_graph(const std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>& collapse_graph)
 -> std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>> {
 	/*std::map<std::string, std::tuple<std::set<std::string>, std::set<std::string>>> without_shared_pointers;
 	for (const auto& pair : collapse_graph) {
@@ -396,11 +397,11 @@ auto deep_copy_collapse_graph(const std::map<std::shared_ptr<std::set<std::strin
 
 void helper_process_sub_colorings(
 	std::list<std::map<std::string, int>>& all_colorings,
-	std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>& collapse_graph,
+	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
 	bool skip_output,
 	std::mutex& mutex_all_colorings,
 	const std::size_t max_threads,
-	std::list<std::future<void>>& futures,
+	std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>>& futures,
 	std::mutex& m_futures,
 	//std::list<activation_record>& chain,
 	const std::vector<std::string>& all_vars,
@@ -408,14 +409,14 @@ void helper_process_sub_colorings(
 	std::size_t ivar2,
 	std::size_t level
 ) {
-	
 
-	const auto iter_for_var_name = [&](const std::string& name) -> std::remove_reference_t<decltype(collapse_graph)>::iterator {
-		for (auto iter = collapse_graph.begin(); iter != collapse_graph.end(); ++iter) {
+
+	const auto iter_for_var_name = [&](const std::string& name) -> std::remove_reference_t<decltype(*collapse_graph)>::iterator {
+		for (auto iter = collapse_graph->begin(); iter != collapse_graph->end(); ++iter) {
 			if (iter->first->find(name) != iter->first->end())
 				return iter;
 		}
-		return collapse_graph.end();
+		return collapse_graph->end();
 	};
 
 	const auto can_merge = [&](std::size_t v1, std::size_t v2) -> bool {
@@ -444,34 +445,67 @@ void helper_process_sub_colorings(
 	activation_record ar(false);
 
 	while (true) {
-		if (level < 32 )
-			standard_logger().info(std::string("progress on level ") + std::to_string(level) + "  :  " + std::to_string((double(ivar1)* double(all_vars.size()) + double(ivar2)) / (double(all_vars.size())*double(all_vars.size()))));
+		if (level < 40)
+			standard_logger().info(std::string("progress on level ") + std::to_string(level) + "  :  " + std::to_string((double(ivar1) * double(all_vars.size()) + double(ivar2)) / (double(all_vars.size()) * double(all_vars.size()))));
 
-				while (!can_merge(ivar1, ivar2)) {
-					bool can_increase = increase_var_pair(ivar1, ivar2);
-					if (!can_increase) {
-						//### GOTO output current merging, no merge possible., check if it maximal before outputting
-						std::size_t i1{ 0 }, i2{ 0 };
-						while (increase_var_pair(i1, i2)) {
-							if (can_merge(i1, i2)) return; // not maximal
-						}
-						// merging is maximal when here. add it to all_colorings:
-						int next_free_color{ 0 };
-						std::map<std::string, int> the_extracted_coloring;
-						for (auto iter = collapse_graph.cbegin(); iter != collapse_graph.cend(); ++iter) {
-							for (auto jter = iter->first->cbegin(); jter != iter->first->cend(); ++jter) {// all variables within one color equivalence class
-								the_extracted_coloring[*jter] = next_free_color;
-							}
-							++next_free_color;
-						}
-						auto lock = std::unique_lock(mutex_all_colorings);
-						all_colorings.push_back(the_extracted_coloring);
-						if constexpr (false)
-							standard_logger().info(std::string("pushed coloring No ") + std::to_string(all_colorings.size()));
-						return;
-					}
+		while (!can_merge(ivar1, ivar2)) {
+			bool can_increase = increase_var_pair(ivar1, ivar2);
+			if (!can_increase) {
+				//### GOTO output current merging, no merge possible., check if it maximal before outputting
+				std::size_t i1{ 0 }, i2{ 0 };
+				while (increase_var_pair(i1, i2)) {
+					if (can_merge(i1, i2)) return; // not maximal
 				}
+				// merging is maximal when here. add it to all_colorings:
+				int next_free_color{ 0 };
+				std::map<std::string, int> the_extracted_coloring;
+				for (auto iter = collapse_graph->cbegin(); iter != collapse_graph->cend(); ++iter) {
+					for (auto jter = iter->first->cbegin(); jter != iter->first->cend(); ++jter) {// all variables within one color equivalence class
+						the_extracted_coloring[*jter] = next_free_color;
+					}
+					++next_free_color;
+				}
+				auto lock = std::unique_lock(mutex_all_colorings);
+				all_colorings.push_back(the_extracted_coloring);
+				if constexpr (false)
+					standard_logger().info(std::string("pushed coloring No ") + std::to_string(all_colorings.size()));
+				return;
+			}
+		}
 		// here we can merge ivar1 ivar2 or just don't do it.
+
+		bool in_parallel = futures.size() < max_threads;
+
+		if (in_parallel) {
+			std::size_t i1_sub = ivar1;
+			std::size_t i2_sub = ivar2;
+			increase_var_pair(i1_sub, i2_sub);
+
+			auto collapse_graph_copy = std::make_shared<collapse_graph_t>(deep_copy_collapse_graph(*collapse_graph));
+			auto lock = std::unique_lock(m_futures);
+			futures.push_back(
+				std::make_tuple(
+					std::async(
+						std::launch::async, [&] {
+							//std::this_thread::sleep_for(3s);
+							return helper_process_sub_colorings(all_colorings,
+								collapse_graph_copy,
+								false,
+								mutex_all_colorings,
+								max_threads,
+								futures,
+								m_futures,
+								all_vars,
+								i1_sub,
+								i2_sub,
+								level + 1
+							);
+						}
+					),
+					collapse_graph_copy
+							)
+			);
+		}
 
 
 		//apply merging
@@ -493,7 +527,7 @@ void helper_process_sub_colorings(
 		set1->second.insert(ar.temp_join.deleted_set_neighbours.cbegin(), ar.temp_join.deleted_set_neighbours.cend()); //link neighbours of deleted set2 to set1 %02
 
 
-		for (auto iter = collapse_graph.begin(); iter != collapse_graph.end(); ++iter) { // replace shared_ptr to deleted set2 by shared_ptr to set1 where it can be found. %03
+		for (auto iter = collapse_graph->begin(); iter != collapse_graph->end(); ++iter) { // replace shared_ptr to deleted set2 by shared_ptr to set1 where it can be found. %03
 			auto find_del_set_link = iter->second.find(ar.temp_join.deleted_set);
 			if (find_del_set_link != iter->second.end()) {
 				iter->second.erase(find_del_set_link);
@@ -504,25 +538,27 @@ void helper_process_sub_colorings(
 					ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link.push_back(iter->first);
 			}
 		}
-		collapse_graph.erase(set2); // delete entry %04
+		collapse_graph->erase(set2); // delete entry %04
 
 		// sub routine
 		helper_process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures, all_vars, ivar1, ivar2, level + 1);
 
+		if (in_parallel) return;
+
 		// undo merge:
 
-		collapse_graph[ar.temp_join.deleted_set] = ar.temp_join.deleted_set_neighbours; // %04
+		(*collapse_graph)[ar.temp_join.deleted_set] = ar.temp_join.deleted_set_neighbours; // %04
 
 		// %03
 		for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_delete_set1_link) {
-			collapse_graph[key].erase(ar.temp_edge.key_set_ptr1);
-			collapse_graph[key].insert(ar.temp_join.deleted_set);
+			(*collapse_graph)[key].erase(ar.temp_edge.key_set_ptr1);
+			(*collapse_graph)[key].insert(ar.temp_join.deleted_set);
 		}
 		for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link) {
-			collapse_graph[key].insert(ar.temp_join.deleted_set);
+			(*collapse_graph)[key].insert(ar.temp_join.deleted_set);
 		}
 
-		collapse_graph[ar.temp_edge.key_set_ptr1] = std::move(ar.temp_join.neighbours_of_set1_before); // %02
+		(*collapse_graph)[ar.temp_edge.key_set_ptr1] = std::move(ar.temp_join.neighbours_of_set1_before); // %02
 		auto cb = ar.temp_join.deleted_set->begin();
 		auto ce = ar.temp_join.deleted_set->end();
 		for (auto iter = cb;
@@ -535,213 +571,15 @@ void helper_process_sub_colorings(
 		auto can_increase = increase_var_pair(ivar1, ivar2);
 	}
 
-
-#if false
-	while (!chain.empty()) {
-
-		activation_record& ar{ chain.back() };
-
-		/*		if (chain.size() > 3000) {
-					standard_logger().info("here");
-				}
-		*/
-		if constexpr (true)
-			if (chain.size() < 50)
-				standard_logger().info(std::string("rec-depth: ") + std::to_string(chain.size()) + "\t\tphase: " + std::to_string(static_cast<int>(ar.phase)) + "\t\t#colorings: " + std::to_string(all_colorings.size()));
-
-		if constexpr (false)
-			standard_logger().info(std::string("collaps graph on depth  ") + std::to_string(chain.size()) + "  :\n" + [&]() {
-			std::stringstream ss;
-			for (auto pair : collapse_graph) {
-				ss << "set:\n";
-				for (const auto& member : *pair.first)
-					ss << "   " << member << std::endl;
-			}
-			return ss.str();
-				}()
-					);
-
-		if (ar.phase == PHASE::SEARCH_MERGING) {
-			// output the current coloring if !skip_output
-			if (!ar.skip_output) {
-				int next_free_color{ 0 };
-				std::map<std::string, int> the_extracted_coloring;
-				for (auto iter = collapse_graph.cbegin(); iter != collapse_graph.cend(); ++iter) {
-					for (auto jter = iter->first->cbegin(); jter != iter->first->cend(); ++jter) {// all variables within one color equivalence class
-						the_extracted_coloring[*jter] = next_free_color;
-					}
-					++next_free_color;
-				}
-				auto lock = std::unique_lock(mutex_all_colorings);
-				/*for (auto& c : all_colorings) {
-					if (compare_colorings(c, the_extracted_coloring)) {
-						standard_logger().error("stop here");
-					}
-				}
-				*/
-				all_colorings.push_back(the_extracted_coloring);
-			}
-			//std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1;
-			//std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set2;
-			ar.temp_edge.can_be_joined = false;
-			// search for the first two sets that can be collapsed
-			for (auto iter = collapse_graph.begin(); iter != collapse_graph.end(); ++iter) {
-				for (auto jter = std::next(iter); jter != collapse_graph.end(); ++jter) {
-					// iterate over all possible collapse pairs here.
-					auto search_prohibition_edge = iter->second.find(jter->first);
-					ar.temp_edge.can_be_joined = (iter->second.end() == search_prohibition_edge);
-					if (ar.temp_edge.can_be_joined) {
-						ar.searched_set1_representor = *iter->first->cbegin();
-						ar.searched_set2_representor = *jter->first->cbegin();
-						//standard_logger().info(std::string("search result on depth  ") + std::to_string(chain.size()) + "  :  " + ar.searched_set1_representor + "  <--->  " + ar.searched_set2_representor);
-						goto found_merging_9876542834;
-					}
-				}
-			}
-		found_merging_9876542834:
-			// case 0: no possible collapse: just return.
-			if (!ar.temp_edge.can_be_joined) {
-				//standard_logger().info(std::string("search result on depth  ") + std::to_string(chain.size()) + "  :  NO MATCH");
-				chain.pop_back();
-				continue;
-			};
-		}
-
-		const auto find_collapse_graph_iterator_by_set_representator = [&collapse_graph](std::string representator) {
-			for (auto iter = collapse_graph.begin(); iter != collapse_graph.end(); ++iter)
-				if (iter->first->find(representator) != iter->first->end())
-					return iter;
-		};
-
-		if (ar.phase == PHASE::FORBID_MERGING) {
-			//standard_logger().info(std::string("Excluding possible merge found:\n") + to_string(*set1->first) + "\n" + to_string(*set2->first));
-
-			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1{
-				find_collapse_graph_iterator_by_set_representator(ar.searched_set1_representor)
-			};
-			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set2{
-				find_collapse_graph_iterator_by_set_representator(ar.searched_set2_representor)
-			};
-
-
-			//standard_logger().info(std::string("forbid merge on depth  ") + std::to_string(chain.size()) + "  :  " + ar.searched_set1_representor + "  <--->  " + ar.searched_set2_representor);
-
-
-			set1->second.insert(set2->first);
-			set2->second.insert(set1->first);
-			ar.temp_edge.key_set_ptr1 = set1->first;
-			//			ar.temp_edge.iter1 = set1;
-			ar.temp_edge.key_set_ptr2 = set2->first;
-			//			ar.temp_edge.iter2 = set2;
-
-			chain.emplace_back(true); // prepare subtree of back tracking
-		}
-
-		if (ar.phase == PHASE::UNDO_FORBID_MERGING) {
-			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1{ collapse_graph.find(ar.temp_edge.key_set_ptr1) };
-			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set2{ collapse_graph.find(ar.temp_edge.key_set_ptr2) };
-
-			//standard_logger().info(std::string("undo forbid merge on depth  ") + std::to_string(chain.size()) + "  :  " + ar.searched_set1_representor + "  <--->  " + ar.searched_set2_representor);
-
-			//rollback
-			set1->second.erase(set2->first);
-			set2->second.erase(set1->first);
-		}
-
-		if (ar.phase == PHASE::FORCE_MERGING) {
-			//ar.temp_join.collapse_graph_debug_copy = collapse_graph;
-
-			// case 2: collapse the two sets and propagate into collapse_graph and var_mapped_to_color_class,
-			// run sub_procedure with skip = false.
-
-			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1{
-				find_collapse_graph_iterator_by_set_representator(ar.searched_set1_representor)
-			};
-			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set2{
-				find_collapse_graph_iterator_by_set_representator(ar.searched_set2_representor)
-			};
-
-			//standard_logger().info(std::string("force merge on depth  ") + std::to_string(chain.size()) + "  :  " + ar.searched_set1_representor + "  <--->  " + ar.searched_set2_representor);
-
-			ar.temp_edge.key_set_ptr1 = set1->first;
-			//ar.temp_edge.key_set_ptr2 = set2->first;
-
-			if (set1->first == set2->first) throw 5;
-
-			ar.temp_join.deleted_set = set2->first;
-			ar.temp_join.deleted_set_neighbours = set2->second;
-			ar.temp_join.neighbours_of_set1_before = set1->second;
-
-
-			set1->first->insert(ar.temp_join.deleted_set->cbegin(), ar.temp_join.deleted_set->cend()); //join sets itself %01
-			set1->second.insert(ar.temp_join.deleted_set_neighbours.cbegin(), ar.temp_join.deleted_set_neighbours.cend()); //link neighbours of deleted set2 to set1 %02
-
-
-			for (auto iter = collapse_graph.begin(); iter != collapse_graph.end(); ++iter) { // replace shared_ptr to deleted set2 by shared_ptr to set1 where it can be found. %03
-				auto find_del_set_link = iter->second.find(ar.temp_join.deleted_set);
-				if (find_del_set_link != iter->second.end()) {
-					iter->second.erase(find_del_set_link);
-					auto [ignored_iterator, insert_took_place] = iter->second.insert(set1->first);
-					if (insert_took_place)
-						ar.temp_join.relink_to_set2_on_rollback_and_delete_set1_link.push_back(iter->first);
-					else
-						ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link.push_back(iter->first);
-				}
-			}
-			collapse_graph.erase(set2); // delete entry %04
-
-			chain.emplace_back(false);
-		}
-
-		if (ar.phase == PHASE::UNDO_MERGING) {
-
-			//standard_logger().info(std::string("undo merge on depth  ") + std::to_string(chain.size()) + "  :  " + ar.searched_set1_representor + "  <--->  " + ar.searched_set2_representor);
-
-			collapse_graph[ar.temp_join.deleted_set] = ar.temp_join.deleted_set_neighbours; // %04
-
-			// %03
-			for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_delete_set1_link) {
-				collapse_graph[key].erase(ar.temp_edge.key_set_ptr1);
-				collapse_graph[key].insert(ar.temp_join.deleted_set);
-			}
-			for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link) {
-				collapse_graph[key].insert(ar.temp_join.deleted_set);
-			}
-
-			collapse_graph[ar.temp_edge.key_set_ptr1] = std::move(ar.temp_join.neighbours_of_set1_before); // %02
-			auto cb = ar.temp_join.deleted_set->begin();
-			auto ce = ar.temp_join.deleted_set->end();
-			for (auto iter = cb;
-				iter != ce;
-				++iter) {
-				const std::string& var_name = *iter;
-				ar.temp_edge.key_set_ptr1->erase(var_name);
-			}// %01
-
-			//standard_logger().info(std::string("unwind merge:\n") + to_string(*ar.temp_edge.key_set_ptr1) + "\n" + to_string(*ar.temp_edge.key_set_ptr2));
-			/*
-			if (collapse_graph != ar.temp_join.collapse_graph_debug_copy) {
-				standard_logger().error("stop here");
-			}
-			*/
-		}
-		ar.phase = next_phase(ar.phase);
-
-		if (ar.phase == PHASE::FINISHED) {
-			chain.pop_back();
-		}
-
-	}
-#endif
 }
 
 void process_sub_colorings(
 	std::list<std::map<std::string, int>>& all_colorings,
-	std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>& collapse_graph,
+	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
 	bool skip_output,
 	std::mutex& mutex_all_colorings,
 	const std::size_t max_threads,
-	std::list<std::future<void>>& futures,
+	std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>>& futures,
 	std::mutex& m_futures,
 	std::vector<std::string> all_vars
 ) {
@@ -755,7 +593,7 @@ void process_sub_colorings(
 
 	std::stringstream ss;
 	ss << "initial collapse graph:\n\n";
-	for (const auto& pair : collapse_graph) {
+	for (const auto& pair : *collapse_graph) {
 		ss << "set  { ";
 		for (const auto& name : *pair.first) {
 			ss << name << ", ";
@@ -1121,7 +959,7 @@ int cli(int argc, char** argv) {
 
 	// brute force all colorings:
 
-	std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>> collapse_graph;
+	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph = std::make_shared< std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>();
 	// set of variables with the same coloring |-> pointers to all other sets that must not be unified with the set.
 
 	std::map<std::string, std::shared_ptr<std::set<std::string>>> var_mapped_to_color_class;
@@ -1133,7 +971,7 @@ int cli(int argc, char** argv) {
 	// add all keys + values to collapse_graph:
 	for (auto iter = graph.begin(); iter != graph.end(); ++iter) {
 		std::shared_ptr<std::set<std::string>> single_node_set = var_mapped_to_color_class[iter->first];
-		auto& local_neighbours = collapse_graph[single_node_set];
+		auto& local_neighbours = (*collapse_graph)[single_node_set];
 		for (auto jter = neighbours(iter->second).cbegin(); jter != neighbours(iter->second).cend(); ++jter) {
 			local_neighbours.insert(var_mapped_to_color_class[*jter]);
 		}
@@ -1146,8 +984,8 @@ int cli(int argc, char** argv) {
 
 	auto filter_thread = std::thread(filter_colorings, std::ref(useful_colorings), std::ref(all_colorings), std::ref(mutex_all_colorings), std::ref(continue_running));
 
-	const std::size_t max_threads{ 16 };
-	std::list<std::future<void>> futures;
+	const std::size_t max_threads{ 8 };
+	std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>> futures;
 	std::mutex m_futures;
 
 	std::vector<std::string> all_var_names;
@@ -1155,6 +993,22 @@ int cli(int argc, char** argv) {
 	std::sort(all_var_names.begin(), all_var_names.end());
 
 	process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures, all_var_names);
+
+	// wait for futures here
+	while (!futures.empty()) {
+		standard_logger().info("waiting for futures...");
+		std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>>::iterator iter;
+		{
+			auto lock = std::unique_lock(m_futures);
+			iter = futures.begin();
+		}
+		std::get<0>(*iter).wait();
+		{
+			auto lock = std::unique_lock(m_futures);
+			futures.erase(iter);
+		}
+	}
+	standard_logger().info("all futures finished!");
 	continue_running = false;
 	filter_thread.join();
 	all_colorings.clear();
