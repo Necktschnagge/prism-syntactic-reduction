@@ -337,6 +337,8 @@ struct activation_record {
 	activation_record(bool skip_output, int phase = 0) : skip_output(skip_output), phase(phase) {}
 };
 
+std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> xx;
+std::shared_ptr<std::vector<activation_record>> yy;
 
 void helper_process_sub_colorings(
 	std::list<std::map<std::string, int>>& all_colorings,
@@ -351,18 +353,19 @@ void helper_process_sub_colorings(
 	>
 	>& futures,
 	std::mutex& m_futures,
-	std::vector<activation_record>& chain
+	std::vector<activation_record>& chain,
+	bool can_create_thread
 ) {
 	while (!chain.empty()) {
 
 		activation_record& ar{ chain.back() };
 
-		/*if (chain.size() % 10 == 0)
-			my_logger(& collapse_graph, "threadX").info(std::string("rec-depth: ") + std::to_string(chain.size()) + "\tphase: " + std::to_string(ar.phase) + "\t#colorings: " + std::to_string(all_colorings.size()) + "\t threads: " );
-			*/
+		if (chain.size() % 25 == 0)
+			my_logger(&collapse_graph, "threadX").info(std::string("rec-depth: ") + std::to_string(chain.size()) + "\tphase: " + std::to_string(ar.phase) + "\t#colorings: " + std::to_string(all_colorings.size()) + "\t threads: ");
+
 		if (ar.phase == 0) {
 
-			if (chain.size() == 10)
+			if (chain.size() == 10 && can_create_thread)
 				if (m_futures.try_lock()) {
 					for (auto iter = futures.begin(); iter != futures.end(); ++iter) {
 						auto status = std::get<0>(*iter).wait_for(std::chrono::milliseconds(0));
@@ -387,28 +390,35 @@ void helper_process_sub_colorings(
 							}
 							rhs = std::move(deep_adapted);
 						}
-
+						for (auto& pair : *collapse_graph_copy) {
+							for (auto el : pair.second)
+								if (collapse_graph_copy->find(el) == collapse_graph_copy->end()) {
+									standard_logger().error("here");
+								}
+						}
 						auto sub_chain = std::make_shared<std::vector<activation_record>>();
 						sub_chain->emplace_back(ar.skip_output);
 						//sub_chain.back().kill_on_end = true;
 
-						futures.push_back(std::make_tuple(
-							std::async(
-								std::launch::async, [&] {
-									//std::this_thread::sleep_for(3s);
-									return helper_process_sub_colorings(all_colorings,
-										*collapse_graph_copy,
-										mutex_all_colorings,
-										max_threads,
-										futures,
-										m_futures,
-										*sub_chain
-									);
-								}
-							),
-							collapse_graph_copy,
-									sub_chain
-									)
+						futures.push_back(
+							std::make_tuple(
+								std::async(
+									std::launch::async, [&] {
+										//std::this_thread::sleep_for(3s);
+										return helper_process_sub_colorings(all_colorings,
+											*collapse_graph_copy,
+											mutex_all_colorings,
+											max_threads,
+											futures,
+											m_futures,
+											*sub_chain,
+											false
+										);
+									}
+								),
+								xx = collapse_graph_copy,
+										yy = sub_chain
+										)
 						);
 						chain.pop_back(); // go back since another thread does the job now.
 						m_futures.unlock();
@@ -416,6 +426,7 @@ void helper_process_sub_colorings(
 					}
 					m_futures.unlock();
 				}
+
 
 
 			// output the current coloring if !skip_output
@@ -574,7 +585,8 @@ void process_sub_colorings(
 		max_threads,
 		futures,
 		m_futures,
-		chain
+		chain,
+		true
 	);
 };
 
@@ -946,9 +958,9 @@ int cli(int argc, char** argv) {
 
 	auto filter_thread = std::thread(filter_colorings, std::ref(useful_colorings), std::ref(all_colorings), std::ref(mutex_all_colorings), std::ref(continue_running));
 
-	const std::size_t max_threads{ 16 };
+	const std::size_t MAX_THREADS{ 1 };
 
-	process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads);
+	process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, MAX_THREADS);
 	continue_running = false;
 	filter_thread.join();
 	all_colorings.clear();
