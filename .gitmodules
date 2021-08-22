@@ -7,3 +7,6 @@
 [submodule "extern/boost-ci"]
 	path = extern/boost-ci
 	url = https://github.com/boostorg/boost-ci
+[submodule "extern/json"]
+	path = extern/json
+	url = https://github.com/nlohmann/json.git
