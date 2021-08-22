@@ -326,15 +326,34 @@ struct temporal_join {
 	//std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>> collapse_graph_debug_copy;
 };
 
+enum class PHASE {
+	SEARCH_MERGING = 0,
+	FORBID_MERGING = 1,
+	UNDO_FORBID_MERGING = 2,
+	FORCE_MERGING = 3,
+	UNDO_MERGING = 4
+
+};
+
+const auto next_phase = [](const PHASE& p) -> PHASE {
+	switch (p)
+	{
+	case PHASE::SEARCH_MERGING: return PHASE::FORCE_MERGING;
+	case PHASE::FORBID_MERGING: return PHASE::UNDO_FORBID_MERGING;
+	case PHASE::FORCE_MERGING: return PHASE::UNDO_MERGING;
+	case PHASE::UNDO_MERGING: return PHASE::FORBID_MERGING;
+	default:
+		break;
+	}
+};
+
 struct activation_record {
 	bool skip_output;
 	temporal_prohibiting_edge temp_edge;
 	temporal_join temp_join;
-	int phase; /* 0 -> start at beginning
-				  1 -> rollback of temporal edge
-			   */
+	PHASE phase;
 	bool kill_on_end;
-	activation_record(bool skip_output, int phase = 0) : skip_output(skip_output), phase(phase), kill_on_end(false) {}
+	activation_record(bool skip_output, PHASE phase = PHASE::SEARCH_MERGING) : skip_output(skip_output), phase(phase), kill_on_end(false) {}
 };
 
 
@@ -356,7 +375,7 @@ void helper_process_sub_colorings(
 					standard_logger().info("here");
 				}
 		*/
-		if (chain.size() < 70)
+		if (chain.size() < 50)
 			standard_logger().info(std::string("rec-depth: ") + std::to_string(chain.size()) + "\t\tphase: " + std::to_string(ar.phase) + "\t\t#colorings: " + std::to_string(all_colorings.size()));
 
 		if (ar.phase == 0) {
@@ -538,6 +557,7 @@ void process_sub_colorings(
 
 	chain.emplace_back(skip_output);
 
+
 	while (!chain.empty()) {
 
 		activation_record& ar{ chain.back() };
@@ -546,7 +566,7 @@ void process_sub_colorings(
 					standard_logger().info("here");
 				}
 		*/
-		if (chain.size() < 70)
+		if (chain.size() < 40)
 			standard_logger().info(std::string("rec-depth: ") + std::to_string(chain.size()) + "\t\tphase: " + std::to_string(ar.phase) + "\t\t#colorings: " + std::to_string(all_colorings.size()));
 
 		if (ar.phase == 0) {
@@ -582,7 +602,7 @@ void process_sub_colorings(
 			}
 
 			/// requires deep copys again!!!!
-			*/ 
+			*/
 
 
 			// output the current coloring if !skip_output
@@ -604,6 +624,7 @@ void process_sub_colorings(
 				*/
 				all_colorings.push_back(the_extracted_coloring);
 			}
+
 			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1;
 			std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set2;
 			ar.temp_edge.can_be_joined = false;
@@ -631,11 +652,12 @@ void process_sub_colorings(
 
 			//case 1
 			// mark the joinable as not joinable and run subprocedure with skip = true
-			set1->second.insert(set2->first);
-			set2->second.insert(set1->first);
-			ar.temp_edge.key_set_ptr1 = set1->first;
-			ar.temp_edge.key_set_ptr2 = set2->first;
-
+			{
+				set1->second.insert(set2->first);
+				set2->second.insert(set1->first);
+				ar.temp_edge.key_set_ptr1 = set1->first;
+				ar.temp_edge.key_set_ptr2 = set2->first;
+			}
 			ar.phase = 1; // rollback of temp edge
 			chain.emplace_back(true);
 			continue;
@@ -945,7 +967,7 @@ unsigned long long count_variables_of_coloring(const std::map<std::string, int>&
 }
 
 void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned long long>>& useful_colorings, std::list<std::map<std::string, int>>& all_colorings, std::mutex& m_all_colorings, bool& continue_running) {
-	unsigned long long TOLERANCE{ 20 };
+	unsigned long long TOLERANCE{ 3 };
 	unsigned long long min_var_count{ std::numeric_limits<unsigned long long>::max() - TOLERANCE };
 	unsigned long long i{ 0 };
 	bool shrink{ false };
@@ -953,7 +975,7 @@ void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned l
 		++i;
 		shrink = false;
 		std::list<std::map<std::string, int>> fetched_colorings;
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(30000));
 		{
 			auto lock = std::unique_lock(m_all_colorings);
 			fetched_colorings = std::move(all_colorings);
@@ -968,14 +990,14 @@ void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned l
 					min_var_count = size;
 					shrink = true;
 				}
-				
+				/*
 				//standard_logger().info("search duplicates in colorings:");
 				for (auto& uc : useful_colorings) {
 					if (compare_colorings(c, uc.first)) {
 						standard_logger().error("found duplicate!");
 					}
 				}
-				
+				*/
 				useful_colorings.push_back(std::make_pair(std::move(c), size));
 			}
 		}
