@@ -843,7 +843,7 @@ unsigned long long count_variables_of_coloring(const std::map<std::string, int>&
 }
 
 void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned long long>>& useful_colorings, std::list<std::map<std::string, int>>& all_colorings, std::mutex& m_all_colorings, bool& continue_running) {
-	unsigned long long TOLERANCE{ 3 };
+	unsigned long long TOLERANCE{ 0 };
 	unsigned long long min_var_count{ std::numeric_limits<unsigned long long>::max() - TOLERANCE };
 	unsigned long long i{ 0 };
 	bool shrink{ false };
@@ -861,7 +861,7 @@ void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned l
 		standard_logger().info(fetched_colorings.size());
 		for (auto& c : fetched_colorings) {
 			auto size = count_variables_of_coloring(c);
-			if (size < min_var_count + TOLERANCE) {
+			if (size <= min_var_count + TOLERANCE) {
 				if (size < min_var_count) {
 					min_var_count = size;
 					shrink = true;
@@ -878,9 +878,9 @@ void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned l
 			}
 		}
 		if (shrink) {
-			std::vector< std::list<std::pair<std::map<std::string, int>, unsigned long long>>::const_iterator> to_delete;
+			std::vector<std::list<std::pair<std::map<std::string, int>, unsigned long long>>::const_iterator> to_delete;
 			for (auto iter = useful_colorings.cbegin(); iter != useful_colorings.cend(); ++iter) {
-				if (!(iter->second < min_var_count + TOLERANCE)) to_delete.push_back(iter);
+				if (!(iter->second <= min_var_count + TOLERANCE)) to_delete.push_back(iter);
 			}
 			for (const auto& iter : to_delete) useful_colorings.erase(iter);
 		}
