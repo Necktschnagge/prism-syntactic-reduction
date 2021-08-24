@@ -418,6 +418,13 @@ void helper_process_sub_colorings(
 		}
 		return collapse_graph->end();
 	};
+	const auto iter_for_var_name_smart = [&](const std::string& name) -> std::remove_reference_t<decltype(*collapse_graph)>::iterator {
+		for (auto iter = collapse_graph->begin(); iter != collapse_graph->end(); ++iter) {
+			if (*iter->first->begin() == name)
+				return iter;
+		}
+		return collapse_graph->end();
+	};
 
 	const auto can_merge = [&](std::size_t v1, std::size_t v2) -> bool {
 		auto set1_iter = iter_for_var_name(all_vars[v1]);
@@ -429,6 +436,21 @@ void helper_process_sub_colorings(
 
 		return true;
 	};
+
+	const auto can_merge_smart = [&](std::size_t v1, std::size_t v2) -> bool {
+		auto set1_iter = iter_for_var_name_smart(all_vars[v1]);
+		if (set1_iter == collapse_graph->end()) return false;
+		
+		auto set2_iter = iter_for_var_name_smart(all_vars[v2]);
+		if (set2_iter == collapse_graph->end()) return false;
+
+		if (set1_iter == set2_iter) return false; // already merged
+
+		if (set1_iter->second.find(set2_iter->first) != set1_iter->second.end()) return false; // merge forbidden
+
+		return true;
+	};
+
 
 	const auto increase_var_pair = [&](std::size_t& i1, std::size_t& i2) -> bool {
 		++i2;
@@ -445,17 +467,19 @@ void helper_process_sub_colorings(
 	activation_record ar(false);
 
 	while (true) {
-		if (level < 40)
+		if (level < 40 && level % 5 == 1)
 			standard_logger().info(std::string("progress on level ") + std::to_string(level) + "  :  " + std::to_string((double(ivar1) * double(all_vars.size()) + double(ivar2)) / (double(all_vars.size()) * double(all_vars.size()))));
 
-		while (!can_merge(ivar1, ivar2)) {
+		while (!can_merge_smart(ivar1, ivar2)) {
 			bool can_increase = increase_var_pair(ivar1, ivar2);
 			if (!can_increase) {
 				//### GOTO output current merging, no merge possible., check if it maximal before outputting
+				/*
 				std::size_t i1{ 0 }, i2{ 0 };
 				while (increase_var_pair(i1, i2)) {
 					if (can_merge(i1, i2)) return; // not maximal
 				}
+				*/
 				// merging is maximal when here. add it to all_colorings:
 				int next_free_color{ 0 };
 				std::map<std::string, int> the_extracted_coloring;
@@ -851,7 +875,7 @@ unsigned long long count_variables_of_coloring(const std::map<std::string, int>&
 }
 
 void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned long long>>& useful_colorings, std::list<std::map<std::string, int>>& all_colorings, std::mutex& m_all_colorings, bool& continue_running) {
-	unsigned long long TOLERANCE{ 500 };
+	unsigned long long TOLERANCE{ 0 };
 	unsigned long long min_var_count{ std::numeric_limits<unsigned long long>::max() - TOLERANCE };
 	unsigned long long i{ 0 };
 	bool shrink{ false };
