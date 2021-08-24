@@ -6,6 +6,9 @@
 
 #include <nlohmann/json.hpp>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
+
 #include <memory>
 #include <unordered_set>
 #include <iostream>
@@ -14,7 +17,7 @@
 #include <limits>
 #include <future>
 #include <sstream>
-#include <sstream>
+#include <bitset>
 
 bool __compare_helper__(std::map<std::string, int>& c1, std::map<std::string, int>& c2) {
 	std::map<int, int> homomorphism;
@@ -394,6 +397,14 @@ auto deep_copy_collapse_graph(const std::map<std::shared_ptr<std::set<std::strin
 	return new_collapse_graph;
 }
 
+struct collapse_node {
+	using big_int = std::bitset<128>; //boost::multiprecision::int128_t;
+	big_int id;
+	big_int forbidden_merges;
+
+	collapse_node(const big_int& id, const big_int& forbidden_merges) : id(id), forbidden_merges(forbidden_merges) {}
+};
+
 
 void helper_process_sub_colorings(
 	std::list<std::map<std::string, int>>& all_colorings,
@@ -409,6 +420,82 @@ void helper_process_sub_colorings(
 	std::size_t ivar2,
 	std::size_t level
 ) {
+	//### check that not more than 128 variables!!!!
+	if (!(all_vars.size() < 128))
+		throw 648358;
+
+	std::list<collapse_node> all_sets;
+
+	const auto get_id_index = [&](const std::string& s) -> std::size_t {
+		std::size_t i{ 0 };
+		for (; i < all_vars.size(); ++i) {
+			if (all_vars[i] == s) break;
+		}
+		return i;
+	};
+
+	for (const auto& pair : *collapse_graph) {
+		if (pair.first->size() != 1) throw 3;
+		collapse_node::big_int id{ 0 };
+		collapse_node::big_int forbidden_merges{ 0 };
+		std::size_t i{ get_id_index(*pair.first->begin()) };
+		id[i] = 1;
+		for (const auto& element : pair.second) {
+			std::size_t i{ get_id_index(*element->begin()) };
+			forbidden_merges[i] = 1;
+		}
+		all_sets.emplace_back(id, forbidden_merges);
+		std::stringstream ss;
+		ss << "add node : " << id << " forbid: " << forbidden_merges;
+		standard_logger().info(ss.str());
+	}
+
+	all_sets.emplace_back(collapse_node::big_int(), collapse_node::big_int().set());
+
+	std::list<collapse_node>::iterator begin_single{ all_sets.begin() };
+	std::list<collapse_node>::iterator end_single{ std::prev(all_sets.end()) };
+	std::list<collapse_node>::iterator begin_combine{ all_sets.begin() };
+	std::list<collapse_node>::iterator begin_check_double{ std::prev(all_sets.end()) };
+
+	// create new bigger sets here:
+	std::size_t last_size = 0;
+	std::size_t counter = 0;
+	std::size_t last_counter_max = all_sets.size();
+	std::size_t count_steps = 0;
+	std::size_t promille = 0;
+	for (auto big = begin_combine; big != all_sets.end(); ++big) {
+		++count_steps;
+		std::size_t npromille = (1000 * double(count_steps) / double(last_counter_max));
+		if (promille != npromille)
+			standard_logger().info(std::string("progress:   ") + std::to_string(double(npromille) / 1000.0));
+		promille = npromille;
+		for (auto small = begin_single; small != end_single; ++small) {
+			if (big->id.count() > last_size) {
+				last_size = big->id.count();
+				standard_logger().info(std::string("Sets of size  ") + std::to_string(last_size) + "  :  " + std::to_string(counter));
+				last_counter_max = counter;
+				counter = 0;
+				count_steps = 0;
+				begin_check_double = std::prev(all_sets.end());
+			}
+			if ((big->id & small->id).any()) continue;
+			if ((small->forbidden_merges & big->id).any()) continue;
+			// check if created twice:
+			const auto new_id{ small->id | big->id };
+			for (auto comp = begin_check_double; comp != all_sets.end(); ++comp) {
+				if (comp->id == new_id)
+					goto skip;
+			}
+			all_sets.emplace_back(new_id, small->forbidden_merges | big->forbidden_merges);
+			++counter;
+		skip: continue;
+			//standard_logger().info(std::string("created with set size:  ") + std::to_string(all_sets.back().id.count()));
+			//standard_logger().info(std::string("counter:  ") + std::to_string(counter));
+
+		}
+	}
+
+	return;
 
 
 	const auto iter_for_var_name = [&](const std::string& name) -> std::remove_reference_t<decltype(*collapse_graph)>::iterator {
@@ -440,7 +527,7 @@ void helper_process_sub_colorings(
 	const auto can_merge_smart = [&](std::size_t v1, std::size_t v2) -> bool {
 		auto set1_iter = iter_for_var_name_smart(all_vars[v1]);
 		if (set1_iter == collapse_graph->end()) return false;
-		
+
 		auto set2_iter = iter_for_var_name_smart(all_vars[v2]);
 		if (set2_iter == collapse_graph->end()) return false;
 
