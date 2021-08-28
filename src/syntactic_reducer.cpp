@@ -424,7 +424,7 @@ void helper_process_sub_colorings(
 	if (!(all_vars.size() < 128))
 		throw 648358;
 
-	std::list<collapse_node> all_sets;
+	std::list<std::list<collapse_node>> all_sets;
 
 	const auto get_id_index = [&](const std::string& s) -> std::size_t {
 		std::size_t i{ 0 };
@@ -434,6 +434,10 @@ void helper_process_sub_colorings(
 		return i;
 	};
 
+	all_sets.emplace_back(); // size zero
+	all_sets.emplace_back(); // size one
+
+	// fill size one
 	for (const auto& pair : *collapse_graph) {
 		if (pair.first->size() != 1) throw 3;
 		collapse_node::big_int id{ 0 };
@@ -444,60 +448,201 @@ void helper_process_sub_colorings(
 			std::size_t i{ get_id_index(*element->begin()) };
 			forbidden_merges[i] = 1;
 		}
-		all_sets.emplace_back(id, forbidden_merges);
+		all_sets.back().emplace_back(id, forbidden_merges);
 		std::stringstream ss;
 		ss << "add node : " << id << " forbid: " << forbidden_merges;
 		standard_logger().info(ss.str());
 	}
 
-	all_sets.emplace_back(collapse_node::big_int(), collapse_node::big_int().set());
+	//all_sets.emplace_back(collapse_node::big_int(), collapse_node::big_int().set());
 
-	std::list<collapse_node>::iterator begin_single{ all_sets.begin() };
-	std::list<collapse_node>::iterator end_single{ std::prev(all_sets.end()) };
-	std::list<collapse_node>::iterator begin_combine{ all_sets.begin() };
-	std::list<collapse_node>::iterator begin_check_double{ std::prev(all_sets.end()) };
+	std::size_t next_free_index{ 2 };
 
-	// create new bigger sets here:
-	std::size_t last_size = 0;
-	std::size_t counter = 0;
-	std::size_t last_counter_max = all_sets.size();
-	std::size_t count_steps = 0;
-	std::size_t promille = 0;
-	for (auto big = begin_combine; big != all_sets.end(); ++big) {
-		++count_steps;
-		std::size_t npromille = (1000 * double(count_steps) / double(last_counter_max));
-		if (promille != npromille)
-			standard_logger().info(std::string("progress:   ") + std::to_string(double(npromille) / 1000.0));
-		promille = npromille;
-		for (auto small = begin_single; small != end_single; ++small) {
-			if (big->id.count() > last_size) {
-				last_size = big->id.count();
-				standard_logger().info(std::string("Sets of size  ") + std::to_string(last_size) + "  :  " + std::to_string(counter));
-				last_counter_max = counter;
-				counter = 0;
-				count_steps = 0;
-				begin_check_double = std::prev(all_sets.end());
+	while (true) {
+		//
+		std::list<collapse_node>::iterator begin_single{ std::next(all_sets.begin(),1)->begin() };
+		std::list<collapse_node>::iterator end_single{ std::next(all_sets.begin(),1)->end() };
+
+		std::list<collapse_node>& last_filled{ all_sets.back() };
+
+		all_sets.emplace_back();
+
+		std::list<collapse_node>& fill{ all_sets.back() };
+
+		const auto produce = [&](int mod, int index, std::pair<std::list<collapse_node>, std::mutex>& results) {
+			int rounds = last_filled.size() - index;
+			if (rounds < 0) return;
+			rounds += mod - 1;
+			rounds /= mod;
+			if (rounds == 0) return;
+
+			auto big = std::next(last_filled.begin(), index);
+
+			for (int count = 1; true; ++count) {
+				for (auto small = begin_single; small != end_single; ++small) {
+
+					if ((big->id & small->id).any()) continue;
+					if ((small->forbidden_merges & big->id).any()) continue;
+					const auto new_id{ small->id | big->id };
+					const auto new_forbidden{ small->forbidden_merges | big->forbidden_merges };
+					std::size_t wait{ 0 };
+					{
+						auto lock = std::unique_lock(results.second);
+						results.first.emplace_back(new_id, new_forbidden);
+						wait = results.first.size();
+					}
+					if (wait > 900) std::this_thread::sleep_for(std::chrono::milliseconds(1000 * (wait - 900)));
+				}
+				if (count == rounds) return;
+				std::advance(big, mod);
 			}
-			if ((big->id & small->id).any()) continue;
-			if ((small->forbidden_merges & big->id).any()) continue;
-			// check if created twice:
-			const auto new_id{ small->id | big->id };
-			for (auto comp = begin_check_double; comp != all_sets.end(); ++comp) {
-				if (comp->id == new_id)
-					goto skip;
-			}
-			all_sets.emplace_back(new_id, small->forbidden_merges | big->forbidden_merges);
-			++counter;
-		skip: continue;
-			//standard_logger().info(std::string("created with set size:  ") + std::to_string(all_sets.back().id.count()));
-			//standard_logger().info(std::string("counter:  ") + std::to_string(counter));
+		};
 
+		constexpr uint8_t count_produce_threads{ 25 };
+		constexpr uint8_t count_filter_threads{ count_produce_threads };
+
+
+		std::array<std::pair<std::list<collapse_node>, std::mutex>, count_produce_threads> produced;
+
+		std::array<std::thread, count_produce_threads> produce_threads;
+
+		for (uint8_t t = 0; t < count_produce_threads; ++t) {
+			produce_threads[t] = std::thread(produce, count_produce_threads, t, std::ref(produced[t]));
 		}
+
+
+		bool produce_process_done{ false };
+
+		std::list<std::list<collapse_node>> filtered_chain;
+		std::mutex m_filtered_chain;
+
+		const auto filter = [&](int prod_index) {
+			while (true) {
+				std::list<collapse_node> fetched;
+				{
+					auto lock = std::unique_lock(produced[prod_index].second);
+					fetched = std::move(produced[prod_index].first);
+					standard_logger().info(std::string("                                                            filter_thread fetched    ID ") + std::to_string(prod_index) + "  size   " + std::to_string(fetched.size()));
+
+					if (produce_process_done && fetched.empty()) {
+						standard_logger().info(std::string("filter_thread done   ID ") + std::to_string(prod_index));
+						return;
+					}
+				}
+				if (fetched.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+				// duplicates inside fetched:
+				for (auto iter = fetched.begin(); iter != fetched.end(); ++iter) {
+					auto jter = std::next(iter);
+					while (jter != fetched.end()) {
+						auto del = jter;
+						++jter;
+						if (iter->id == del->id) {
+							fetched.erase(del);
+							continue;
+						}
+					}
+				}
+				standard_logger().info(std::string("filter_thread finished self-checking     ID ") + std::to_string(prod_index));
+
+				// check against chain:
+				std::list<std::list<collapse_node>>::iterator first;
+				std::list<std::list<collapse_node>>::iterator last;
+
+				// fetch chain borders:
+				{
+					auto lock = std::unique_lock(m_filtered_chain);
+
+					if (filtered_chain.empty()) {
+						auto s = fetched.size();
+						filtered_chain.push_back(std::move(fetched));
+						standard_logger().info(std::string("       filter_thread write into chain    ID ") + std::to_string(prod_index) + "  size   " + std::to_string(s));
+						continue;
+					}
+
+					first = filtered_chain.begin();
+					last = std::prev(filtered_chain.end());
+				}
+
+				while (true) {
+					//check this area:
+					while (true) {
+						for (auto iter = first->begin(); iter != first->end(); ++iter) {
+							auto jter = fetched.begin();
+							while (jter != fetched.end()) {
+								auto del = jter;
+								++jter;
+								if (iter->id == del->id) {
+									fetched.erase(del);
+									continue;
+								}
+							}
+						}
+						//standard_logger().info(std::string("filter_thread steps to next chain element     ID ") + std::to_string(prod_index) + "  remaining   " + std::to_string(std::distance(first, last)));
+						if (first == last) break;
+						++first;
+					}
+
+					// check if chain got longer:
+					{
+						auto lock = std::unique_lock(m_filtered_chain);
+
+						auto new_last = std::prev(filtered_chain.end());
+
+						if (last == new_last) {
+							auto s = fetched.size();
+							filtered_chain.push_back(std::move(fetched));
+							standard_logger().info(std::string("       filter_thread write into chain    ID ") + std::to_string(prod_index) + "  size   " + std::to_string(s));
+							break;
+						}
+						last = new_last;
+						++first;
+					}
+				}
+
+			}
+		};
+
+		std::array<std::thread, count_filter_threads> filter_threads;
+
+		for (uint8_t t = 0; t < count_filter_threads; ++t) {
+			filter_threads[t] = std::thread(filter, t);
+		}
+
+		// join all threads:
+		for (uint8_t t = 0; t < count_produce_threads; ++t) {
+			produce_threads[t].join();
+		}
+		produce_process_done = true;
+		standard_logger().info("preproduce: done");
+		for (uint8_t t = 0; t < count_filter_threads; ++t) {
+			filter_threads[t].join();
+		}
+
+		standard_logger().info("Collecting...");
+
+		for (auto& part : filtered_chain) {
+			fill.splice(fill.end(), std::move(part));
+		}
+
+		auto filled_size{ fill.size() };
+
+		standard_logger().info(std::string("successfully created sets with size  ") + std::to_string(next_free_index) + "  counting " + std::to_string(filled_size));
+
+		if (filled_size == 0) {
+			return;
+		}
+
+		++next_free_index;
+
 	}
+
+
+
 
 	return;
 
-
+#if false
 	const auto iter_for_var_name = [&](const std::string& name) -> std::remove_reference_t<decltype(*collapse_graph)>::iterator {
 		for (auto iter = collapse_graph->begin(); iter != collapse_graph->end(); ++iter) {
 			if (iter->first->find(name) != iter->first->end())
@@ -680,8 +825,8 @@ void helper_process_sub_colorings(
 		}// %01
 
 		auto can_increase = increase_var_pair(ivar1, ivar2);
-	}
-
+}
+#endif
 }
 
 void process_sub_colorings(
@@ -1093,7 +1238,7 @@ int cli(int argc, char** argv) {
 	std::list<std::pair<std::map<std::string, int>, unsigned long long>> useful_colorings;
 	bool continue_running{ true };
 
-	auto filter_thread = std::thread(filter_colorings, std::ref(useful_colorings), std::ref(all_colorings), std::ref(mutex_all_colorings), std::ref(continue_running));
+	//auto filter_thread = std::thread(filter_colorings, std::ref(useful_colorings), std::ref(all_colorings), std::ref(mutex_all_colorings), std::ref(continue_running));
 
 	const std::size_t max_threads{ 8 };
 	std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>> futures;
@@ -1121,7 +1266,7 @@ int cli(int argc, char** argv) {
 	}
 	standard_logger().info("all futures finished!");
 	continue_running = false;
-	filter_thread.join();
+	//filter_thread.join();
 	all_colorings.clear();
 	std::transform(useful_colorings.begin(), useful_colorings.end(), std::back_inserter(all_colorings), [](const std::pair<std::map<std::string, int>, unsigned long long>& x) { return x.first; });
 
