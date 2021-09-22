@@ -411,6 +411,19 @@ struct collapse_node {
 	bool operator <(const collapse_node& another) { return this->id.to_string() < another.id.to_string(); }
 };
 
+std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const std::vector<collapse_node>& the_array) {
+	std::vector<collapse_node> newly_created_ones;
+	for (auto iter = the_array.cbegin(); iter != the_array.cend(); ++iter) {
+		if ((the_unique.forbidden_merges & iter->id).none() && (the_unique.id & iter->id).none()) {
+			newly_created_ones.emplace_back(the_unique.id | iter->id, the_unique.forbidden_merges | iter->forbidden_merges);
+		}
+	}
+	return newly_created_ones;
+}
+
+
+std::vector<collapse_node> all_nodes_size_9;
+
 template <class T>
 class comp_bitset { // comp collapse node would be the correct name
 public:
@@ -424,21 +437,11 @@ public:
 const auto COMP_BITSET = comp_bitset<collapse_node::big_int>();
 
 void helper_process_sub_colorings(
-	std::list<std::map<std::string, int>>& all_colorings,
 	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
-	bool skip_output,
-	std::mutex& mutex_all_colorings,
-	const std::size_t max_threads,
-	std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>>& futures,
-	std::mutex& m_futures,
-	//std::list<activation_record>& chain,
-	const std::vector<std::string>& all_vars,
-	std::size_t ivar1,
-	std::size_t ivar2,
-	std::size_t level
+	const std::vector<std::string>& all_vars
 ) {
-	std::ofstream save_max_sets("max_sets.txt"); //make parameter
-	std::ofstream save_all_sets("all_sets.txt"); //make parameter
+	std::ofstream save_max_sets("max_sets.txt", std::ios_base::app); //make parameter
+	std::ofstream save_all_sets("all_sets.txt", std::ios_base::app); //make parameter
 	std::mutex mutex_save_max_sets;
 
 
@@ -478,12 +481,43 @@ void helper_process_sub_colorings(
 
 	//all_sets.emplace_back(collapse_node::big_int(), collapse_node::big_int().set());
 
-	std::size_t next_free_index{ 2 };
+	all_sets.emplace_back(); // size two
+	all_sets.emplace_back(); // size 3
+	all_sets.emplace_back(); // size 4
+	all_sets.emplace_back(); // size 5
+	all_sets.emplace_back(); // size 6
+	all_sets.emplace_back(); // size 7
+	all_sets.emplace_back(); // size 8
+
+	// load size nine from file
+	all_sets.emplace_back(std::move(all_nodes_size_9));
+	for (auto& elem : all_sets.back()) {
+
+		std::vector<collapse_node>::iterator begin_single{ std::next(all_sets.begin(),1)->begin() };
+		std::vector<collapse_node>::iterator end_single{ std::next(all_sets.begin(),1)->end() };
+
+		for (auto iter = begin_single; iter != end_single; ++iter) {
+			if ((iter->id & elem.id).any())
+				elem.forbidden_merges |= iter->forbidden_merges;
+		}
+	}
+	if (!std::is_sorted(all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
+		standard_logger().error("not sorted here");
+		std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
+	}
+
+	std::size_t next_free_index{ 10 };
 
 	while (true) {
 		//
 		std::vector<collapse_node>::iterator begin_single{ std::next(all_sets.begin(),1)->begin() };
 		std::vector<collapse_node>::iterator end_single{ std::next(all_sets.begin(),1)->end() };
+
+		std::list<std::vector<collapse_node>::iterator> produce_todo_list;
+		std::mutex mutex_produce_todo_list;
+		for (auto iter = begin_single; iter != end_single; ++iter) {
+			produce_todo_list.push_back(iter);
+		}
 
 		if (all_sets.size() > 3) {
 			auto begin_erase = std::next(all_sets.begin(), 2);
@@ -494,33 +528,132 @@ void helper_process_sub_colorings(
 				iter->shrink_to_fit();
 			}
 		}
+
 		std::vector<collapse_node>& last_filled{ all_sets.back() };
-		for (const auto& set : last_filled) {
-			save_all_sets << set.id.to_string() << std::endl;
-		}
+
+		// double for last entry
+		const auto write_all_sets_to_file = [&]() {
+
+			std::size_t size{ 0 }, count{ 0 };
+			if (!last_filled.empty()) size = last_filled.front().id.count();
+			if (size == 9) return; ///#### debug code   ....  because of part which is already calculated
+			count = last_filled.size();
+
+			for (const auto& set : last_filled) {
+				save_all_sets << set.id.to_string() << std::endl;
+			}
+			standard_logger().info(std::string("Wrote all sets to file:   size: ") + std::to_string(size) + ",   count: " + std::to_string(count));
+
+		};
 
 		all_sets.emplace_back();
 
 		std::vector<collapse_node>& fill{ all_sets.back() };
 
-		constexpr uint8_t count_produce_threads{ 25 };
-		constexpr uint8_t count_filter_threads{ count_produce_threads };
+		std::list<std::vector<collapse_node>> filtered_chain;
+		std::mutex m_filtered_chain;
+
+
+		// double for last entry
+		const auto write_max_sets_to_file = [&]() {
+			std::size_t size{ 0 };
+			std::size_t count_max_sets{ 0 };
+			if (!last_filled.empty()) size = last_filled.front().id.count();
+
+			for (const auto& elem : last_filled) {
+				for (auto iter = begin_single; iter != end_single; ++iter) {
+					if ((elem.id & iter->forbidden_merges).none()) {
+						// not maximal
+						goto next_iteration_0925727394;
+					}
+				}
+				//set is maximal
+				{
+					auto lock = std::unique_lock(mutex_save_max_sets);
+					save_max_sets << elem.id.to_string() << std::endl;
+					++count_max_sets;
+				}
+			next_iteration_0925727394:
+				continue;
+			}
+			standard_logger().info(std::string("Wrote max sets to file:   size: ") + std::to_string(size) + ",   count: " + std::to_string(count_max_sets));
+		};
+
+		const auto produce_and_merge = [&](int log_id) {
+			while (true) {
+				/* get todo*/
+				std::vector<collapse_node>::iterator todo;
+				{
+					auto lock = std::unique_lock(mutex_produce_todo_list);
+
+					if (produce_todo_list.empty()) {
+						standard_logger().info(std::string("END of thread     ID : ") + std::to_string(log_id));
+						return; // END OF THREAD
+					}
+
+					todo = produce_todo_list.front(); // GET TODO
+					produce_todo_list.pop_front();
+				}
+
+				/* produce todo */
+				std::vector<collapse_node> created = enlarge_sets(*todo, last_filled);
+				if (!std::is_sorted(created.cbegin(), created.cend(), COMP_BITSET)) {
+					standard_logger().error("not sorted here");
+					std::sort(created.begin(), created.end(), COMP_BITSET);
+				}
+
+				standard_logger().info(std::string("Created a series of new sets       thread - ID : ") + std::to_string(log_id));
+				/* merge into some existing as long as there exists something */
+				while (true) {
+					// fetch some other vector to merge with
+					std::vector<collapse_node> another_to_merge_with;
+					{
+						auto lock = std::unique_lock(m_filtered_chain);
+
+
+						if (filtered_chain.empty()) {
+							filtered_chain.emplace_back(std::move(created));
+							break;
+						}
+						else {
+							/* add it to list of produced but unmerged */
+							another_to_merge_with = std::move(filtered_chain.front());
+							filtered_chain.pop_front();
+						}
+					}
+
+					/* perform the merge */
+					std::vector<collapse_node> merged_vector;
+					std::merge(/*std::execution::parallel_policy(),*/ created.begin(), created.end(), another_to_merge_with.begin(), another_to_merge_with.end(), std::back_inserter(merged_vector));
+					merged_vector.erase(std::unique(merged_vector.begin(), merged_vector.end()), merged_vector.end());
+					standard_logger().info(std::string("Successfully merged two sets       thread - ID : ") + std::to_string(log_id));
+
+					created.clear();
+					created = std::move(merged_vector);
+				}
+			}
+		};
+
+
+
+		constexpr uint8_t count_produce_threads{ 16 };
 
 		std::array<std::pair<std::vector<collapse_node>, std::mutex>, count_produce_threads> produced;
 
 		std::array<std::thread, count_produce_threads> produce_threads;
 
+
+		std::array<std::thread, count_produce_threads> produce_and_merge_threads;
+
 		bool produce_process_done{ false };
 		bool filter_process_done{ false };
 		bool merge_process_done{ false };
 
-		std::list<std::vector<collapse_node>> filtered_chain;
-		std::mutex m_filtered_chain;
 		std::size_t filtered_chain_accumulated_size{ 0 };
 
-		std::array<std::thread, count_filter_threads> filter_threads;
+		std::array<std::thread, count_produce_threads> filter_threads;
 
-		std::array<std::thread, count_filter_threads> merge_threads;
+		std::array<std::thread, count_produce_threads> merge_threads;
 
 		const auto produce = [&](int mod, int index, std::pair<std::vector<collapse_node>, std::mutex>& results) {
 			int rounds = last_filled.size() - index;
@@ -534,7 +667,6 @@ void helper_process_sub_colorings(
 			for (int count = 1; true; ++count) {
 				bool found_extension{ false };
 				for (auto small = begin_single; small != end_single; ++small) {
-
 					if ((big->id & small->id).any()) continue;
 					if ((small->forbidden_merges & big->id).any()) continue;
 					const auto new_id{ small->id | big->id };
@@ -640,18 +772,18 @@ void helper_process_sub_colorings(
 			}
 		};
 
+		/*
 		for (uint8_t t = 0; t < count_produce_threads; ++t) {
 			produce_threads[t] = std::thread(produce, count_produce_threads, t, std::ref(produced[t]));
 		}
 
-		for (uint8_t t = 0; t < count_filter_threads; ++t) {
+		for (uint8_t t = 0; t < count_produce_threads; ++t) {
 			filter_threads[t] = std::thread(filter, t);
 		}
 
-		for (uint8_t t = 0; t < count_filter_threads; ++t) {
+		for (uint8_t t = 0; t < count_produce_threads; ++t) {
 			merge_threads[t] = std::thread(merge, t);
 		}
-
 		auto progress_logger_thread = std::thread(progress_logger);
 
 		// join all threads:
@@ -661,19 +793,34 @@ void helper_process_sub_colorings(
 		produce_process_done = true;
 		standard_logger().info("produce phase: done");
 
-		for (uint8_t t = 0; t < count_filter_threads; ++t) {
+		for (uint8_t t = 0; t < count_produce_threads; ++t) {
 			filter_threads[t].join();
 		}
 		filter_process_done = true;
 		standard_logger().info("sort and filter phase: done");
 
-		for (uint8_t t = 0; t < count_filter_threads; ++t) {
+		for (uint8_t t = 0; t < count_produce_threads; ++t) {
 			merge_threads[t].join();
 		}
 		merge_process_done = true;
 		standard_logger().info("merging: done");
 
 		progress_logger_thread.join();
+		*/
+
+		std::thread write_max_sets_to_file_thread = std::thread(write_max_sets_to_file);
+		std::thread write_all_sets_to_file_thread = std::thread(write_all_sets_to_file);
+
+		for (uint8_t t = 0; t < count_produce_threads; ++t) {
+			produce_and_merge_threads[t] = std::thread(produce_and_merge, t);
+		}
+
+		for (uint8_t t = 0; t < count_produce_threads; ++t) {
+			produce_and_merge_threads[t].join();
+		}
+
+		write_max_sets_to_file_thread.join();
+		write_all_sets_to_file_thread.join();
 
 		fill = std::move(filtered_chain.front());
 
@@ -689,196 +836,8 @@ void helper_process_sub_colorings(
 
 	}
 
-
-
-
 	return;
 
-#if false
-	const auto iter_for_var_name = [&](const std::string& name) -> std::remove_reference_t<decltype(*collapse_graph)>::iterator {
-		for (auto iter = collapse_graph->begin(); iter != collapse_graph->end(); ++iter) {
-			if (iter->first->find(name) != iter->first->end())
-				return iter;
-		}
-		return collapse_graph->end();
-	};
-	const auto iter_for_var_name_smart = [&](const std::string& name) -> std::remove_reference_t<decltype(*collapse_graph)>::iterator {
-		for (auto iter = collapse_graph->begin(); iter != collapse_graph->end(); ++iter) {
-			if (*iter->first->begin() == name)
-				return iter;
-		}
-		return collapse_graph->end();
-	};
-
-	const auto can_merge = [&](std::size_t v1, std::size_t v2) -> bool {
-		auto set1_iter = iter_for_var_name(all_vars[v1]);
-		auto set2_iter = iter_for_var_name(all_vars[v2]);
-
-		if (set1_iter == set2_iter) return false; // already merged
-
-		if (set1_iter->second.find(set2_iter->first) != set1_iter->second.end()) return false; // merge forbidden
-
-		return true;
-	};
-
-	const auto can_merge_smart = [&](std::size_t v1, std::size_t v2) -> bool {
-		auto set1_iter = iter_for_var_name_smart(all_vars[v1]);
-		if (set1_iter == collapse_graph->end()) return false;
-
-		auto set2_iter = iter_for_var_name_smart(all_vars[v2]);
-		if (set2_iter == collapse_graph->end()) return false;
-
-		if (set1_iter == set2_iter) return false; // already merged
-
-		if (set1_iter->second.find(set2_iter->first) != set1_iter->second.end()) return false; // merge forbidden
-
-		return true;
-	};
-
-
-	const auto increase_var_pair = [&](std::size_t& i1, std::size_t& i2) -> bool {
-		++i2;
-		if (!(i2 < all_vars.size())) {
-			++i1;
-			i2 = i1;
-		}
-		if (!(i1 < all_vars.size())) {
-			return false; // no valid increase possible
-		}
-		return true;
-	};
-
-	activation_record ar(false);
-
-	while (true) {
-		if (level < 40 && level % 5 == 1)
-			standard_logger().info(std::string("progress on level ") + std::to_string(level) + "  :  " + std::to_string((double(ivar1) * double(all_vars.size()) + double(ivar2)) / (double(all_vars.size()) * double(all_vars.size()))));
-
-		while (!can_merge_smart(ivar1, ivar2)) {
-			bool can_increase = increase_var_pair(ivar1, ivar2);
-			if (!can_increase) {
-				//### GOTO output current merging, no merge possible., check if it maximal before outputting
-				/*
-				std::size_t i1{ 0 }, i2{ 0 };
-				while (increase_var_pair(i1, i2)) {
-					if (can_merge(i1, i2)) return; // not maximal
-				}
-				*/
-				// merging is maximal when here. add it to all_colorings:
-				int next_free_color{ 0 };
-				std::map<std::string, int> the_extracted_coloring;
-				for (auto iter = collapse_graph->cbegin(); iter != collapse_graph->cend(); ++iter) {
-					for (auto jter = iter->first->cbegin(); jter != iter->first->cend(); ++jter) {// all variables within one color equivalence class
-						the_extracted_coloring[*jter] = next_free_color;
-					}
-					++next_free_color;
-				}
-				auto lock = std::unique_lock(mutex_all_colorings);
-				all_colorings.push_back(the_extracted_coloring);
-				if constexpr (false)
-					standard_logger().info(std::string("pushed coloring No ") + std::to_string(all_colorings.size()));
-				return;
-			}
-		}
-		// here we can merge ivar1 ivar2 or just don't do it.
-
-		bool in_parallel = futures.size() < max_threads;
-
-		if (in_parallel) {
-			std::size_t i1_sub = ivar1;
-			std::size_t i2_sub = ivar2;
-			increase_var_pair(i1_sub, i2_sub);
-
-			auto collapse_graph_copy = std::make_shared<collapse_graph_t>(deep_copy_collapse_graph(*collapse_graph));
-			auto lock = std::unique_lock(m_futures);
-			futures.push_back(
-				std::make_tuple(
-					std::async(
-						std::launch::async, [&] {
-							//std::this_thread::sleep_for(3s);
-							return helper_process_sub_colorings(all_colorings,
-								collapse_graph_copy,
-								false,
-								mutex_all_colorings,
-								max_threads,
-								futures,
-								m_futures,
-								all_vars,
-								i1_sub,
-								i2_sub,
-								level + 1
-							);
-						}
-					),
-					collapse_graph_copy
-							)
-			);
-		}
-
-
-		//apply merging
-		std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set1{
-			iter_for_var_name(all_vars[ivar1])
-		};
-		std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>::iterator set2{
-			iter_for_var_name(all_vars[ivar2])
-		};
-
-		ar.temp_edge.key_set_ptr1 = set1->first;
-
-		ar.temp_join.deleted_set = set2->first;
-		ar.temp_join.deleted_set_neighbours = set2->second;
-		ar.temp_join.neighbours_of_set1_before = set1->second;
-
-
-		set1->first->insert(ar.temp_join.deleted_set->cbegin(), ar.temp_join.deleted_set->cend()); //join sets itself %01
-		set1->second.insert(ar.temp_join.deleted_set_neighbours.cbegin(), ar.temp_join.deleted_set_neighbours.cend()); //link neighbours of deleted set2 to set1 %02
-
-
-		for (auto iter = collapse_graph->begin(); iter != collapse_graph->end(); ++iter) { // replace shared_ptr to deleted set2 by shared_ptr to set1 where it can be found. %03
-			auto find_del_set_link = iter->second.find(ar.temp_join.deleted_set);
-			if (find_del_set_link != iter->second.end()) {
-				iter->second.erase(find_del_set_link);
-				auto [ignored_iterator, insert_took_place] = iter->second.insert(set1->first);
-				if (insert_took_place)
-					ar.temp_join.relink_to_set2_on_rollback_and_delete_set1_link.push_back(iter->first);
-				else
-					ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link.push_back(iter->first);
-			}
-		}
-		collapse_graph->erase(set2); // delete entry %04
-
-		// sub routine
-		helper_process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures, all_vars, ivar1, ivar2, level + 1);
-
-		if (in_parallel) return;
-
-		// undo merge:
-
-		(*collapse_graph)[ar.temp_join.deleted_set] = ar.temp_join.deleted_set_neighbours; // %04
-
-		// %03
-		for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_delete_set1_link) {
-			(*collapse_graph)[key].erase(ar.temp_edge.key_set_ptr1);
-			(*collapse_graph)[key].insert(ar.temp_join.deleted_set);
-		}
-		for (const auto key : ar.temp_join.relink_to_set2_on_rollback_and_keep_set1_link) {
-			(*collapse_graph)[key].insert(ar.temp_join.deleted_set);
-		}
-
-		(*collapse_graph)[ar.temp_edge.key_set_ptr1] = std::move(ar.temp_join.neighbours_of_set1_before); // %02
-		auto cb = ar.temp_join.deleted_set->begin();
-		auto ce = ar.temp_join.deleted_set->end();
-		for (auto iter = cb;
-			iter != ce;
-			++iter) {
-			const std::string& var_name = *iter;
-			ar.temp_edge.key_set_ptr1->erase(var_name);
-		}// %01
-
-		auto can_increase = increase_var_pair(ivar1, ivar2);
-	}
-#endif
 }
 
 void process_sub_colorings(
@@ -920,7 +879,7 @@ void process_sub_colorings(
 	if (all_vars.size() < 2)
 		throw 2;
 
-	helper_process_sub_colorings(all_colorings, collapse_graph, skip_output, mutex_all_colorings, max_threads, futures, m_futures, all_vars, ivar1, ivar2, 0);
+	helper_process_sub_colorings(collapse_graph, all_vars);
 
 }
 
@@ -1158,6 +1117,8 @@ unsigned long long count_variables_of_coloring(const std::map<std::string, int>&
 	return values.size();
 }
 
+
+
 void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned long long>>& useful_colorings, std::list<std::map<std::string, int>>& all_colorings, std::mutex& m_all_colorings, bool& continue_running) {
 	unsigned long long TOLERANCE{ 0 };
 	unsigned long long min_var_count{ std::numeric_limits<unsigned long long>::max() - TOLERANCE };
@@ -1363,10 +1324,38 @@ int cli(int argc, char** argv) {
 	return 0;
 }
 
+
+
 int main(int argc, char** argv)
 {
 	init_logger();
 
+	{
+		/* read and analyse all_sets file. */
+
+		std::ifstream read_all_sets("all_sets.txt");
+
+		std::string line;
+
+		std::map<int, int> count;
+		for (int x = 0; x < 20; ++x) {
+			count[x] = 0;
+		}
+
+		while (std::getline(read_all_sets, line)) {
+			++count[std::count(line.cbegin(), line.cend(), '1')];
+
+			if (std::count(line.cbegin(), line.cend(), '1') == 9) {
+				all_nodes_size_9.emplace_back(collapse_node::big_int(line), collapse_node::big_int());
+			}
+		}
+
+		for (int x = 0; x < 20; ++x) {
+			standard_logger().info(std::to_string(x) + "  :  " + std::to_string(count[x]));
+		}
+	}
+
+	//return 0;
 	return cli(argc, argv);
 
 }
