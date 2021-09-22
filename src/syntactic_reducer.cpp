@@ -874,10 +874,10 @@ void helper_process_sub_colorings(
 			++iter) {
 			const std::string& var_name = *iter;
 			ar.temp_edge.key_set_ptr1->erase(var_name);
-}// %01
+		}// %01
 
 		auto can_increase = increase_var_pair(ivar1, ivar2);
-}
+	}
 #endif
 }
 
