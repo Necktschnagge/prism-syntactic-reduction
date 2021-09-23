@@ -562,7 +562,7 @@ void helper_process_sub_colorings(
 
 			for (const auto& elem : last_filled) {
 				for (auto iter = begin_single; iter != end_single; ++iter) {
-					if ((elem.id & iter->forbidden_merges).none()) {
+					if ((elem.id & iter->forbidden_merges).none() && (elem.id & iter->id).none()) {
 						// not maximal
 						goto next_iteration_0925727394;
 					}
