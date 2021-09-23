@@ -440,6 +440,9 @@ void helper_process_sub_colorings(
 	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
 	const std::vector<std::string>& all_vars
 ) {
+
+	static constexpr bool SANITY_CHECKS{ false };
+
 	std::ofstream save_max_sets("max_sets.txt", std::ios_base::app); //make parameter
 	std::ofstream save_all_sets("all_sets.txt", std::ios_base::app); //make parameter
 	std::mutex mutex_save_max_sets;
@@ -479,34 +482,7 @@ void helper_process_sub_colorings(
 		standard_logger().info(ss.str());
 	}
 
-	//all_sets.emplace_back(collapse_node::big_int(), collapse_node::big_int().set());
-
-	all_sets.emplace_back(); // size two
-	all_sets.emplace_back(); // size 3
-	all_sets.emplace_back(); // size 4
-	all_sets.emplace_back(); // size 5
-	all_sets.emplace_back(); // size 6
-	all_sets.emplace_back(); // size 7
-	all_sets.emplace_back(); // size 8
-
-	// load size nine from file
-	all_sets.emplace_back(std::move(all_nodes_size_9));
-	for (auto& elem : all_sets.back()) {
-
-		std::vector<collapse_node>::iterator begin_single{ std::next(all_sets.begin(),1)->begin() };
-		std::vector<collapse_node>::iterator end_single{ std::next(all_sets.begin(),1)->end() };
-
-		for (auto iter = begin_single; iter != end_single; ++iter) {
-			if ((iter->id & elem.id).any())
-				elem.forbidden_merges |= iter->forbidden_merges;
-		}
-	}
-	if (!std::is_sorted(all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
-		standard_logger().error("not sorted here");
-		std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
-	}
-
-	std::size_t next_free_index{ 10 };
+	std::size_t next_free_index{ 2 };
 
 	while (true) {
 		//
@@ -536,7 +512,6 @@ void helper_process_sub_colorings(
 
 			std::size_t size{ 0 }, count{ 0 };
 			if (!last_filled.empty()) size = last_filled.front().id.count();
-			if (size == 9) return; ///#### debug code   ....  because of part which is already calculated
 			count = last_filled.size();
 
 			for (const auto& set : last_filled) {
@@ -597,9 +572,11 @@ void helper_process_sub_colorings(
 
 				/* produce todo */
 				std::vector<collapse_node> created = enlarge_sets(*todo, last_filled);
-				if (!std::is_sorted(created.cbegin(), created.cend(), COMP_BITSET)) {
-					standard_logger().error("not sorted here");
-					std::sort(created.begin(), created.end(), COMP_BITSET);
+				if constexpr (SANITY_CHECKS) {
+					if (!std::is_sorted(created.cbegin(), created.cend(), COMP_BITSET)) {
+						standard_logger().error("not sorted here");
+						std::sort(created.begin(), created.end(), COMP_BITSET);
+					}
 				}
 
 				standard_logger().info(std::string("Created a series of new sets       thread - ID : ") + std::to_string(log_id));
@@ -636,191 +613,25 @@ void helper_process_sub_colorings(
 
 
 
-		constexpr uint8_t count_produce_threads{ 16 };
+		constexpr uint8_t count_threads{ 16 };
 
-		std::array<std::pair<std::vector<collapse_node>, std::mutex>, count_produce_threads> produced;
+		std::array<std::thread, count_threads> produce_and_merge_threads;
 
-		std::array<std::thread, count_produce_threads> produce_threads;
-
-
-		std::array<std::thread, count_produce_threads> produce_and_merge_threads;
-
-		bool produce_process_done{ false };
-		bool filter_process_done{ false };
-		bool merge_process_done{ false };
-
-		std::size_t filtered_chain_accumulated_size{ 0 };
-
-		std::array<std::thread, count_produce_threads> filter_threads;
-
-		std::array<std::thread, count_produce_threads> merge_threads;
-
-		const auto produce = [&](int mod, int index, std::pair<std::vector<collapse_node>, std::mutex>& results) {
-			int rounds = last_filled.size() - index;
-			if (rounds < 0) return;
-			rounds += mod - 1;
-			rounds /= mod;
-			if (rounds == 0) return;
-
-			auto big = std::next(last_filled.begin(), index);
-
-			for (int count = 1; true; ++count) {
-				bool found_extension{ false };
-				for (auto small = begin_single; small != end_single; ++small) {
-					if ((big->id & small->id).any()) continue;
-					if ((small->forbidden_merges & big->id).any()) continue;
-					const auto new_id{ small->id | big->id };
-					const auto new_forbidden{ small->forbidden_merges | big->forbidden_merges };
-					//std::size_t wait{ 0 };
-					{
-						auto lock = std::unique_lock(results.second);
-						results.first.emplace_back(new_id, new_forbidden);
-						//wait = results.first.size();
-					}
-					found_extension = true;
-					//if (wait > 900) std::this_thread::sleep_for(std::chrono::milliseconds(1000 * (wait - 900)));
-				}
-				if (!found_extension) {
-					auto lock = std::unique_lock(mutex_save_max_sets);
-					save_max_sets << big->id.to_string() << std::endl;
-				}
-				if (count == rounds) return;
-				std::advance(big, mod);
-			}
-		};
-
-		const auto filter = [&](int prod_index) {
-			while (true) {
-				std::vector<collapse_node> fetched;
-				{
-					auto lock = std::unique_lock(produced[prod_index].second);
-					fetched = std::move(produced[prod_index].first);
-					//standard_logger().info(std::string("                                                            filter_thread fetched    ID ") + std::to_string(prod_index) + "  size   " + std::to_string(fetched.size()));
-
-					if (produce_process_done && fetched.empty()) {
-						standard_logger().info(std::string("filter_thread done   ID ") + std::to_string(prod_index));
-						return;
-					}
-				}
-				if (fetched.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-
-				std::sort(fetched.begin(), fetched.end(), COMP_BITSET);
-				//standard_logger().info(std::string("filter_thread finished self-sort     ID ") + std::to_string(prod_index));
-
-				fetched.erase(std::unique(fetched.begin(), fetched.end()), fetched.end());
-				//standard_logger().info(std::string("filter_thread finished self-checking     ID ") + std::to_string(prod_index));
-
-
-				{
-					auto lock = std::unique_lock(m_filtered_chain);
-					filtered_chain_accumulated_size += fetched.size();
-					filtered_chain.push_back(std::move(fetched));
-				}
-			}
-		};
-
-		const auto merge = [&](int prod_index) {
-			while (true) {
-				std::vector<collapse_node> fetched1;
-				std::vector<collapse_node> fetched2;
-				std::vector<collapse_node> merged3;
-				std::size_t before{ 0 };
-				bool wait{ false };
-				{
-					auto lock = std::unique_lock(m_filtered_chain);
-					if (filtered_chain.size() > 1) {
-						fetched1 = std::move(filtered_chain.front());
-						filtered_chain.pop_front();
-						fetched2 = std::move(filtered_chain.front());
-						filtered_chain.pop_front();
-					}
-					else {
-						if (filter_process_done) {
-							standard_logger().info(std::string("END of merge thread           ID ") + std::to_string(prod_index));
-							return; // there are enough other threads performing merges.
-						}
-						wait = true;
-					}
-				}
-				before = fetched1.size() + fetched2.size();
-				if (wait) {
-					std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-				}
-				std::merge(/*std::execution::parallel_policy(),*/ fetched1.begin(), fetched1.end(), fetched2.begin(), fetched2.end(), std::back_inserter(merged3));
-				merged3.erase(std::unique(merged3.begin(), merged3.end()), merged3.end());
-				{
-					auto lock = std::unique_lock(m_filtered_chain);
-					filtered_chain_accumulated_size -= (before - merged3.size());
-					filtered_chain.push_back(std::move(merged3));
-				}
-				//standard_logger().info(std::string("successful merge on thread           ID ") + std::to_string(prod_index));
-
-			}
-		};
-
-		const auto progress_logger = [&]() {
-			while (true) {
-				{
-					auto lock = std::unique_lock(m_filtered_chain);
-					standard_logger().info(std::string("Current size of accumulated new sets:    ") + std::to_string(filtered_chain_accumulated_size));
-				}
-				for (unsigned long long i = 0; i < 60 * 60; ++i) {
-					std::this_thread::sleep_for(std::chrono::seconds(1));
-					if (merge_process_done) return;
-				}
-			}
-		};
-
-		/*
-		for (uint8_t t = 0; t < count_produce_threads; ++t) {
-			produce_threads[t] = std::thread(produce, count_produce_threads, t, std::ref(produced[t]));
-		}
-
-		for (uint8_t t = 0; t < count_produce_threads; ++t) {
-			filter_threads[t] = std::thread(filter, t);
-		}
-
-		for (uint8_t t = 0; t < count_produce_threads; ++t) {
-			merge_threads[t] = std::thread(merge, t);
-		}
-		auto progress_logger_thread = std::thread(progress_logger);
-
-		// join all threads:
-		for (uint8_t t = 0; t < count_produce_threads; ++t) {
-			produce_threads[t].join();
-		}
-		produce_process_done = true;
-		standard_logger().info("produce phase: done");
-
-		for (uint8_t t = 0; t < count_produce_threads; ++t) {
-			filter_threads[t].join();
-		}
-		filter_process_done = true;
-		standard_logger().info("sort and filter phase: done");
-
-		for (uint8_t t = 0; t < count_produce_threads; ++t) {
-			merge_threads[t].join();
-		}
-		merge_process_done = true;
-		standard_logger().info("merging: done");
-
-		progress_logger_thread.join();
-		*/
-
+		/* start threads */
 		std::thread write_max_sets_to_file_thread = std::thread(write_max_sets_to_file);
 		std::thread write_all_sets_to_file_thread = std::thread(write_all_sets_to_file);
 
-		for (uint8_t t = 0; t < count_produce_threads; ++t) {
+		for (uint8_t t = 0; t < count_threads; ++t) {
 			produce_and_merge_threads[t] = std::thread(produce_and_merge, t);
 		}
 
-		for (uint8_t t = 0; t < count_produce_threads; ++t) {
-			produce_and_merge_threads[t].join();
-		}
-
+		/* join  threads */
 		write_max_sets_to_file_thread.join();
 		write_all_sets_to_file_thread.join();
+		
+		for (uint8_t t = 0; t < count_threads; ++t) {
+			produce_and_merge_threads[t].join();
+		}
 
 		fill = std::move(filtered_chain.front());
 
@@ -1329,7 +1140,7 @@ int cli(int argc, char** argv) {
 int main(int argc, char** argv)
 {
 	init_logger();
-
+#if false
 	{
 		/* read and analyse all_sets file. */
 
@@ -1355,7 +1166,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	//return 0;
+#endif
 	return cli(argc, argv);
 
 }
