@@ -25,7 +25,7 @@ stages:
         vmImage: $(imageName)
         name: $(the_name)
       
-      condition: false
+      #condition: false
       timeoutInMinutes: 30
       steps:
        - script: ls /usr/lib/jvm/
@@ -119,7 +119,7 @@ stages:
       pool:
         vmImage: $(imageName)
         name: $(the_name)
-      condition: false
+      #condition: false
       timeoutInMinutes: 30
       steps:
        - script: git submodule update --init --recursive
