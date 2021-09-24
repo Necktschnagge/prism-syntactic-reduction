@@ -406,8 +406,8 @@ struct collapse_node {
 
 	collapse_node(const big_int& id, const big_int& forbidden_merges) : id(id), forbidden_merges(forbidden_merges) {}
 
-	bool operator == (const collapse_node& another) { return this->id == another.id; }
-	bool operator <(const collapse_node& another) { return this->id.to_string() < another.id.to_string(); }
+	bool operator == (const collapse_node& another) const { return this->id == another.id; }
+	bool operator <(const collapse_node& another) const { return this->id.to_string() < another.id.to_string(); }
 };
 
 std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const std::vector<collapse_node>& the_array) {
