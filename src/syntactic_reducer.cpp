@@ -480,7 +480,7 @@ void helper_process_sub_colorings(
 		ss << "add node : " << id << " forbid: " << forbidden_merges;
 		standard_logger().info(ss.str());
 	}
-	std::sort(all_sets.back().begin(), all_sets.back().end());
+	std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
 
 	std::size_t next_free_index{ 2 };
 
