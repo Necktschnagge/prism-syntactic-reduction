@@ -1222,7 +1222,7 @@ public:
 		return result;
 	}
 
-	virtual bool is_primitive() const { return false; }
+	virtual bool is_primitive() const override { return false; }
 
 	virtual bool is_sound() const final override {
 		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::formula_definition);
@@ -1344,7 +1344,7 @@ public:
 	}
 
 
-	virtual bool is_primitive() const { return false; }
+	virtual bool is_primitive() const override { return false; }
 
 	virtual bool is_sound() const final override {
 		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::const_definition);
@@ -1581,7 +1581,7 @@ public:
 		return result;
 	}
 
-	virtual bool is_primitive() const { return false; }
+	virtual bool is_primitive() const override { return false; }
 
 	virtual bool is_sound() const final override {
 		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::global_definition);
@@ -1820,7 +1820,7 @@ public:
 		return result;
 	}
 
-	virtual bool is_primitive() const { return false; }
+	virtual bool is_primitive() const override { return false; }
 
 	virtual bool is_sound() const final override {
 		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::transition);
@@ -1938,7 +1938,7 @@ public:
 		return result;
 	}
 
-	virtual bool is_primitive() const { return false; }
+	virtual bool is_primitive() const override { return false; }
 
 	virtual bool is_sound() const final override {
 		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::module_definition);
@@ -2092,7 +2092,7 @@ public:
 		return result;
 	}
 
-	virtual bool is_primitive() const { return false; }
+	virtual bool is_primitive() const override { return false; }
 
 	virtual bool is_sound() const final override {
 		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::reward_definition);
@@ -2158,7 +2158,7 @@ public:
 		return result;
 	}
 
-	virtual bool is_primitive() const { return false; }
+	virtual bool is_primitive() const override { return false; }
 
 	virtual bool is_sound() const final override {
 		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::init_definition);
@@ -2170,7 +2170,7 @@ class dtmc_body : public token {
 public:
 	using token::token;
 
-	virtual bool is_primitive() const { return false; }
+	virtual bool is_primitive() const override { return false; }
 
 	token_list local_children;
 
@@ -2348,7 +2348,7 @@ public:
 		return result;
 	}
 
-	virtual bool is_primitive() const { return false; }
+	virtual bool is_primitive() const override { return false; }
 
 	virtual bool is_sound() const final override {
 		return true;
