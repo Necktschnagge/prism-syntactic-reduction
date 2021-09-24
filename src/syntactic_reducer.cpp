@@ -507,7 +507,14 @@ void helper_process_sub_colorings(
 
 		std::vector<collapse_node>& last_filled{ all_sets.back() };
 
-		// double for last entry
+
+		all_sets.emplace_back();
+
+		std::vector<collapse_node>& fill{ all_sets.back() };
+
+		std::list<std::vector<collapse_node>> filtered_chain;
+		std::mutex m_filtered_chain;
+
 		const auto write_all_sets_to_file = [&]() {
 
 			std::size_t size{ 0 }, count{ 0 };
@@ -521,15 +528,6 @@ void helper_process_sub_colorings(
 
 		};
 
-		all_sets.emplace_back();
-
-		std::vector<collapse_node>& fill{ all_sets.back() };
-
-		std::list<std::vector<collapse_node>> filtered_chain;
-		std::mutex m_filtered_chain;
-
-
-		// double for last entry
 		const auto write_max_sets_to_file = [&]() {
 			std::size_t size{ 0 };
 			std::size_t count_max_sets{ 0 };
@@ -610,8 +608,6 @@ void helper_process_sub_colorings(
 				}
 			}
 		};
-
-
 
 		constexpr uint8_t count_threads{ 16 };
 
