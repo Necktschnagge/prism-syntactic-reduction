@@ -16,6 +16,9 @@ stages:
  
    jobs:
     - job: Prism_Cloud
+      # This job builds the prism binaries on an ubuntu cloud vm
+      # and uploads the binaries back into the git repository.
+      # This job is intended to run once to get prism binaries in the repository forever.
       strategy:
         matrix:
           ubuntu_20_04:
@@ -25,7 +28,7 @@ stages:
         vmImage: $(imageName)
         name: $(the_name)
       
-      #condition: false
+      condition: false # Only enable if new prism binaries are really needed !!!
       timeoutInMinutes: 30
       steps:
        - script: ls /usr/lib/jvm/
