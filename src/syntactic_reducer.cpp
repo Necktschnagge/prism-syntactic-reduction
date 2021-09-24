@@ -19,7 +19,6 @@
 #include <sstream>
 #include <bitset>
 #include <algorithm>
-#include <execution>
 
 bool __compare_helper__(std::map<std::string, int>& c1, std::map<std::string, int>& c2) {
 	std::map<int, int> homomorphism;
