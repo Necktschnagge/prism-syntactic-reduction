@@ -573,6 +573,7 @@ void helper_process_sub_colorings(
 
 	std::vector<collapse_node>& primitives{ all_sets.back() };
 
+	if constexpr (false)
 	{ // read last collection....
 		std::ifstream read_all_sets("all_sets.txt"); //make parameter
 
@@ -591,22 +592,25 @@ void helper_process_sub_colorings(
 	std::ofstream save_all_sets("all_sets.txt", std::ios_base::app); //make parameter
 	std::mutex mutex_save_max_sets;
 
+	if constexpr (false)
+	{
+		all_sets.emplace_back(); // size 2
+		all_sets.emplace_back(); // size 3
+		all_sets.emplace_back(); // size 4
+		all_sets.emplace_back(); // size 5
+		all_sets.emplace_back(); // size 6
+		all_sets.emplace_back(); // size 7
+		all_sets.emplace_back(); // size 8
+		all_sets.emplace_back(); // size 9
+		all_sets.push_back(std::move(all_nodes_size_10));
 
-	all_sets.emplace_back(); // size 2
-	all_sets.emplace_back(); // size 3
-	all_sets.emplace_back(); // size 4
-	all_sets.emplace_back(); // size 5
-	all_sets.emplace_back(); // size 6
-	all_sets.emplace_back(); // size 7
-	all_sets.emplace_back(); // size 8
-	all_sets.emplace_back(); // size 9
-	all_sets.push_back(std::move(all_nodes_size_10));
-
-	if (!std::is_sorted(std::execution::par, all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
-		standard_logger().warn("Loaded data not yet sorted.");
-		std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
+		if (!std::is_sorted(std::execution::par, all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
+			standard_logger().warn("Loaded data not yet sorted.");
+			std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
+		}
 	}
-	std::size_t next_free_index{ 11 };
+
+	std::size_t next_free_index{ 2 };
 
 	while (true) {
 		//
@@ -644,7 +648,7 @@ void helper_process_sub_colorings(
 			std::size_t size{ 0 }, count{ 0 };
 			if (!last_filled.empty()) size = last_filled.front().id.count();
 			count = last_filled.size();
-			if (size == 10) return;
+			//if (size == 10) return;
 
 			for (const auto& set : last_filled) {
 				save_all_sets << set.id.to_string() << std::endl;
@@ -658,7 +662,7 @@ void helper_process_sub_colorings(
 			std::size_t count_max_sets{ 0 };
 			if (!last_filled.empty()) size = last_filled.front().id.count();
 
-			if (size == 10) return;
+			//if (size == 10) return;
 
 			for (const auto& elem : last_filled) {
 				for (auto iter = begin_single; iter != end_single; ++iter) {
@@ -726,7 +730,7 @@ void helper_process_sub_colorings(
 
 					/* perform the merge */
 					std::vector<collapse_node> merged_vector;
-					//std::merge(/*std::execution::parallel_policy(),*/ created.begin(), created.end(), another_to_merge_with.begin(), another_to_merge_with.end(), std::back_inserter(merged_vector));
+					//std::merge(std::execution::par_unseq, created.begin(), created.end(), another_to_merge_with.begin(), another_to_merge_with.end(), std::back_inserter(merged_vector));
 					//merged_vector.erase(std::unique(merged_vector.begin(), merged_vector.end()), merged_vector.end());
 
 					multimerge(10, created, another_to_merge_with, merged_vector, COMP_BITSET);
