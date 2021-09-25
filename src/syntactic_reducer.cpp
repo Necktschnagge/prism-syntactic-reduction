@@ -421,7 +421,7 @@ std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const s
 }
 
 
-std::vector<collapse_node> all_nodes_size_9;
+std::vector<collapse_node> all_nodes_size_10;
 
 template <class T>
 class comp_bitset { // comp collapse node would be the correct name
@@ -435,6 +435,16 @@ public:
 
 const auto COMP_BITSET = comp_bitset<collapse_node::big_int>();
 
+collapse_node create_collapse_node_from_id(collapse_node::big_int id, const std::vector<collapse_node>& primitives) {
+	auto result = collapse_node(id, collapse_node::big_int());
+	for (const auto& elem : primitives) {
+		if ((elem.id & id).any())
+			result.forbidden_merges |= elem.forbidden_merges;
+
+	}
+	return result;
+}
+
 void helper_process_sub_colorings(
 	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
 	const std::vector<std::string>& all_vars
@@ -442,16 +452,10 @@ void helper_process_sub_colorings(
 
 	static constexpr bool SANITY_CHECKS{ false };
 
-	std::ofstream save_max_sets("max_sets.txt", std::ios_base::app); //make parameter
-	std::ofstream save_all_sets("all_sets.txt", std::ios_base::app); //make parameter
-	std::mutex mutex_save_max_sets;
-
-
 	//### check that not more than 128 variables!!!!
 	if (!(all_vars.size() < collapse_node::N))
 		throw 648358;
 
-	std::list<std::vector<collapse_node>> all_sets;
 
 	const auto get_id_index = [&](const std::string& s) -> std::size_t {
 		std::size_t i{ 0 };
@@ -460,6 +464,8 @@ void helper_process_sub_colorings(
 		}
 		return i;
 	};
+
+	std::list<std::vector<collapse_node>> all_sets;
 
 	all_sets.emplace_back(); // size zero
 	all_sets.emplace_back(); // size one
@@ -482,7 +488,40 @@ void helper_process_sub_colorings(
 	}
 	std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
 
-	std::size_t next_free_index{ 2 };
+	std::vector<collapse_node>& primitives{ all_sets.back() };
+
+	{ // read last collection....
+		std::ifstream read_all_sets("all_sets.txt"); //make parameter
+
+		std::string line;
+
+		while (std::getline(read_all_sets, line)) {
+			//++count[std::count(line.cbegin(), line.cend(), '1')];
+
+			if (std::count(line.cbegin(), line.cend(), '1') == 10) {
+				all_nodes_size_10.emplace_back(create_collapse_node_from_id(collapse_node::big_int(line), primitives));
+			}
+		}
+	}
+
+	std::ofstream save_max_sets("max_sets.txt", std::ios_base::app); //make parameter
+	std::ofstream save_all_sets("all_sets.txt", std::ios_base::app); //make parameter
+	std::mutex mutex_save_max_sets;
+
+
+	all_sets.emplace_back(); // size 2
+	all_sets.emplace_back(); // size 3
+	all_sets.emplace_back(); // size 4
+	all_sets.emplace_back(); // size 5
+	all_sets.emplace_back(); // size 6
+	all_sets.emplace_back(); // size 7
+	all_sets.emplace_back(); // size 8
+	all_sets.emplace_back(); // size 9
+	all_sets.push_back(std::move(all_nodes_size_10));
+
+	std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
+
+	std::size_t next_free_index{ 11 };
 
 	while (true) {
 		//
@@ -520,6 +559,7 @@ void helper_process_sub_colorings(
 			std::size_t size{ 0 }, count{ 0 };
 			if (!last_filled.empty()) size = last_filled.front().id.count();
 			count = last_filled.size();
+			if (size == 10) return;
 
 			for (const auto& set : last_filled) {
 				save_all_sets << set.id.to_string() << std::endl;
@@ -532,6 +572,8 @@ void helper_process_sub_colorings(
 			std::size_t size{ 0 };
 			std::size_t count_max_sets{ 0 };
 			if (!last_filled.empty()) size = last_filled.front().id.count();
+
+			if (size == 10) return;
 
 			for (const auto& elem : last_filled) {
 				for (auto iter = begin_single; iter != end_single; ++iter) {
@@ -624,7 +666,7 @@ void helper_process_sub_colorings(
 		/* join  threads */
 		write_max_sets_to_file_thread.join();
 		write_all_sets_to_file_thread.join();
-		
+
 		for (uint8_t t = 0; t < count_threads; ++t) {
 			produce_and_merge_threads[t].join();
 		}
