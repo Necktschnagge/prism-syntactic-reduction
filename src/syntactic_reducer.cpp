@@ -19,6 +19,7 @@
 #include <sstream>
 #include <bitset>
 #include <algorithm>
+#include <execution>
 
 bool __compare_helper__(std::map<std::string, int>& c1, std::map<std::string, int>& c2) {
 	std::map<int, int> homomorphism;
@@ -411,13 +412,32 @@ struct collapse_node {
 };
 
 std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const std::vector<collapse_node>& the_array) {
-	std::vector<collapse_node> newly_created_ones;
-	for (auto iter = the_array.cbegin(); iter != the_array.cend(); ++iter) {
-		if ((the_unique.forbidden_merges & iter->id).none() && (the_unique.id & iter->id).none()) {
-			newly_created_ones.emplace_back(the_unique.id | iter->id, the_unique.forbidden_merges | iter->forbidden_merges);
+	std::array<std::vector<collapse_node>, 8> newly_created_ones;
+	std::list<std::thread> threads;
+
+	const auto linear_enlarge = [](const collapse_node& the_unique, std::vector<collapse_node>::const_iterator begin, std::vector<collapse_node>::const_iterator end, std::vector<collapse_node>& destination) {
+		for (auto iter = begin; iter != end; ++iter) {
+			if ((the_unique.forbidden_merges & iter->id).none() && (the_unique.id & iter->id).none()) {
+				destination.emplace_back(the_unique.id | iter->id, the_unique.forbidden_merges | iter->forbidden_merges);
+			}
 		}
+	};
+
+	for (int i = 0; i < 8; ++i) {
+		threads.emplace_back(linear_enlarge, std::ref(the_unique), the_array.cbegin() + (i * the_array.size()) / 8, the_array.cbegin() + ((i + 1) * the_array.size()) / 8, std::ref(newly_created_ones[i]));
+	};
+	if (!(the_array.cbegin() + ((7 + 1) * the_array.size()) / 8 == the_array.cend()))
+	{
+		throw 845923735;
 	}
-	return newly_created_ones;
+	while (!threads.empty()) {
+		threads.front().join();
+		threads.pop_front();
+	}
+	for (int i = 1; i < 8; ++i) {
+		newly_created_ones[0].insert(newly_created_ones[0].end(), newly_created_ones[i].cbegin(), newly_created_ones[i].cend());
+	}
+	return newly_created_ones[0];
 }
 
 
@@ -443,6 +463,69 @@ collapse_node create_collapse_node_from_id(collapse_node::big_int id, const std:
 
 	}
 	return result;
+}
+
+
+template< class _Container, class _Comp>
+void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Container& destination, _Comp comp) {
+
+	if (c1.empty()) {
+		destination = std::move(c2);
+		return;
+	}
+	if (c2.empty()) {
+		destination = std::move(c1);
+		return;
+	}
+
+	_Container pivots;
+	for (std::size_t i{ 1 }; i < count_threads; ++i) {
+		pivots.push_back(c1[c1.size() * i / count_threads]);
+		pivots.push_back(c2[c2.size() * i / count_threads]);
+	}
+	std::sort(pivots.begin(), pivots.end(), comp);
+
+	std::list<_Container> splitted1;
+	std::list<_Container> splitted2;
+	std::list<_Container> merged3;
+	for (std::size_t i{ 1 }; i < count_threads; ++i) {
+		std::size_t index = 2 * i - 1;
+		auto p1 = std::lower_bound(c1.begin(), c1.end(), pivots[index], comp);
+		auto p2 = std::lower_bound(c2.begin(), c2.end(), pivots[index], comp);
+		splitted1.emplace_back(c1.begin(), p1);
+		splitted2.emplace_back(c2.begin(), p2);
+		c1.erase(c1.begin(), p1);
+		c2.erase(c2.begin(), p2);
+	}
+	c1.shrink_to_fit();
+	c2.shrink_to_fit();
+	splitted1.push_back(std::move(c1));
+	splitted2.push_back(std::move(c2));
+	std::list<std::thread> threads;
+
+	const auto mm = [](_Container& left, _Container& right, _Container& destination) {
+		std::merge(
+			left.cbegin(),
+			left.cend(),
+			right.cbegin(),
+			right.cend(),
+			std::back_inserter(destination)
+		);
+		destination.erase(std::unique(destination.begin(), destination.end()), destination.end());
+	};
+	for (std::size_t i{ 0 }; i < count_threads; ++i) {
+		auto& left = *std::next(splitted1.cbegin(), i);
+		auto& right = *std::next(splitted2.cbegin(), i);
+		merged3.emplace_back();
+		threads.emplace_back(mm, left, right, std::ref(merged3.back()));
+	}
+	while (!threads.empty()) {
+		threads.front().join();
+		threads.pop_front();
+	}
+	for (const auto& vec : merged3) {
+		destination.insert(destination.cend(), vec.cbegin(), vec.cend());
+	}
 }
 
 void helper_process_sub_colorings(
@@ -519,8 +602,10 @@ void helper_process_sub_colorings(
 	all_sets.emplace_back(); // size 9
 	all_sets.push_back(std::move(all_nodes_size_10));
 
-	std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
-
+	if (!std::is_sorted(std::execution::par, all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
+		standard_logger().warn("Loaded data not yet sorted.");
+		std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
+	}
 	std::size_t next_free_index{ 11 };
 
 	while (true) {
@@ -641,8 +726,11 @@ void helper_process_sub_colorings(
 
 					/* perform the merge */
 					std::vector<collapse_node> merged_vector;
-					std::merge(/*std::execution::parallel_policy(),*/ created.begin(), created.end(), another_to_merge_with.begin(), another_to_merge_with.end(), std::back_inserter(merged_vector));
-					merged_vector.erase(std::unique(merged_vector.begin(), merged_vector.end()), merged_vector.end());
+					//std::merge(/*std::execution::parallel_policy(),*/ created.begin(), created.end(), another_to_merge_with.begin(), another_to_merge_with.end(), std::back_inserter(merged_vector));
+					//merged_vector.erase(std::unique(merged_vector.begin(), merged_vector.end()), merged_vector.end());
+
+					multimerge(10, created, another_to_merge_with, merged_vector, COMP_BITSET);
+
 					standard_logger().info(std::string("Successfully merged two sets       thread - ID : ") + std::to_string(log_id));
 
 					created.clear();
@@ -651,7 +739,7 @@ void helper_process_sub_colorings(
 			}
 		};
 
-		constexpr uint8_t count_threads{ 16 };
+		constexpr uint8_t count_threads{ 4 };
 
 		std::array<std::thread, count_threads> produce_and_merge_threads;
 
