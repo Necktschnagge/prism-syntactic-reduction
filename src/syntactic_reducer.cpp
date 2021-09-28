@@ -467,7 +467,7 @@ collapse_node create_collapse_node_from_id(collapse_node::big_int id, const std:
 
 
 template< class _Container, class _Comp>
-void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Container& destination, _Comp comp) {
+void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Container& destination, const _Comp& comp) {
 
 	if (c1.empty()) {
 		destination = std::move(c2);
@@ -514,10 +514,10 @@ void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Cont
 		destination.erase(std::unique(destination.begin(), destination.end()), destination.end());
 	};
 	for (std::size_t i{ 0 }; i < count_threads; ++i) {
-		auto& left = *std::next(splitted1.cbegin(), i);
-		auto& right = *std::next(splitted2.cbegin(), i);
+		//auto& left = *std::next(splitted1.cbegin(), i);
+		//auto& right = *std::next(splitted2.cbegin(), i);
 		merged3.emplace_back();
-		threads.emplace_back(mm, left, right, std::ref(merged3.back()));
+		threads.emplace_back(mm, *std::next(splitted1.cbegin(), i), *std::next(splitted2.cbegin(), i), std::ref(merged3.back()));
 	}
 	while (!threads.empty()) {
 		threads.front().join();
