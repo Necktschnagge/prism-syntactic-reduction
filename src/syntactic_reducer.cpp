@@ -729,11 +729,11 @@ void helper_process_sub_colorings(
 					}
 
 					/* perform the merge */
-					std::vector<collapse_node> merged_vector;
-					//std::merge(std::execution::par_unseq, created.begin(), created.end(), another_to_merge_with.begin(), another_to_merge_with.end(), std::back_inserter(merged_vector));
-					//merged_vector.erase(std::unique(merged_vector.begin(), merged_vector.end()), merged_vector.end());
+					std::vector<collapse_node> merged_vector(another_to_merge_with.size() + created.size(),collapse_node(collapse_node::big_int(), collapse_node::big_int()));
+					auto new_end = std::merge(std::execution::par, created.begin(), created.end(), another_to_merge_with.begin(), another_to_merge_with.end(), merged_vector.begin());
+					merged_vector.erase(std::unique(merged_vector.begin(), new_end), merged_vector.end());
 
-					multimerge(10, created, another_to_merge_with, merged_vector, COMP_BITSET);
+					//multimerge(10, created, another_to_merge_with, merged_vector, COMP_BITSET);
 
 					standard_logger().info(std::string("Successfully merged two sets       thread - ID : ") + std::to_string(log_id));
 
@@ -743,7 +743,7 @@ void helper_process_sub_colorings(
 			}
 		};
 
-		constexpr uint8_t count_threads{ 4 };
+		constexpr uint8_t count_threads{ 1 };
 
 		std::array<std::thread, count_threads> produce_and_merge_threads;
 
