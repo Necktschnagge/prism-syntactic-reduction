@@ -11,11 +11,11 @@ add_library(${PROJECT_NAME}_lib STATIC ${SOURCES}) #for using in tests
 
 
 #message("Custom Message:   " ${Boost_LIBRARIES})
-if (GCC)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	TARGET_LINK_LIBRARIES(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES} tbb)
 	message("ON GCC")
 else()
 	TARGET_LINK_LIBRARIES(${PROJECT_NAME} LINK_PUBLIC ${Boost_LIBRARIES})
 	message("NOT ON GCC")
-endif (GCC)
+endif()
 #TARGET_LINK_LIBRARIES(${PROJECT_NAME}_lib LINK_PUBLIC ${Boost_LIBRARIES} )
