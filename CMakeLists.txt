@@ -7,6 +7,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 project(${PROJECT_NAME} VERSION 1.0)
 
+set( CMAKE_VERBOSE_MAKEFILE on )
 
 ############### Language and Flags ###############
 
