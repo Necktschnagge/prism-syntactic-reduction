@@ -412,7 +412,8 @@ struct collapse_node {
 };
 
 std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const std::vector<collapse_node>& the_array) {
-	std::array<std::vector<collapse_node>, 8> newly_created_ones;
+	constexpr std::size_t Cthreads = 16;
+	std::array<std::vector<collapse_node>, Cthreads> newly_created_ones;
 	std::list<std::thread> threads;
 
 	const auto linear_enlarge = [](const collapse_node& the_unique, std::vector<collapse_node>::const_iterator begin, std::vector<collapse_node>::const_iterator end, std::vector<collapse_node>& destination) {
@@ -423,10 +424,10 @@ std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const s
 		}
 	};
 
-	for (int i = 0; i < 8; ++i) {
-		threads.emplace_back(linear_enlarge, std::ref(the_unique), the_array.cbegin() + (i * the_array.size()) / 8, the_array.cbegin() + ((i + 1) * the_array.size()) / 8, std::ref(newly_created_ones[i]));
+	for (int i = 0; i < Cthreads; ++i) {
+		threads.emplace_back(linear_enlarge, std::ref(the_unique), the_array.cbegin() + (i * the_array.size()) / Cthreads, the_array.cbegin() + ((i + 1) * the_array.size()) / Cthreads, std::ref(newly_created_ones[i]));
 	};
-	if (!(the_array.cbegin() + ((7 + 1) * the_array.size()) / 8 == the_array.cend()))
+	if (!(the_array.cbegin() + (((Cthreads -1) + 1) * the_array.size()) / Cthreads == the_array.cend()))
 	{
 		throw 845923735;
 	}
@@ -434,7 +435,7 @@ std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const s
 		threads.front().join();
 		threads.pop_front();
 	}
-	for (int i = 1; i < 8; ++i) {
+	for (int i = 1; i < Cthreads; ++i) {
 		newly_created_ones[0].insert(newly_created_ones[0].end(), newly_created_ones[i].cbegin(), newly_created_ones[i].cend());
 	}
 	return newly_created_ones[0];
@@ -511,6 +512,10 @@ void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Cont
 			right.cend(),
 			std::back_inserter(destination)
 		);
+		left.clear();
+		right.clear();
+		left.shrink_to_fit();
+		right.shrink_to_fit();
 		destination.erase(std::unique(destination.begin(), destination.end()), destination.end());
 	};
 	for (std::size_t i{ 0 }; i < count_threads; ++i) {
@@ -523,8 +528,10 @@ void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Cont
 		threads.front().join();
 		threads.pop_front();
 	}
-	for (const auto& vec : merged3) {
+	for (auto& vec : merged3) {
 		destination.insert(destination.cend(), vec.cbegin(), vec.cend());
+		vec.clear();
+		vec.shrink_to_fit();
 	}
 }
 
@@ -729,7 +736,7 @@ void helper_process_sub_colorings(
 					//std::merge(/*std::execution::parallel_policy(),*/ created.begin(), created.end(), another_to_merge_with.begin(), another_to_merge_with.end(), std::back_inserter(merged_vector));
 					//merged_vector.erase(std::unique(merged_vector.begin(), merged_vector.end()), merged_vector.end());
 
-					multimerge(10, created, another_to_merge_with, merged_vector, COMP_BITSET);
+					multimerge(16, created, another_to_merge_with, merged_vector, COMP_BITSET);
 
 					standard_logger().info(std::string("Successfully merged two sets       thread - ID : ") + std::to_string(log_id));
 
@@ -739,7 +746,7 @@ void helper_process_sub_colorings(
 			}
 		};
 
-		constexpr uint8_t count_threads{ 4 };
+		constexpr uint8_t count_threads{ 1 };
 
 		std::array<std::thread, count_threads> produce_and_merge_threads;
 
