@@ -517,7 +517,7 @@ void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Cont
 		//auto& left = *std::next(splitted1.cbegin(), i);
 		//auto& right = *std::next(splitted2.cbegin(), i);
 		merged3.emplace_back();
-		threads.push_back(std::thread(mm, std::ref(*std::next(splitted1.cbegin(), i)), std::ref(*std::next(splitted2.cbegin(), i)), std::ref(merged3.back())));
+		threads.push_back(std::thread(mm, std::ref(*std::next(splitted1.begin(), i)), std::ref(*std::next(splitted2.begin(), i)), std::ref(merged3.back())));
 	}
 	while (!threads.empty()) {
 		threads.front().join();
