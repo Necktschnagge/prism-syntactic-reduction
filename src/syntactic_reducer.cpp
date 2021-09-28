@@ -603,8 +603,11 @@ void helper_process_sub_colorings(
 		all_sets.emplace_back(); // size 8
 		all_sets.emplace_back(); // size 9
 		all_sets.push_back(std::move(all_nodes_size_10));
-
+#ifdef __clang__
+		if (!std::is_sorted(all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
+#else
 		if (!std::is_sorted(std::execution::par, all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
+#endif
 			standard_logger().warn("Loaded data not yet sorted.");
 			std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
 		}
