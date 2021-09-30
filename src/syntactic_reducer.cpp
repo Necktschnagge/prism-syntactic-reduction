@@ -427,7 +427,7 @@ std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const s
 	for (int i = 0; i < Cthreads; ++i) {
 		threads.emplace_back(linear_enlarge, std::ref(the_unique), the_array.cbegin() + (i * the_array.size()) / Cthreads, the_array.cbegin() + ((i + 1) * the_array.size()) / Cthreads, std::ref(newly_created_ones[i]));
 	};
-	if (!(the_array.cbegin() + (((Cthreads -1) + 1) * the_array.size()) / Cthreads == the_array.cend()))
+	if (!(the_array.cbegin() + (((Cthreads - 1) + 1) * the_array.size()) / Cthreads == the_array.cend()))
 	{
 		throw 845923735;
 	}
@@ -535,8 +535,8 @@ void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Cont
 	}
 }
 
-void helper_process_sub_colorings(
-	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
+void find_local_groupings(
+	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph, // ### resolve this to mke it easier.
 	const std::vector<std::string>& all_vars
 ) {
 
@@ -580,7 +580,10 @@ void helper_process_sub_colorings(
 
 	std::vector<collapse_node>& primitives{ all_sets.back() };
 
-	if constexpr (false)
+	static constexpr bool READ_LAST_PROGRESS_AND_RESUME{ false };
+	constexpr int size_to_skip{ 10 };
+
+	if constexpr (READ_LAST_PROGRESS_AND_RESUME)
 	{ // read last collection....
 		std::ifstream read_all_sets("all_sets.txt"); //make parameter
 
@@ -599,7 +602,9 @@ void helper_process_sub_colorings(
 	std::ofstream save_all_sets("all_sets.txt", std::ios_base::app); //make parameter
 	std::mutex mutex_save_max_sets;
 
-	if constexpr (false)
+	std::size_t next_free_index{ 2 };
+
+	if constexpr (READ_LAST_PROGRESS_AND_RESUME)
 	{
 		all_sets.emplace_back(); // size 2
 		all_sets.emplace_back(); // size 3
@@ -618,9 +623,10 @@ void helper_process_sub_colorings(
 			standard_logger().warn("Loaded data not yet sorted.");
 			std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
 		}
+
+		next_free_index = 11;
 	}
 
-	std::size_t next_free_index{ 2 };
 
 	while (true) {
 		//
@@ -658,7 +664,8 @@ void helper_process_sub_colorings(
 			std::size_t size{ 0 }, count{ 0 };
 			if (!last_filled.empty()) size = last_filled.front().id.count();
 			count = last_filled.size();
-			//if (size == 10) return;
+			if constexpr (READ_LAST_PROGRESS_AND_RESUME)
+				if (size == size_to_skip) return;
 
 			for (const auto& set : last_filled) {
 				save_all_sets << set.id.to_string() << std::endl;
@@ -672,7 +679,8 @@ void helper_process_sub_colorings(
 			std::size_t count_max_sets{ 0 };
 			if (!last_filled.empty()) size = last_filled.front().id.count();
 
-			//if (size == 10) return;
+			if constexpr (READ_LAST_PROGRESS_AND_RESUME)
+				if (size == size_to_skip) return;
 
 			for (const auto& elem : last_filled) {
 				for (auto iter = begin_single; iter != end_single; ++iter) {
@@ -793,13 +801,8 @@ void helper_process_sub_colorings(
 }
 
 void process_sub_colorings(
-	std::list<std::map<std::string, int>>& all_colorings,
 	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
-	bool skip_output,
-	std::mutex& mutex_all_colorings,
 	const std::size_t max_threads,
-	std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>>& futures,
-	std::mutex& m_futures,
 	std::vector<std::string> all_vars
 ) {
 
@@ -1063,7 +1066,7 @@ again_while:
 }
 
 
-unsigned long long count_variables_of_coloring(const std::map<std::string, int>& coloring) {
+unsigned long long count_variables_of_coloring(const std::map<std::string, int>&coloring) {
 	std::set<int> values;
 	for (const auto& pair : coloring) values.insert(pair.second);
 	return values.size();
@@ -1071,7 +1074,7 @@ unsigned long long count_variables_of_coloring(const std::map<std::string, int>&
 
 
 
-void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned long long>>& useful_colorings, std::list<std::map<std::string, int>>& all_colorings, std::mutex& m_all_colorings, bool& continue_running) {
+void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned long long>>&useful_colorings, std::list<std::map<std::string, int>>&all_colorings, std::mutex & m_all_colorings, bool& continue_running) {
 	unsigned long long TOLERANCE{ 0 };
 	unsigned long long min_var_count{ std::numeric_limits<unsigned long long>::max() - TOLERANCE };
 	unsigned long long i{ 0 };
@@ -1146,7 +1149,7 @@ int cli(int argc, char** argv) {
 
 
 	// when here then all live set were computed.
-	std::vector<std::string> excluded_vars{ "y_Integrator_44480461" };
+	std::vector<std::string> excluded_vars{ "y_Integrator_44480461", "x_cfblk5_1_1174489129" };
 
 	standard_logger().info("Start parsing...");
 	auto ftoken = file_token(model_string_ptr);
@@ -1213,7 +1216,7 @@ int cli(int argc, char** argv) {
 	std::transform(graph.begin(), graph.end(), std::back_inserter(all_var_names), [](auto& pair) {return pair.first; });
 	std::sort(all_var_names.begin(), all_var_names.end());
 
-	process_sub_colorings(all_colorings, collapse_graph, false, mutex_all_colorings, max_threads, futures, m_futures, all_var_names);
+	process_sub_colorings(collapse_graph, max_threads, all_var_names);
 
 	// wait for futures here
 	while (!futures.empty()) {
