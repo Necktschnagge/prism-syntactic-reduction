@@ -1378,17 +1378,27 @@ void write_all_partitionings(const std::filesystem::path & directory, const std:
 }
 
 file_token construct_reduced_model(
-	const file_token& original_model,
-	const std::vector<collapse_node::big_int>& partitioning,
-	std::string cf_var_name, const std::map<std::string, int>& const_table,
-	live_var_map& live_vars,
-	const std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph
+	const file_token & original_model,
+	const std::vector<collapse_node::big_int>&partitioning,
+	const std::vector<std::string>&all_vars,
+	std::string cf_var_name, const std::map<std::string, int>&const_table,
+	live_var_map & live_vars,
+	const std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>&graph
 ) {
 	file_token reduced_file(original_model);
 
-	//### todo here apply partitioning to graph....
+	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>> graph_with_colors{ graph };
 
-	apply_coloring_to_file_token(reduced_file, cf_var_name, const_table, live_vars, graph);
+	//### todo here apply partitioning to graph.... <-- DONE     .... but refactor!!!, use a more restricted structure instead of graph data type
+
+	for (std::size_t color_i{ 0 }; color_i < partitioning.size(); ++color_i) {
+		for (std::size_t var_id{ 0 }; var_id < all_vars.size(); ++var_id) {
+			if (partitioning[color_i][var_id])
+				color(graph_with_colors[all_vars[var_id]]) = color_i;
+		}
+	}
+
+	apply_coloring_to_file_token(reduced_file, cf_var_name, const_table, live_vars, graph_with_colors);
 
 	return reduced_file;
 }
