@@ -803,9 +803,6 @@ void find_local_groupings(
 		++next_free_index;
 
 	}
-
-	return;
-
 }
 
 enum class selected : char {
@@ -1434,14 +1431,8 @@ int cli(int argc, char** argv) {
 
 	std::mutex mutex_all_colorings;
 	std::list<std::map<std::string, int>> all_colorings;
-	std::list<std::pair<std::map<std::string, int>, unsigned long long>> useful_colorings;
-	bool continue_running{ true };
-
-	//auto filter_thread = std::thread(filter_colorings, std::ref(useful_colorings), std::ref(all_colorings), std::ref(mutex_all_colorings), std::ref(continue_running));
 
 	const std::size_t max_threads{ 8 };
-	std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>> futures;
-	std::mutex m_futures;
 
 	/*#### create such a class where inverse search is added as member function!!!
 	class var_names_collection {
@@ -1459,6 +1450,7 @@ int cli(int argc, char** argv) {
 	std::vector<std::string> all_var_names;
 	std::transform(graph.begin(), graph.end(), std::back_inserter(all_var_names), [](auto& pair) {return pair.first; });
 	std::sort(all_var_names.begin(), all_var_names.end());
+	//## sanity check: no duplicates in this vector.
 
 	auto enemies_table = grouping_enemies_table(all_var_names.size());
 	for (std::size_t var_id{ 0 }; var_id < all_var_names.size(); ++var_id) {
@@ -1475,27 +1467,7 @@ int cli(int argc, char** argv) {
 
 	std::vector<std::vector<collapse_node::big_int>> all_colorings_with_minimal_variables;
 
-	find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, all_colorings_with_minimal_variables);
-
-	// wait for futures here
-	while (!futures.empty()) {
-		standard_logger().info("waiting for futures...");
-		std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>>::iterator iter;
-		{
-			auto lock = std::unique_lock(m_futures);
-			iter = futures.begin();
-		}
-		std::get<0>(*iter).wait();
-		{
-			auto lock = std::unique_lock(m_futures);
-			futures.erase(iter);
-		}
-	}
-	standard_logger().info("all futures finished!");
-	continue_running = false;
-	//filter_thread.join();
-	all_colorings.clear();
-	std::transform(useful_colorings.begin(), useful_colorings.end(), std::back_inserter(all_colorings), [](const std::pair<std::map<std::string, int>, unsigned long long>& x) { return x.first; });
+	find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, all_colorings_with_minimal_variables);  //####refactor maxthreads inner and outer threads config....
 
 	//### all colorings still unused here.
 	/*+++++++++++++++++++++++++++++*/
