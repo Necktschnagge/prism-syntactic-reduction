@@ -538,9 +538,9 @@ void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Cont
 }
 
 void find_local_groupings(
-	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph, // ### resolve this to mke it easier.
 	const grouping_enemies_table& enemies_table,
-	const std::vector<std::string>& all_vars
+	const std::vector<std::string>& all_vars,
+	std::vector<collapse_node> max_groupings
 ) {
 
 	static constexpr bool SANITY_CHECKS{ false };
@@ -563,23 +563,27 @@ void find_local_groupings(
 	all_sets.emplace_back(); // size zero
 	all_sets.emplace_back(); // size one
 
-	// fill size one
-	for (const auto& pair : *collapse_graph) {
-		if (pair.first->size() != 1) throw 3;
-		collapse_node::big_int id{ 0 };
-		collapse_node::big_int forbidden_merges{ 0 };
-		std::size_t i{ get_id_index(*pair.first->begin()) };
-		id[i] = 1;
-		for (const auto& element : pair.second) {
-			std::size_t i{ get_id_index(*element->begin()) };
-			forbidden_merges[i] = 1;
+	// fill size one -new variant
+	for (std::size_t var_id{ 0 }; var_id < enemies_table.size(); ++var_id) {
+		collapse_node::big_int var_id_bitstring{ 0 };
+		collapse_node::big_int enemies_bitstring{ 0 };
+		var_id_bitstring[var_id] = 1;
+		for (const auto& enemie : enemies_table[var_id]) {
+			enemies_bitstring[enemie] = 1;
 		}
-		all_sets.back().emplace_back(id, forbidden_merges);
+		all_sets.back().emplace_back(var_id_bitstring, enemies_bitstring);
+
 		std::stringstream ss;
-		ss << "add node : " << id << " forbid: " << forbidden_merges;
+		ss << "add node : " << var_id_bitstring << " forbid: " << enemies_bitstring;
 		standard_logger().info(ss.str());
 	}
-	std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
+
+	if (!std::is_sorted(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET)) {
+		standard_logger().warn("Per algorithm design the sequence of initial size-one sets should already be ordered, but indeed is not.");
+		std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
+	}
+
+	// ### for accumulating: make a new vector where maximal size 1 sets will be excluded.
 
 	std::vector<collapse_node>& primitives{ all_sets.back() };
 
@@ -694,6 +698,7 @@ void find_local_groupings(
 				}
 				//set is maximal
 				{
+					max_groupings.push_back(elem);
 					auto lock = std::unique_lock(mutex_save_max_sets);
 					save_max_sets << elem.id.to_string() << std::endl;
 					++count_max_sets;
@@ -803,9 +808,118 @@ void find_local_groupings(
 
 }
 
+enum class selected : char {
+	YES, NO, UNDECIDED
+};
+
+struct consideration {
+	std::vector<selected> sel;
+	collapse_node::big_int already_covered;
+
+	std::size_t count() const {
+		return std::count_if(sel.cbegin(), sel.cend(), [](selected x) { return x == selected::YES; });
+	}
+
+	consideration(const std::vector<selected>& sel, const collapse_node::big_int& already_covered) : sel(sel), already_covered(already_covered) {}
+};
+
+void find_all_global_coverings_with_max_groupings(
+	const std::vector<std::string>& all_vars,
+	const std::vector<collapse_node>& max_groupings,
+	std::vector<consideration>&result_combinations
+) {
+
+	std::size_t min_selection_size_so_far{ all_vars.size() };
+
+	auto goal = collapse_node::big_int();
+
+	for (std::size_t i = 0; i < all_vars.size(); ++i) {
+		goal[i] = 1;
+	}
+
+	std::list<consideration> todo_chain;
+
+	todo_chain.emplace_back(std::vector<selected>(max_groupings.size(), selected::UNDECIDED), collapse_node::big_int()); // nothing yet selected, already_covered zero variables
+
+	{	// corner case speed up: If some variable needs a singleton group, we can select it at the beginning.
+		consideration& initial_consideration{ todo_chain.back() };
+		for (std::size_t i = 0; i < max_groupings.size(); ++i) {
+			if (max_groupings[i].id.count() == 1) {
+				initial_consideration.sel[i] = selected::YES;
+				initial_consideration.already_covered |= max_groupings[i].id;
+			}
+		}
+	}
+	// mark all max single var sets as already selected here!!! #####
+
+	const auto step = [&](const consideration& rec) {
+		if (rec.already_covered == goal) { // reached goal :)
+			const auto size_selection = rec.count();
+			if (size_selection < min_selection_size_so_far) {
+				min_selection_size_so_far = size_selection;
+				result_combinations.clear(); // discard all previously found combinations that took more selected items.
+			}
+			result_combinations.push_back(rec);
+			return;
+		}
+		if (rec.count() >= min_selection_size_so_far) // did not reached goal, but with the next selection we will exceed min_selection_size_so_far
+			return;
+
+		// construct sub cases:
+
+		collapse_node::big_int rest_goal = goal & (~rec.already_covered); // the variables that are not yet covered by selected groups.
+
+		// select the next group to add to consideration by looking for max rest_goal elimination:
+		std::size_t sel_i = 0;
+		std::size_t sel_rest_size = 0;
+		for (std::size_t i = 0; i < max_groupings.size(); ++i) {
+			const auto rest_usage_size = (max_groupings[i].id & rest_goal).count();
+			if (rest_usage_size > sel_rest_size) {
+				sel_rest_size = rest_usage_size;
+				sel_i = i;
+			}
+		}
+		if (sel_rest_size == 0)
+			return; // cannot select any progress.
+		if ((min_selection_size_so_far - rec.count()) * sel_rest_size < rest_goal.size())
+			// with each step of selecting another group we may cover at most {sel_rest_size} rest variables.
+			// We cannot cover all rest variables {rest_goal.size()} if we only have {(min_selection_size_so_far - rec.count())} choices left
+			// without exceeding {min_selection_size_so_far} choices.
+			return;
+
+		// Abort criterium: If there is a specific variable that is not yet covered and all its groups are already excluded we cannot reach goal anymore.
+		if constexpr /* USE THIS CRITERIUM? */ (true) {
+			collapse_node::big_int reachable_goal;
+			for (std::size_t i{ 0 }; i < max_groupings.size(); ++i) {
+				if (rec.sel[i] != selected::NO) reachable_goal |= max_groupings[i].id;
+				if (reachable_goal == goal) goto abort_criterium_proceed_4756928;
+			}
+			return; // here it holds that:   reachable_goal != goal
+		}
+	abort_criterium_proceed_4756928:
+
+		consideration add_yes = rec;
+		consideration add_no = rec;
+
+		add_yes.sel[sel_i] = selected::YES;
+		add_yes.already_covered = add_yes.already_covered | max_groupings[sel_i].id;
+
+		add_no.sel[sel_i] = selected::NO;
+
+		todo_chain.push_front(add_yes);
+		todo_chain.push_back(add_no);
+	};
+
+	while (!todo_chain.empty()) {
+		consideration first = todo_chain.front();
+		todo_chain.pop_front();
+		step(first);
+	}
+}
+
 void process_sub_colorings(
 	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
-	const grouping_enemies_table& enemies_table,
+	const grouping_enemies_table & enemies_table,
 	const std::size_t max_threads,
 	std::vector<std::string> all_vars
 ) {
@@ -818,6 +932,7 @@ void process_sub_colorings(
 	//chain.emplace_back(skip_output);
 
 	std::stringstream ss;
+	//#### remove collapse graph usage here!
 	ss << "initial collapse graph:\n\n";
 	for (const auto& pair : *collapse_graph) {
 		ss << "set  { ";
@@ -838,84 +953,15 @@ void process_sub_colorings(
 	if (all_vars.size() < 2)
 		throw 2;
 
-	find_local_groupings(collapse_graph, enemies_table, all_vars);
+	std::vector<collapse_node> max_groupings;
 
-	//analyse local to global:
+	find_local_groupings(enemies_table, all_vars, max_groupings);
 
-	enum class selected : char {
-		YES, NO, UNDECIDED
-	};
+	// find all global coverings with max groupings:
+	std::vector<consideration> result_combinations;
+	find_all_global_coverings_with_max_groupings(all_vars, max_groupings, result_combinations);
 
-	std::size_t min_selection_size_so_far{ all_vars.size() };
-	
-	auto goal = collapse_node(collapse_node::big_int(), collapse_node::big_int());
-
-	for (std::size_t i = 0; i < min_selection_size_so_far; ++i) {
-		goal.id[i] = 1;
-	}
-
-	struct activ_record {
-		std::vector<selected> sel;
-		collapse_node sum;
-
-		std::size_t count() const {
-			return std::count_if(sel.cbegin(), sel.cend(), [](selected x) { return x == selected::YES; });
-		}
-
-		activ_record(const std::vector<selected>& sel, const collapse_node& sum) : sel(sel), sum(sum) {}
-	};
-	std::vector<collapse_node> max_local_sets; ///###initialize!!!!b
-	std::vector<activ_record> result_combinations;
-
-	std::list<activ_record> todo_chain;
-
-	todo_chain.emplace_back(std::vector<selected>(max_local_sets.size(), selected::UNDECIDED), collapse_node(collapse_node::big_int(), collapse_node::big_int())); // sum zero
-	// mark all max single var sets as already selected here!!!
-
-	const auto step = [&](const activ_record& rec) {
-		if (rec.sum.id == goal.id) { // reached goal :)
-			result_combinations.push_back(rec);
-			const auto size_selection = rec.count();
-			if (size_selection < min_selection_size_so_far) {
-				min_selection_size_so_far = size_selection;
-			}
-			return;
-		}
-		if (rec.count() >= min_selection_size_so_far) // did not reached goal, but with the next selection we will exceed min_selection_size_so_far
-			return;
-
-		// construct sub cases:
-
-		collapse_node::big_int rest_goal = goal.id & (~rec.sum.id);
-		// select max rest_goal elimination:
-		std::size_t sel_i = 0;
-		std::size_t sel_rest_size = 0;
-		for (std::size_t i = 0; i < max_local_sets.size(); ++i) {
-			const auto rest_usage_size = (max_local_sets[i].id & rest_goal).count();
-			if (rest_usage_size > sel_rest_size) {
-				sel_rest_size = rest_usage_size;
-				sel_i = i;
-			}
-		}
-		if (sel_rest_size == 0)
-			return; // cannot select any progress.
-
-		// if (min -selected ) * sel_rest_size < rest_goal.size()  ==> ABORT! no solution#
-
-		// another abort criterium: there is a var which has been excluded everywhere
-
-		activ_record add_yes = rec;
-		activ_record add_no = rec;
-
-		add_yes.sel[sel_i] = selected::YES;
-		add_yes.sum.id = add_yes.sum.id | max_local_sets[sel_i].id;
-
-		add_no.sel[sel_i] = selected::NO;
-
-		todo_chain.push_front(add_yes);
-		todo_chain.push_back(add_no);
-
-	};
+	//
 
 }
 
@@ -1305,7 +1351,7 @@ int cli(int argc, char** argv) {
 
 	};
 
-	algor for inverse search here: 
+	algor for inverse search here:
 			auto [first, last] = std::equal_range(all_var_names.cbegin(), all_var_names.cend(), do_not_merge_with);
 			if ((first == last) || (first + 1 != last))
 				throw 935734839;
@@ -1426,4 +1472,4 @@ int main(int argc, char** argv)
 #endif
 	return cli(argc, argv);
 
-}
+	}
