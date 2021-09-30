@@ -21,6 +21,8 @@
 #include <algorithm>
 #include <execution>
 
+using grouping_enemies_table = std::vector<std::set<std::size_t>>; /// [var_id_x] |-> { var_id_y | var_id_x and var_id_y cannot be merged }
+
 bool __compare_helper__(std::map<std::string, int>& c1, std::map<std::string, int>& c2) {
 	std::map<int, int> homomorphism;
 	for (auto& pair : c1) {
@@ -537,6 +539,7 @@ void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Cont
 
 void find_local_groupings(
 	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph, // ### resolve this to mke it easier.
+	const grouping_enemies_table& enemies_table,
 	const std::vector<std::string>& all_vars
 ) {
 
@@ -802,6 +805,7 @@ void find_local_groupings(
 
 void process_sub_colorings(
 	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
+	const grouping_enemies_table& enemies_table,
 	const std::size_t max_threads,
 	std::vector<std::string> all_vars
 ) {
@@ -834,11 +838,94 @@ void process_sub_colorings(
 	if (all_vars.size() < 2)
 		throw 2;
 
-	helper_process_sub_colorings(collapse_graph, all_vars);
+	find_local_groupings(collapse_graph, enemies_table, all_vars);
+
+	//analyse local to global:
+
+	enum class selected : char {
+		YES, NO, UNDECIDED
+	};
+
+	std::size_t min_selection_size_so_far{ all_vars.size() };
+	
+	auto goal = collapse_node(collapse_node::big_int(), collapse_node::big_int());
+
+	for (std::size_t i = 0; i < min_selection_size_so_far; ++i) {
+		goal.id[i] = 1;
+	}
+
+	struct activ_record {
+		std::vector<selected> sel;
+		collapse_node sum;
+
+		std::size_t count() const {
+			return std::count_if(sel.cbegin(), sel.cend(), [](selected x) { return x == selected::YES; });
+		}
+
+		activ_record(const std::vector<selected>& sel, const collapse_node& sum) : sel(sel), sum(sum) {}
+	};
+	std::vector<collapse_node> max_local_sets; ///###initialize!!!!b
+	std::vector<activ_record> result_combinations;
+
+	std::list<activ_record> todo_chain;
+
+	todo_chain.emplace_back(std::vector<selected>(max_local_sets.size(), selected::UNDECIDED), collapse_node(collapse_node::big_int(), collapse_node::big_int())); // sum zero
+	// mark all max single var sets as already selected here!!!
+
+	const auto step = [&](const activ_record& rec) {
+		if (rec.sum.id == goal.id) { // reached goal :)
+			result_combinations.push_back(rec);
+			const auto size_selection = rec.count();
+			if (size_selection < min_selection_size_so_far) {
+				min_selection_size_so_far = size_selection;
+			}
+			return;
+		}
+		if (rec.count() >= min_selection_size_so_far) // did not reached goal, but with the next selection we will exceed min_selection_size_so_far
+			return;
+
+		// construct sub cases:
+
+		collapse_node::big_int rest_goal = goal.id & (~rec.sum.id);
+		// select max rest_goal elimination:
+		std::size_t sel_i = 0;
+		std::size_t sel_rest_size = 0;
+		for (std::size_t i = 0; i < max_local_sets.size(); ++i) {
+			const auto rest_usage_size = (max_local_sets[i].id & rest_goal).count();
+			if (rest_usage_size > sel_rest_size) {
+				sel_rest_size = rest_usage_size;
+				sel_i = i;
+			}
+		}
+		if (sel_rest_size == 0)
+			return; // cannot select any progress.
+
+		// if (min -selected ) * sel_rest_size < rest_goal.size()  ==> ABORT! no solution#
+
+		// another abort criterium: there is a var which has been excluded everywhere
+
+		activ_record add_yes = rec;
+		activ_record add_no = rec;
+
+		add_yes.sel[sel_i] = selected::YES;
+		add_yes.sum.id = add_yes.sum.id | max_local_sets[sel_i].id;
+
+		add_no.sel[sel_i] = selected::NO;
+
+		todo_chain.push_front(add_yes);
+		todo_chain.push_back(add_no);
+
+	};
 
 }
 
-void live_range_analysis(const file_token& ftoken, const std::map<std::string, int>& const_table, const std::string& var_name, std::vector<std::string>& excluded_vars, std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph, live_var_map& live_vars) {
+void live_range_analysis(
+	const file_token & ftoken,
+	const std::map<std::string, int>&const_table,
+	const std::string & var_name, std::vector<std::string>&excluded_vars,
+	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>&graph,
+	live_var_map & live_vars
+) {
 	// live range analysis:
 	// calculate program graph:
 	std::string var_name_next{ var_name + "'" };
@@ -1212,11 +1299,37 @@ int cli(int argc, char** argv) {
 	std::list<std::tuple<std::future<void>, std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>>>> futures;
 	std::mutex m_futures;
 
+	/*#### create such a class where inverse search is added as member function!!!
+	class var_names_collection {
+		std::vector<std::string> all_var_names;
+
+	};
+
+	algor for inverse search here: 
+			auto [first, last] = std::equal_range(all_var_names.cbegin(), all_var_names.cend(), do_not_merge_with);
+			if ((first == last) || (first + 1 != last))
+				throw 935734839;
+			std::size_t var_id_enemie{ first - all_var_names.cbegin() };
+	*/
+
 	std::vector<std::string> all_var_names;
 	std::transform(graph.begin(), graph.end(), std::back_inserter(all_var_names), [](auto& pair) {return pair.first; });
 	std::sort(all_var_names.begin(), all_var_names.end());
 
-	process_sub_colorings(collapse_graph, max_threads, all_var_names);
+	auto enemies_table = grouping_enemies_table(all_var_names.size());
+	for (std::size_t var_id{ 0 }; var_id < all_var_names.size(); ++var_id) {
+		if (!enemies_table[var_id].empty())
+			throw 9134872798; //### just a sanity check, remove please!
+		for (const std::string& do_not_merge_with : neighbours(graph[all_var_names[var_id]])) {
+			auto [first, last] = std::equal_range(all_var_names.cbegin(), all_var_names.cend(), do_not_merge_with);
+			if ((first == last) || (first + 1 != last))
+				throw 935734839;
+			std::size_t var_id_enemie{ static_cast<std::size_t>(first - all_var_names.cbegin()) };
+			enemies_table[var_id].insert(var_id_enemie);
+		}
+	}
+
+	process_sub_colorings(collapse_graph, enemies_table, max_threads, all_var_names);
 
 	// wait for futures here
 	while (!futures.empty()) {
