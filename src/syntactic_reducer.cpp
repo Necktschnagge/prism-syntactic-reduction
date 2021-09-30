@@ -1008,39 +1008,59 @@ void find_all_coverings_with_non_overlapping_groups(
 
 }
 
-void find_all_colorings_with_minimal_variables(
-	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
+void print_enemies_table_to_log( //#?ready
+	const grouping_enemies_table & enemies_table,
+	std::vector<std::string> all_vars
+) {
+	std::stringstream ss;
+	ss << std::endl;
+	for (std::size_t i{ 0 }; i < enemies_table.size(); ++i) {
+		ss << "Enemies of variable with id   " << i << "   (" << all_vars[i] << "):" << std::endl
+			<< "   {";
+		for (const auto& enemie : enemies_table[i]) {
+			ss << "variable   " << enemie << "   (" << all_vars[enemie] << "),\n";
+		}
+		ss << "   }\n\n";
+	}
+	ss << "\n\n\n";
+
+	standard_logger().info(ss.str());
+}
+
+void find_all_minimal_partitionings( //#?ready
 	const grouping_enemies_table & enemies_table,
 	const std::size_t max_threads,
 	std::vector<std::string> all_vars,
-	std::vector<std::vector<collapse_node::big_int>>& all_colorings_with_minimal_variables
+	std::vector<std::vector<collapse_node::big_int>>&all_colorings_with_minimal_variables
 ) {
+	standard_logger().info("#############################################################################################");
+	standard_logger().info("##### Start calculating all possible partitionings with minimal number of partitions... #####");
+	standard_logger().info("#############################################################################################");
+	standard_logger().info("");
 
-	std::stringstream ss;
-	//#### remove collapse graph usage here!
-	ss << "initial collapse graph:\n\n";
-	for (const auto& pair : *collapse_graph) {
-		ss << "set  { ";
-		for (const auto& name : *pair.first) {
-			ss << name << ", ";
-		}
-		ss << " }\n";
-		ss << "   forbidden merge partners:\n";
-		for (const auto& sptr : pair.second) {
-			ss << "      [" << *sptr->begin() << "]\n";
-		}
-	}
-	standard_logger().info(ss.str());
+	standard_logger().info("The following enemies are forbidden to be merged into one partition:");
+	standard_logger().info("");
 
+	print_enemies_table_to_log(enemies_table, all_vars);
+
+	standard_logger().info("Calculating all maximal local groupings...");
 	std::vector<collapse_node> max_groupings;
-
 	find_local_groupings(enemies_table, all_vars, max_groupings);
+	standard_logger().info("Calculating all maximal local groupings   ...DONE!");
 
-	// find all global coverings with max groupings:
+	standard_logger().info("Calculating all coverings of the whole variable set by selecting minimal amounts of local groupings...");
 	std::vector<consideration> combinations_of_max_groupings;
 	find_all_global_coverings_with_max_groupings(all_vars, max_groupings, combinations_of_max_groupings);
+	standard_logger().info("Calculating all coverings of the whole variable set by selecting minimal amounts of local groupings   ...DONE!");
 
+	standard_logger().info("Calculating all partitionings of the whole variable set by eliminating overlapping maximal local groupings...");
 	find_all_coverings_with_non_overlapping_groups(all_vars, max_groupings, combinations_of_max_groupings, all_colorings_with_minimal_variables);
+	standard_logger().info("Calculating all partitionings of the whole variable set by eliminating overlapping maximal local groupings   ...DONE!");
+
+	standard_logger().info("##############################################################################################");
+	standard_logger().info("##### Finished calculating all possible partitionings with minimal number of partitions. #####");
+	standard_logger().info("##############################################################################################");
+
 }
 
 void live_range_analysis(
@@ -1455,7 +1475,7 @@ int cli(int argc, char** argv) {
 
 	std::vector<std::vector<collapse_node::big_int>> all_colorings_with_minimal_variables;
 
-	find_all_colorings_with_minimal_variables(collapse_graph, enemies_table, max_threads, all_var_names, all_colorings_with_minimal_variables);
+	find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, all_colorings_with_minimal_variables);
 
 	// wait for futures here
 	while (!futures.empty()) {
@@ -1547,7 +1567,7 @@ int main(int argc, char** argv)
 		for (int x = 0; x < 20; ++x) {
 			standard_logger().info(std::to_string(x) + "  :  " + std::to_string(count[x]));
 		}
-}
+	}
 
 #endif
 	return cli(argc, argv);
