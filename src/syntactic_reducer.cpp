@@ -1350,30 +1350,56 @@ void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned l
 }
 
 void write_var_list_txt(const std::filesystem::path & directory, const std::vector<std::string>&all_vars) {
+	std::filesystem::create_directories(directory);
 	auto file = std::ofstream((directory / "var_list.txt").c_str());
+	/*standard_logger().info(
+		std::string(
+			(directory / "var_list.txt").c_str()
+		)
+	);
+	*/
 	for (const auto& var : all_vars)
 		file << var << std::endl;
 }
 
 void write_max_local_groupings(const std::filesystem::path & directory, const std::vector<collapse_node>&max_groupings) {
+	std::filesystem::create_directories(directory);
 	auto file = std::ofstream((directory / "max_groupings.txt").c_str());
 	for (const auto& group : max_groupings)
 		file << group.id.to_string() << std::endl;
 }
 
 void write_all_partitionings(const std::filesystem::path & directory, const std::vector<std::vector<collapse_node::big_int>>&all_partitionings_with_minimal_size) {
-	auto file = std::ofstream((directory / "all_partitions.txt").c_str());
+	std::filesystem::create_directories(directory);
+	auto file = std::ofstream((directory / "all_partitions.json").c_str());
 
 	nlohmann::json json;
-	auto& j_partitions{ json["partitions"] };
+	auto& j_partitions{ json["partitionings"] };
 	for (std::size_t i{ 0 }; i < all_partitionings_with_minimal_size.size(); ++i) {
 		const auto& partitioning = all_partitionings_with_minimal_size[i];
 		nlohmann::json this_partitioning;
 		for (const auto& partition : partitioning)
-			this_partitioning["partitions:"].push_back(partition.to_string());
-		j_partitions[i].push_back(this_partitioning);
+			this_partitioning["partitions"].push_back(partition.to_string());
+		j_partitions[std::to_string(i)] = this_partitioning;
 	}
 
+	file << json.dump(3);
+}
+
+void write_model_to_file(const std::filesystem::path & directory, const file_token & model) {
+	std::filesystem::create_directories(directory);
+	auto file = std::ofstream((directory / "reduced_model.prism").c_str());
+	print_model_to_stream(model, file);
+}
+
+void write_partitioning_to_file(const std::filesystem::path & directory, const std::vector<collapse_node::big_int>&partitioning) {
+	std::filesystem::create_directories(directory);
+	auto file = std::ofstream((directory / "partitioning.json").c_str());
+
+	nlohmann::json json;
+	for (const auto& partition : partitioning) {
+		json["partitions"].push_back(partition.to_string());
+	}
 	file << json.dump(3);
 }
 
@@ -1425,7 +1451,11 @@ int cli(int argc, char** argv) {
 		model_string_ptr = std::make_shared<std::string>(example_family());
 	}
 
-	auto output_files_directory = std::filesystem::path(".");
+	auto output_files_directory = std::filesystem::path(argv[0]).parent_path().parent_path();
+	//auto output_files_directory = std::filesystem::path(".");
+	output_files_directory /= "RESULTS";
+
+	//output_files_directory
 
 	// debug code:
 	//std::ifstream model_ifstream;
@@ -1486,9 +1516,6 @@ int cli(int argc, char** argv) {
 		}
 	}
 
-	std::mutex mutex_all_colorings;
-	std::list<std::map<std::string, int>> all_colorings;
-
 	const std::size_t max_threads{ 8 };
 
 	/*#### create such a class where inverse search is added as member function!!!
@@ -1533,50 +1560,29 @@ int cli(int argc, char** argv) {
 	// max_groupings.txt
 	write_max_local_groupings(output_files_directory, max_groupings);
 
-	// all_partitions.txt
+	// all_partitions.json
 	write_all_partitionings(output_files_directory, all_partitionings_with_minimal_size);
 
+	for (std::size_t i{ 0 }; i < all_partitionings_with_minimal_size.size(); ++i) {
+		file_token reduced_model = construct_reduced_model(ftoken, all_partitionings_with_minimal_size[i], all_var_names, var_name, const_table, live_vars, graph);
 
-	//output files structure:
-		/*
-		01/
-			partitioning.txt
-			reduced_model.txt
-		02/
-			partitioning.txt
-			reduced_model.txt
+		// reduced_model.prism
+		write_model_to_file(output_files_directory / std::to_string(i), reduced_model);
 
-		03/
-			partitioning.txt
-			reduced_model.txt
+		// partitioning.json
+		write_partitioning_to_file(output_files_directory / std::to_string(i), all_partitionings_with_minimal_size[i]);
+	}
 
+	//## create a meta json to be able to start the prism stuff in consequence...
 
+	//
+	//### all colorings still unused here.
+/*+++++++++++++++++++++++++++++*/
+	/*
+		print_coloring_from_graph_with_color_annotations(graph, output_model);
+		apply_coloring_to_file_token(reduced_model_parse_tree, var_name, const_table, live_vars, graph);
 
 		*/
-
-		//### all colorings still unused here.
-/*+++++++++++++++++++++++++++++*/
-
-	unsigned long long i{ 0 };
-	for (const std::map<std::string, int>& coloring : all_colorings) {
-		std::string reduced_model_file_name{ std::string("reduced_model") + std::to_string(i) + ".prism" };
-
-		// for convenience: apply coloring into graph:
-		for (const auto& pair : coloring) {
-			color(graph[pair.first]) = pair.second;
-		}
-		std::ofstream output_model((artifacts_path / reduced_model_file_name).string());
-		file_token reduced_model_parse_tree(ftoken);
-		apply_coloring_to_file_token(reduced_model_parse_tree, var_name, const_table, live_vars, graph);
-		print_model_to_stream(reduced_model_parse_tree, output_model);
-		print_coloring_from_graph_with_color_annotations(graph, output_model);
-		++i;
-	}
-	nlohmann::json meta_results;
-	meta_results["count_models"] = i;
-	auto json_file = std::ofstream((artifacts_path / "meta.json").string());
-	json_file << meta_results.dump(3);
-
 
 	/*
 	starke_coloring(graph);
