@@ -540,7 +540,7 @@ void multimerge(std::size_t count_threads, _Container& c1, _Container& c2, _Cont
 void find_local_groupings(
 	const grouping_enemies_table& enemies_table,
 	const std::vector<std::string>& all_vars,
-	std::vector<collapse_node> max_groupings
+	std::vector<collapse_node>& max_groupings
 ) {
 
 	static constexpr bool SANITY_CHECKS{ false };
@@ -698,8 +698,8 @@ void find_local_groupings(
 				}
 				//set is maximal
 				{
-					max_groupings.push_back(elem);
 					auto lock = std::unique_lock(mutex_save_max_sets);
+					max_groupings.push_back(elem);
 					save_max_sets << elem.id.to_string() << std::endl;
 					++count_max_sets;
 				}
@@ -824,9 +824,9 @@ struct consideration {
 };
 
 void find_all_global_coverings_with_max_groupings(
-	const std::vector<std::string>& all_vars,
-	const std::vector<collapse_node>& max_groupings,
-	std::vector<consideration>&result_combinations
+	const std::vector<std::string>&all_vars,
+	const std::vector<collapse_node>&max_groupings,
+	std::vector<consideration>&combinations_of_max_groupings
 ) {
 
 	std::size_t min_selection_size_so_far{ all_vars.size() };
@@ -857,9 +857,9 @@ void find_all_global_coverings_with_max_groupings(
 			const auto size_selection = rec.count();
 			if (size_selection < min_selection_size_so_far) {
 				min_selection_size_so_far = size_selection;
-				result_combinations.clear(); // discard all previously found combinations that took more selected items.
+				combinations_of_max_groupings.clear(); // discard all previously found combinations that took more selected items.
 			}
-			result_combinations.push_back(rec);
+			combinations_of_max_groupings.push_back(rec);
 			return;
 		}
 		if (rec.count() >= min_selection_size_so_far) // did not reached goal, but with the next selection we will exceed min_selection_size_so_far
@@ -881,7 +881,7 @@ void find_all_global_coverings_with_max_groupings(
 		}
 		if (sel_rest_size == 0)
 			return; // cannot select any progress.
-		if ((min_selection_size_so_far - rec.count()) * sel_rest_size < rest_goal.size())
+		if ((min_selection_size_so_far - rec.count()) * sel_rest_size < rest_goal.count())
 			// with each step of selecting another group we may cover at most {sel_rest_size} rest variables.
 			// We cannot cover all rest variables {rest_goal.size()} if we only have {(min_selection_size_so_far - rec.count())} choices left
 			// without exceeding {min_selection_size_so_far} choices.
@@ -917,19 +917,104 @@ void find_all_global_coverings_with_max_groupings(
 	}
 }
 
-void process_sub_colorings(
+void find_all_coverings_with_non_overlapping_groups(
+	std::vector<std::string> all_vars,
+	const std::vector<collapse_node>&max_groupings,
+	const std::vector<consideration>&combinations_of_max_groupings,
+	std::vector<std::vector<collapse_node::big_int>>&coverings_with_non_overlapping_groups
+) {
+	if (combinations_of_max_groupings.empty()) return;
+	coverings_with_non_overlapping_groups.clear();
+
+	std::vector<std::vector<collapse_node::big_int>> coverings_with_overlapping_groups;
+
+	const auto COUNT_VARS{ all_vars.size() };
+
+	for (const auto& group_combination : combinations_of_max_groupings) {
+		//std::size_t last_size = coverings_with_non_overlapping_groups.size();
+		//std::vector<std::size_t> select_group_for_variable(COUNT_VARS, 0);
+
+		std::vector<collapse_node::big_int> only_used_max_groups;
+		for (std::size_t i{ 0 }; i < group_combination.sel.size(); ++i) {
+			if (group_combination.sel[i] == selected::YES) {
+				only_used_max_groups.push_back(max_groupings[i].id);
+			}
+		}
+
+		coverings_with_overlapping_groups.push_back(only_used_max_groups);
+	}
+
+	// resolve overlappings:
+	std::vector<std::vector<collapse_node::big_int>> next_coverings_with_overlapping_groups;
+	while (!coverings_with_overlapping_groups.empty()) {
+		for (const std::vector<collapse_node::big_int>& covering : coverings_with_overlapping_groups) {
+			// for each var search for overlapping
+			for (std::size_t var_id{ 0 }; var_id < COUNT_VARS; ++var_id) {
+				// list all groups covering var_id:
+				std::vector<std::size_t> indices_covering_var_id;
+				for (std::size_t j{ 0 }; j < covering.size(); ++j) {
+					if (covering[j][var_id])
+						indices_covering_var_id.push_back(j);
+				}
+				// if var_id is overlapping in this covering:
+				if (indices_covering_var_id.size() > 1) {
+					auto sub_cases = std::vector< std::vector<collapse_node::big_int>>(indices_covering_var_id.size(), covering);
+					for (std::size_t i{ 0 }; i < sub_cases.size(); ++i) {
+						for (std::size_t j{ 0 }; j < indices_covering_var_id.size(); ++j) {
+							if (i != j) sub_cases[i][indices_covering_var_id[j]][var_id] = 0;// at sub case i, take the jth group covering var_id, reset bit for var_id
+						}
+					}
+					next_coverings_with_overlapping_groups.insert(next_coverings_with_overlapping_groups.cend(), sub_cases.cbegin(), sub_cases.cend());
+					goto proceed_with_next_covering_763941346;
+				}
+				// var_id was not overlapping, lets check the others...
+			}
+			//no var_id is overlapping, so the whole covering is not overlapping:
+			coverings_with_non_overlapping_groups.push_back(covering);
+		proceed_with_next_covering_763941346:
+			continue;
+		}
+		coverings_with_overlapping_groups = std::move(next_coverings_with_overlapping_groups);
+	}
+
+	// sort and eliminate duplicates:
+
+	// inner sort
+	for (std::vector<collapse_node::big_int>& element : coverings_with_non_overlapping_groups) {
+		std::sort(
+			element.begin(),
+			element.end(),
+			[](const collapse_node::big_int& left, const collapse_node::big_int& right) {
+				return left.to_string() < right.to_string();
+			}
+		);
+	}
+	// outer sort
+	std::sort(
+		coverings_with_non_overlapping_groups.begin(),
+		coverings_with_non_overlapping_groups.end(),
+		[](const std::vector<collapse_node::big_int>& left, const std::vector<collapse_node::big_int>& right) {
+			if (left.size() < right.size()) return true;
+			for (std::size_t i{ 0 }; i < left.size(); ++i) {
+				if (left[i].to_string() < right[i].to_string()) return true;
+				if (left[i].to_string() > right[i].to_string()) return false;
+			}
+			return false;
+		}
+	);
+
+	// remove duplicates
+	coverings_with_non_overlapping_groups.erase(std::unique(coverings_with_non_overlapping_groups.begin(), coverings_with_non_overlapping_groups.end()), coverings_with_non_overlapping_groups.cend());
+
+}
+
+void find_all_colorings_with_minimal_variables(
 	std::shared_ptr<std::map<std::shared_ptr<std::set<std::string>>, std::set<std::shared_ptr<std::set<std::string>>>>> collapse_graph,
 	const grouping_enemies_table & enemies_table,
 	const std::size_t max_threads,
-	std::vector<std::string> all_vars
+	std::vector<std::string> all_vars,
+	std::vector<std::vector<collapse_node::big_int>>& all_colorings_with_minimal_variables
 ) {
-
-
-
-	/* do - undo - chain*/
-	//std::list<activation_record> chain;
-
-	//chain.emplace_back(skip_output);
 
 	std::stringstream ss;
 	//#### remove collapse graph usage here!
@@ -947,22 +1032,15 @@ void process_sub_colorings(
 	}
 	standard_logger().info(ss.str());
 
-	std::size_t ivar1 = 0;
-	std::size_t ivar2 = 1;
-
-	if (all_vars.size() < 2)
-		throw 2;
-
 	std::vector<collapse_node> max_groupings;
 
 	find_local_groupings(enemies_table, all_vars, max_groupings);
 
 	// find all global coverings with max groupings:
-	std::vector<consideration> result_combinations;
-	find_all_global_coverings_with_max_groupings(all_vars, max_groupings, result_combinations);
+	std::vector<consideration> combinations_of_max_groupings;
+	find_all_global_coverings_with_max_groupings(all_vars, max_groupings, combinations_of_max_groupings);
 
-	//
-
+	find_all_coverings_with_non_overlapping_groups(all_vars, max_groupings, combinations_of_max_groupings, all_colorings_with_minimal_variables);
 }
 
 void live_range_analysis(
@@ -1375,7 +1453,9 @@ int cli(int argc, char** argv) {
 		}
 	}
 
-	process_sub_colorings(collapse_graph, enemies_table, max_threads, all_var_names);
+	std::vector<std::vector<collapse_node::big_int>> all_colorings_with_minimal_variables;
+
+	find_all_colorings_with_minimal_variables(collapse_graph, enemies_table, max_threads, all_var_names, all_colorings_with_minimal_variables);
 
 	// wait for futures here
 	while (!futures.empty()) {
@@ -1467,9 +1547,9 @@ int main(int argc, char** argv)
 		for (int x = 0; x < 20; ++x) {
 			standard_logger().info(std::to_string(x) + "  :  " + std::to_string(count[x]));
 		}
-	}
+}
 
 #endif
 	return cli(argc, argv);
 
-	}
+}
