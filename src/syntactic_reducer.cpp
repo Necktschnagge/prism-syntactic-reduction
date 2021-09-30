@@ -1028,6 +1028,7 @@ void find_all_minimal_partitionings( //#?ready
 	const grouping_enemies_table & enemies_table,
 	const std::size_t max_threads,
 	std::vector<std::string> all_vars,
+	std::vector<collapse_node>&max_groupings,
 	std::vector<std::vector<collapse_node::big_int>>&all_colorings_with_minimal_variables
 ) {
 	standard_logger().info("#############################################################################################");
@@ -1041,7 +1042,6 @@ void find_all_minimal_partitionings( //#?ready
 	print_enemies_table_to_log(enemies_table, all_vars);
 
 	standard_logger().info("Calculating all maximal local groupings...");
-	std::vector<collapse_node> max_groupings;
 	find_local_groupings(enemies_table, all_vars, max_groupings);
 	standard_logger().info("Calculating all maximal local groupings   ...DONE!");
 
@@ -1349,6 +1349,51 @@ void filter_colorings(std::list<std::pair<std::map<std::string, int>, unsigned l
 
 }
 
+void write_var_list_txt(const std::filesystem::path & directory, const std::vector<std::string>&all_vars) {
+	auto file = std::ofstream((directory / "var_list.txt").c_str());
+	for (const auto& var : all_vars)
+		file << var << std::endl;
+}
+
+void write_max_local_groupings(const std::filesystem::path & directory, const std::vector<collapse_node>&max_groupings) {
+	auto file = std::ofstream((directory / "max_groupings.txt").c_str());
+	for (const auto& group : max_groupings)
+		file << group.id.to_string() << std::endl;
+}
+
+void write_all_partitionings(const std::filesystem::path & directory, const std::vector<std::vector<collapse_node::big_int>>&all_partitionings_with_minimal_size) {
+	auto file = std::ofstream((directory / "all_partitions.txt").c_str());
+
+	nlohmann::json json;
+	auto& j_partitions{ json["partitions"] };
+	for (std::size_t i{ 0 }; i < all_partitionings_with_minimal_size.size(); ++i) {
+		const auto& partitioning = all_partitionings_with_minimal_size[i];
+		nlohmann::json this_partitioning;
+		for (const auto& partition : partitioning)
+			this_partitioning["partitions:"].push_back(partition.to_string());
+		j_partitions[i].push_back(this_partitioning);
+	}
+
+	file << json.dump(3);
+}
+
+file_token construct_reduced_model(
+	const file_token& original_model,
+	const std::vector<collapse_node::big_int>& partitioning,
+	std::string cf_var_name, const std::map<std::string, int>& const_table,
+	live_var_map& live_vars,
+	const std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph
+) {
+	file_token reduced_file(original_model);
+
+	//### todo here apply partitioning to graph....
+
+	apply_coloring_to_file_token(reduced_file, cf_var_name, const_table, live_vars, graph);
+
+	return reduced_file;
+}
+
+
 int cli(int argc, char** argv) {
 
 	standard_logger().info(std::string("Running: ") + argv[0]);
@@ -1369,6 +1414,8 @@ int cli(int argc, char** argv) {
 	if (!model_string_ptr) {
 		model_string_ptr = std::make_shared<std::string>(example_family());
 	}
+
+	auto output_files_directory = std::filesystem::path(".");
 
 	// debug code:
 	//std::ifstream model_ifstream;
@@ -1465,12 +1512,41 @@ int cli(int argc, char** argv) {
 		}
 	}
 
-	std::vector<std::vector<collapse_node::big_int>> all_colorings_with_minimal_variables;
+	std::vector<std::vector<collapse_node::big_int>> all_partitionings_with_minimal_size;
+	std::vector<collapse_node> max_groupings;
 
-	find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, all_colorings_with_minimal_variables);  //####refactor maxthreads inner and outer threads config....
+	find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, max_groupings, all_partitionings_with_minimal_size);  //  ####refactor maxthreads inner and outer threads config....
 
-	//### all colorings still unused here.
-	/*+++++++++++++++++++++++++++++*/
+	// var_list.txt
+	write_var_list_txt(output_files_directory, all_var_names);
+
+	// max_groupings.txt
+	write_max_local_groupings(output_files_directory, max_groupings);
+
+	// all_partitions.txt
+	write_all_partitionings(output_files_directory, all_partitionings_with_minimal_size);
+
+
+	//output files structure:
+		/*
+		01/
+			partitioning.txt
+			reduced_model.txt
+		02/
+			partitioning.txt
+			reduced_model.txt
+
+		03/
+			partitioning.txt
+			reduced_model.txt
+
+
+
+		*/
+
+		//### all colorings still unused here.
+/*+++++++++++++++++++++++++++++*/
+
 	unsigned long long i{ 0 };
 	for (const std::map<std::string, int>& coloring : all_colorings) {
 		std::string reduced_model_file_name{ std::string("reduced_model") + std::to_string(i) + ".prism" };
