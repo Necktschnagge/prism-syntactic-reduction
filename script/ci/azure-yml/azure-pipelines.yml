@@ -84,6 +84,7 @@ stages:
          condition: succeeded()
 
  - stage: build
+   condition: false # INACTIVE SINCE AUTOMATIC GIT PUSH
    dependsOn: prebuild_artifacts
    jobs:
     - job: Cloud
@@ -151,7 +152,7 @@ stages:
          condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
 
  - stage: test_and_analyze
-   
+   condition: false # INACTIVE SINCE AUTOMATIC GIT PUSH   
    #dependsOn: build
    
    jobs:
@@ -188,10 +189,6 @@ stages:
        - script: ls -la ./RESULTS/
          displayName: "Check directory content of RESULTS"
          condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
-       - script: ./script/ci/upload-generated-models.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)"
-         displayName: "Upload generated models"
-         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
-
     - job: cloud_collect_data
       strategy:
         matrix:
