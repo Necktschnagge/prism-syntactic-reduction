@@ -12,10 +12,10 @@ trigger:
 
 
 stages:
- - stage: prebuild_artifacts
+ - stage: distribute_generated_models
  
    jobs:
-    - job: Prism_Cloud
+    - job: Cloud_Ubuntu
       # This job builds the prism binaries on an ubuntu cloud vm
       # and uploads the binaries back into the git repository.
       # This job is intended to run once to get prism binaries in the repository forever.
@@ -28,60 +28,59 @@ stages:
         vmImage: $(imageName)
         name: $(the_name)
       
-      condition: false # Only enable if new prism binaries are really needed !!!
       timeoutInMinutes: 30
       steps:
-       - script: ls /usr/lib/jvm/
-         displayName: "check Java install directory"
+       - script: git rev-parse --abbrev-ref HEAD
+         displayName: "check git branch"
          condition: succeeded()
-       - script: sudo rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-         displayName: "Remove Java 11"
-         condition: succeeded()
-       - script: sudo apt-get install -y openjdk-8-jdk
-         displayName: "Install custom Java version"
-         condition: succeeded()
-       - script: javac -version
-         displayName: "Check Java version"
-         condition: succeeded()
-       - script: cd prism-sttt17/prism/ && make JAVA_DIR=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64
-         displayName: "Build prism"
-         condition: succeeded()
-       - script: mv prism-sttt17/ ../dumped ### override existing files or not?
-         displayName: "Move binaries"
-         condition: succeeded()
-       - script: ls -R ../dumped ### override existing files or not?
-         displayName: "What has been moved?"
-         condition: succeeded()
-       - script: git checkout artifacts --
-         displayName: "git: checkout artifacts"
-         condition: succeeded()
-       - script: rm -R artifacts/prism-sttt17/ || echo "Nothing to remove." ### override existing files or not?
-         displayName: "Remove old build"
-         condition: succeeded()
-       - script: mv ../dumped artifacts/prism-sttt17/ ### override existing files or not?
-         displayName: "Move binaries"
-         condition: succeeded()
-       - script: sed -i.bak 's#PRISM_DIR="/home/vsts/work/1/s/prism-sttt17/prism"#PRISM_DIR="/home/vsts/work/1/s/artifacts/prism-sttt17/prism"#g' artifacts/prism-sttt17/prism/bin/prism
-         displayName: "adapt PRISM_DIR directory"
-         condition: succeeded()
-       - script: ls -R artifacts/prism-sttt17/ ### override existing files or not?
-         displayName: "What has been moved?"
-         condition: succeeded()
-       - script: rm artifacts/prism-sttt17/.gitignore ### override existing files or not?
-         displayName: "remove .gitignore in prism-sttt17"
-         condition: succeeded()
-       - script: git add artifacts/* 
-         displayName: "git: Stage changes"
-         condition: succeeded()
-       - script: git status
-         displayName: "git: status"
-         condition: succeeded()
-       - script: git -c user.name="CI Agent" -c user.email="ci-agent@example.org" commit -m "prism binaries"
-         displayName: "Commit binaries"
-         condition: succeeded()
-       - script: git push https://$(USER_NAME):$(PERSONAL_ACCESS_TOKEN)@github.com/$(echo "$(git remote get-url origin)" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//') ${git_branch_artifacts} 
-         displayName: "git: push binaries."
-         condition: succeeded()
+       #- script: sudo rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+       #  displayName: "Remove Java 11"
+       #  condition: succeeded()
+       #- script: sudo apt-get install -y openjdk-8-jdk
+       #  displayName: "Install custom Java version"
+       #  condition: succeeded()
+       #- script: javac -version
+       #  displayName: "Check Java version"
+       #  condition: succeeded()
+       #- script: cd prism-sttt17/prism/ && make JAVA_DIR=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64
+       #  displayName: "Build prism"
+       #  condition: succeeded()
+       #- script: mv prism-sttt17/ ../dumped ### override existing files or not?
+       #  displayName: "Move binaries"
+       #  condition: succeeded()
+       #- script: ls -R ../dumped ### override existing files or not?
+       #  displayName: "What has been moved?"
+       #  condition: succeeded()
+       #- script: git checkout artifacts --
+       #  displayName: "git: checkout artifacts"
+       #  condition: succeeded()
+       #- script: rm -R artifacts/prism-sttt17/ || echo "Nothing to remove." ### override existing files or not?
+       #  displayName: "Remove old build"
+       #  condition: succeeded()
+       #- script: mv ../dumped artifacts/prism-sttt17/ ### override existing files or not?
+       #  displayName: "Move binaries"
+       #  condition: succeeded()
+       #- script: sed -i.bak 's#PRISM_DIR="/home/vsts/work/1/s/prism-sttt17/prism"#PRISM_DIR="/home/vsts/work/1/s/artifacts/prism-sttt17/prism"#g' artifacts/prism-sttt17/prism/bin/prism
+       #  displayName: "adapt PRISM_DIR directory"
+       #  condition: succeeded()
+       #- script: ls -R artifacts/prism-sttt17/ ### override existing files or not?
+       #  displayName: "What has been moved?"
+       #  condition: succeeded()
+       #- script: rm artifacts/prism-sttt17/.gitignore ### override existing files or not?
+       #  displayName: "remove .gitignore in prism-sttt17"
+       #  condition: succeeded()
+       #- script: git add artifacts/* 
+       #  displayName: "git: Stage changes"
+       #  condition: succeeded()
+       #- script: git status
+       #  displayName: "git: status"
+       #  condition: succeeded()
+       #- script: git -c user.name="CI Agent" -c user.email="ci-agent@example.org" commit -m "prism binaries"
+       #  displayName: "Commit binaries"
+       #  condition: succeeded()
+       #- script: git push https://$(USER_NAME):$(PERSONAL_ACCESS_TOKEN)@github.com/$(echo "$(git remote get-url origin)" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//') ${git_branch_artifacts} 
+       #  displayName: "git: push binaries."
+       #  condition: succeeded()
 
  - stage: build
    condition: false # INACTIVE SINCE AUTOMATIC GIT PUSH
