@@ -1431,7 +1431,15 @@ file_token construct_reduced_model(
 	return reduced_file;
 }
 
-const auto path_to_string = [](auto path) { return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(path.c_str()); };
+
+const auto path_to_string = [](auto path) {
+	if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
+		return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(path.c_str());
+	}
+	else {
+		return std::string(path.c_str());
+	}
+};
 
 int cli(int argc, char** argv) {
 	standard_logger().info("This is Syntactic Reducer 1.0\n\n");
