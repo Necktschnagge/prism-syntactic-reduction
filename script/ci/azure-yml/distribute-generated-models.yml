@@ -33,9 +33,9 @@ stages:
        - script: git rev-parse --abbrev-ref HEAD
          displayName: "check git branch"
          condition: succeeded()
-       #- script: sudo rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-       #  displayName: "Remove Java 11"
-       #  condition: succeeded()
+       - script: echo ${Build.SourceBranch}
+         displayName: "cHECK BRANCH VIA AZURE VARIABLES"
+         condition: succeeded()
        #- script: sudo apt-get install -y openjdk-8-jdk
        #  displayName: "Install custom Java version"
        #  condition: succeeded()
