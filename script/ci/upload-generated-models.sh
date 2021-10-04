@@ -4,6 +4,8 @@ git_access_token=${2}
 git_hash_last_commit=$(git rev-parse HEAD)
 git_branch_for_results="ci-generate-models-${git_hash_last_commit}"
 user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//')
+echo ${user_repo_id}
+
 
 git switch -c ${git_branch_for_results} #switch to new branch pointing to current HEAD
 cp script/ci/azure-yml/distribute-generated-models.yml azure-pipelines.yml
