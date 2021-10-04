@@ -33,7 +33,7 @@ stages:
        - script: git rev-parse --abbrev-ref HEAD
          displayName: "check git branch"
          condition: succeeded()
-       - script: echo ${Build.SourceBranch}
+       - script: echo ${{ Build.SourceBranch }}
          displayName: "cHECK BRANCH VIA AZURE VARIABLES"
          condition: succeeded()
        #- script: sudo apt-get install -y openjdk-8-jdk
