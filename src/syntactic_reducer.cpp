@@ -1444,7 +1444,7 @@ const auto path_to_string = [](auto path) {
 int cli(int argc, char** argv) {
 	standard_logger().info("This is Syntactic Reducer 1.0\n\n");
 	//standard_logger().info(std::string("Running config json: ") + argv[0]);
-	const std::string CURRENT_PATH_CHAR_STRING{ std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(std::filesystem::current_path().c_str()) };
+	const std::string CURRENT_PATH_CHAR_STRING{ path_to_string(std::filesystem::current_path()) };
 	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING);
 	//std::filesystem::path CURRENT_PATH{ CURRENT_PATH_CHAR_STRING };
 
