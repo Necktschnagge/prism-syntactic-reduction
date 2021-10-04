@@ -20,6 +20,8 @@
 #include <bitset>
 #include <algorithm>
 #include <execution>
+#include <locale>
+#include <codecvt>
 
 using grouping_enemies_table = std::vector<std::set<std::size_t>>; /// [var_id_x] |-> { var_id_y | var_id_x and var_id_y cannot be merged }
 
@@ -1429,48 +1431,68 @@ file_token construct_reduced_model(
 	return reduced_file;
 }
 
+const auto path_to_string = [](auto path) { return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(path.c_str()); };
 
 int cli(int argc, char** argv) {
+	standard_logger().info("This is Syntactic Reducer 1.0\n\n");
+	//standard_logger().info(std::string("Running config json: ") + argv[0]);
+	const std::string CURRENT_PATH_CHAR_STRING{ std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(std::filesystem::current_path().c_str()) };
+	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING);
+	//std::filesystem::path CURRENT_PATH{ CURRENT_PATH_CHAR_STRING };
 
-	standard_logger().info(std::string("Running: ") + argv[0]);
-
-	std::shared_ptr<std::string> model_string_ptr;
-	std::filesystem::path artifacts_path;
-
+	standard_logger().info("Loading config json...");
+	/* Obtain config json path */
+	std::filesystem::path config_json_path{ argv[1] };
+	standard_logger().info(std::string("Given config json path:  ") + path_to_string(config_json_path));
+	config_json_path = std::filesystem::canonical(config_json_path);
+	const std::filesystem::path config_json_directory{ config_json_path.parent_path() };
+	standard_logger().info(std::string("Canonical config json path:  ") + path_to_string(config_json_path));
+	/* Load config json */
+	nlohmann::json config;
 	if (argc >= 2) {
-		std::ifstream model_ifstream;
-		model_ifstream.open(argv[1]);
-		model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
+		std::ifstream config_json_ifstream;
+		config_json_ifstream.open(config_json_path);
+		//auto config_json = std::string(std::istreambuf_iterator<char>(config_json_ifstream), std::istreambuf_iterator<char>());
+		try {
+			config = nlohmann::json::parse(config_json_ifstream);
+		}
+		catch (...) {
+			standard_logger().error("Exception on parsing config json!");
+			throw;
+		}
 	}
-
-	if (argc >= 3) {
-		artifacts_path = argv[2];
+	else {
+		standard_logger().error("Missing config json path!");
+		return 1;
 	}
-
-	if (!model_string_ptr) {
-		model_string_ptr = std::make_shared<std::string>(example_family());
-	}
-
-	auto output_files_directory = std::filesystem::path(argv[0]).parent_path().parent_path();
-	//auto output_files_directory = std::filesystem::path(".");
-	output_files_directory /= "RESULTS";
-
-	//output_files_directory
-
-	// debug code:
-	//std::ifstream model_ifstream;
-	//model_ifstream.open(R"(..\..\Examples\bsp.prism)");
-	//model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
+	standard_logger().info(std::string("Successfully loaded config json:\n\n") + config.dump(3) + "\n");
 
 
+	/* Load model */
+	standard_logger().info("Loading model...");
+	//standard_logger().debug(path_to_string(config_json_directory / std::string(config["model_path"])));
+	std::filesystem::path model_path{
+		std::filesystem::canonical(
+			config_json_directory / std::string(config["model_path"])
+		)
+	};
+	standard_logger().info(std::string("Canonical model path:  ") + path_to_string(model_path));
+	std::ifstream model_ifstream;
+	model_ifstream.open(model_path);
+	auto model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
+	standard_logger().info("Loading model   ...DONE!");
+
+	std::filesystem::path results_directory{ std::filesystem::weakly_canonical(config_json_directory / std::string(config["result_dir"])) };
+	standard_logger().info(std::string("Results will be written to directory:  ") + path_to_string(results_directory));
+
+	standard_logger().info("Loading list of excluded variables...");
 	// when here then all live set were computed.
-	std::vector<std::string> excluded_vars{ "y_Integrator_44480461", "x_cfblk5_1_1174489129" };
+	auto excluded_vars = std::vector<std::string>(config["exclude_vars"].cbegin(), config["exclude_vars"].cend());
+	//std::vector<std::string> excluded_vars{ "y_Integrator_44480461", "x_cfblk5_1_1174489129" };
 
 	standard_logger().info("Start parsing...");
 	auto ftoken = file_token(model_string_ptr);
-
 	ftoken.parse();
-
 	bool check = ftoken.is_sound_recursive();
 	standard_logger().info("Finished parsing.");
 
@@ -1555,22 +1577,22 @@ int cli(int argc, char** argv) {
 	find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, max_groupings, all_partitionings_with_minimal_size);  //  ####refactor maxthreads inner and outer threads config....
 
 	// var_list.txt
-	write_var_list_txt(output_files_directory, all_var_names);
+	write_var_list_txt(results_directory, all_var_names);
 
 	// max_groupings.txt
-	write_max_local_groupings(output_files_directory, max_groupings);
+	write_max_local_groupings(results_directory, max_groupings);
 
 	// all_partitions.json
-	write_all_partitionings(output_files_directory, all_partitionings_with_minimal_size);
+	write_all_partitionings(results_directory, all_partitionings_with_minimal_size);
 
 	for (std::size_t i{ 0 }; i < all_partitionings_with_minimal_size.size(); ++i) {
 		file_token reduced_model = construct_reduced_model(ftoken, all_partitionings_with_minimal_size[i], all_var_names, var_name, const_table, live_vars, graph);
 
 		// reduced_model.prism
-		write_model_to_file(output_files_directory / std::to_string(i), reduced_model);
+		write_model_to_file(results_directory / std::to_string(i), reduced_model);
 
 		// partitioning.json
-		write_partitioning_to_file(output_files_directory / std::to_string(i), all_partitionings_with_minimal_size[i]);
+		write_partitioning_to_file(results_directory / std::to_string(i), all_partitionings_with_minimal_size[i]);
 	}
 
 	//## create a meta json to be able to start the prism stuff in consequence...
@@ -1584,21 +1606,21 @@ int cli(int argc, char** argv) {
 
 		*/
 
-	/*
-	starke_coloring(graph);
+		/*
+		starke_coloring(graph);
 
-	print_coloring_from_graph_with_color_annotations(graph, std::cout);
+		print_coloring_from_graph_with_color_annotations(graph, std::cout);
 
 
-	// copy the whole parse tree
-	file_token reduced_file(ftoken);
+		// copy the whole parse tree
+		file_token reduced_file(ftoken);
 
-	apply_coloring_to_file_token(reduced_file, var_name, const_table, live_vars, graph);
+		apply_coloring_to_file_token(reduced_file, var_name, const_table, live_vars, graph);
 
-	// print reduced model:
-	auto ofile = std::ofstream("reduced_model.prism");
-	print_model_to_stream(reduced_file, ofile);
-	*/
+		// print reduced model:
+		auto ofile = std::ofstream("reduced_model.prism");
+		print_model_to_stream(reduced_file, ofile);
+		*/
 	return 0;
 }
 
@@ -1607,33 +1629,6 @@ int cli(int argc, char** argv) {
 int main(int argc, char** argv)
 {
 	init_logger();
-#if false
-	{
-		/* read and analyse all_sets file. */
-
-		std::ifstream read_all_sets("all_sets.txt");
-
-		std::string line;
-
-		std::map<int, int> count;
-		for (int x = 0; x < 20; ++x) {
-			count[x] = 0;
-		}
-
-		while (std::getline(read_all_sets, line)) {
-			++count[std::count(line.cbegin(), line.cend(), '1')];
-
-			if (std::count(line.cbegin(), line.cend(), '1') == 9) {
-				all_nodes_size_9.emplace_back(collapse_node::big_int(line), collapse_node::big_int());
-			}
-		}
-
-		for (int x = 0; x < 20; ++x) {
-			standard_logger().info(std::to_string(x) + "  :  " + std::to_string(count[x]));
-		}
-	}
-
-#endif
 	return cli(argc, argv);
 
 }
