@@ -6,7 +6,7 @@ git_branch_for_results="ci-generate-models-${git_hash_last_commit}"
 user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//')
 
 git switch -c ${git_branch_for_results} #switch to new branch pointing to current HEAD
-cp script/ci/azure-yml/azure-pipelines.yml azure-pipelines.yml
+cp script/ci/azure-yml/distribute-generated-models.yml azure-pipelines.yml
 git add *
 git status
 git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "Automatic upload of generated models"
