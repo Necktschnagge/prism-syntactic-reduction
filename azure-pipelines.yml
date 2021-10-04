@@ -152,7 +152,7 @@ stages:
 
  - stage: test_and_analyze
    
-   #dependsOn: build
+   dependsOn: [] #build
    
    jobs:
     - job: cloud_generate_all_models

@@ -3,7 +3,7 @@ git_access_token=${2}
 
 git_hash_last_commit=$(git rev-parse HEAD)
 git_branch_for_results="ci-generate-models-${git_hash_last_commit}"
-git branch ${git_branch_for_results}
+git switch -c ${git_branch_for_results} #switch to new branch pointing to current HEAD
 cp script/ci/azure-yml/azure-pipelines.yml azure-pipelines.yml
 git add *
 git status
