@@ -30,8 +30,8 @@ stages:
       
       timeoutInMinutes: 60
       steps:
-       - script: git rev-parse --abbrev-ref HEAD
-         displayName: "check git branch"
+       - script: ./script/ci/distribute_models.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$(BUILD_SOURCEBRANCH)"
+         displayName: "Run distribute_models.sh "
          condition: succeeded()
        - script: echo $BUILD_SOURCEBRANCH
          displayName: "cHECK BRANCH VIA AZURE VARIABLES"
@@ -39,45 +39,4 @@ stages:
        #- script: sudo apt-get install -y openjdk-8-jdk
        #  displayName: "Install custom Java version"
        #  condition: succeeded()
-       #- script: javac -version
-       #  displayName: "Check Java version"
-       #  condition: succeeded()
-       #- script: cd prism-sttt17/prism/ && make JAVA_DIR=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64
-       #  displayName: "Build prism"
-       #  condition: succeeded()
-       #- script: mv prism-sttt17/ ../dumped ### override existing files or not?
-       #  displayName: "Move binaries"
-       #  condition: succeeded()
-       #- script: ls -R ../dumped ### override existing files or not?
-       #  displayName: "What has been moved?"
-       #  condition: succeeded()
-       #- script: git checkout artifacts --
-       #  displayName: "git: checkout artifacts"
-       #  condition: succeeded()
-       #- script: rm -R artifacts/prism-sttt17/ || echo "Nothing to remove." ### override existing files or not?
-       #  displayName: "Remove old build"
-       #  condition: succeeded()
-       #- script: mv ../dumped artifacts/prism-sttt17/ ### override existing files or not?
-       #  displayName: "Move binaries"
-       #  condition: succeeded()
-       #- script: sed -i.bak 's#PRISM_DIR="/home/vsts/work/1/s/prism-sttt17/prism"#PRISM_DIR="/home/vsts/work/1/s/artifacts/prism-sttt17/prism"#g' artifacts/prism-sttt17/prism/bin/prism
-       #  displayName: "adapt PRISM_DIR directory"
-       #  condition: succeeded()
-       #- script: ls -R artifacts/prism-sttt17/ ### override existing files or not?
-       #  displayName: "What has been moved?"
-       #  condition: succeeded()
-       #- script: rm artifacts/prism-sttt17/.gitignore ### override existing files or not?
-       #  displayName: "remove .gitignore in prism-sttt17"
-       #  condition: succeeded()
-       #- script: git add artifacts/* 
-       #  displayName: "git: Stage changes"
-       #  condition: succeeded()
-       #- script: git status
-       #  displayName: "git: status"
-       #  condition: succeeded()
-       #- script: git -c user.name="CI Agent" -c user.email="ci-agent@example.org" commit -m "prism binaries"
-       #  displayName: "Commit binaries"
-       #  condition: succeeded()
-       #- script: git push https://$(USER_NAME):$(PERSONAL_ACCESS_TOKEN)@github.com/$(echo "$(git remote get-url origin)" | sed -E 's/https:\/\/\w*.\w*\///' | sed -E 's/\.git//') ${git_branch_artifacts} 
-       #  displayName: "git: push binaries."
-       #  condition: succeeded()
+       
