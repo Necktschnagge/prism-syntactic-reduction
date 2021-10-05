@@ -19,8 +19,9 @@ user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -
 
 cd ./RESULTS
 ls -la
-for D in `find . -type d`
-do
+#for D in `find . -type d`
+#do
+for D in */ ; do
 	echo iterator: ${D}
 	number=$(echo ${D} | sed -E 's/\.\///')
 	echo number: ${number}
