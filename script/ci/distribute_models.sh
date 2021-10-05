@@ -26,7 +26,7 @@ for D in */ ; do
 	number=$(echo ${D} | sed -E 's/\///')
 	echo number: ${number}
 	sub_branch_name=${branch_name}-${number}
-	git switch -c  #switch to new branch pointing to current HEAD
+	git switch -c ${sub_branch_name} #switch to new branch pointing to current HEAD
 	echo switched branch
 	cp ../script/ci/azure-yml/run-prism-on-one-model.yml ../azure-pipelines.yml
 	echo copied azure-yml
@@ -39,6 +39,7 @@ for D in */ ; do
 	git status
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "Automatic upload of generated models"
 	git status
+	git branch
 	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${sub_branch_name}
 	cd RESULTS
 	
