@@ -30,7 +30,7 @@ stages:
       
       timeoutInMinutes: 60
       steps:
-       - script: ./script/ci/distribute_models.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$(BUILD_SOURCEBRANCH)"
+       - script: ./script/ci/distribute_models.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$BUILD_SOURCEBRANCH"
          displayName: "Run distribute_models.sh "
          condition: succeeded()
        - script: echo $BUILD_SOURCEBRANCH
