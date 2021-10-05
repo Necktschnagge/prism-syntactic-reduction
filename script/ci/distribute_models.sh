@@ -38,7 +38,7 @@ for D in */ ; do
 	git status
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "Automatic upload of generated models"
 	git status
-	#git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${git_branch_for_results}
+	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${git_branch_for_results}
 	cd RESULTS
 	
 	git reset --hard HEAD~1
