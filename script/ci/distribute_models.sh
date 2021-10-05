@@ -29,12 +29,18 @@ for D in */ ; do
 	echo switched branch
 	cp ../script/ci/azure-yml/run-prism-on-one-model.yml ../azure-pipelines.yml
 	echo copied azure-yml
-    cp -r RESULTS/${D} prism_model
+    cp -r ${D} prism_model
+	echo copied prism model
+	
+	cd ..
 	git add *
+	echo added git files.
 	git status
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "Automatic upload of generated models"
 	git status
 	#git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${git_branch_for_results}
+	cd RESULTS
+	
 	git reset --hard HEAD~1
 	echo $D
 	echo $ number
