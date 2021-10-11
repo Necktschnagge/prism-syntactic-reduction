@@ -29,6 +29,7 @@ for D in */ ; do
 	git switch -c ${sub_branch_name} #switch to new branch pointing to current HEAD
 	echo switched branch
 	cp ../script/ci/azure-yml/run-prism-on-one-model.yml ../azure-pipelines.yml
+	cat ../azure-pipelines.yml
 	echo copied azure-yml
     cp -r ${D} prism_model
 	echo ${number} > prism_model/id.txt
