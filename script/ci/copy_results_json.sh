@@ -1,4 +1,4 @@
-it_username=${1}
+git_username=${1}
 git_access_token=${2}
 branch_name=$(echo ${3} | sed -E 's/refs\/heads\///')
 
@@ -46,7 +46,7 @@ while [[ ${pushed_successfully} -eq 0 ]]; do
 	echo merge ...
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge origin/${parent_branch_name}
 	echo push ...
-	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully=1
+	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully=1
 done
 
 count_results=0
