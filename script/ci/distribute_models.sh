@@ -31,7 +31,10 @@ for D in */ ; do
 	cp ../script/ci/azure-yml/run-prism-on-one-model.yml ../azure-pipelines.yml
 	echo copied azure-yml
     cp -r ${D} prism_model
+	echo ${number} > prism_model/id.txt
 	echo copied prism model
+	echo "See id file here:"
+	cat prism_model/id.txt
 	
 	cd ..
 	git add *
