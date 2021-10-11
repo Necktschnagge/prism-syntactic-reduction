@@ -33,12 +33,12 @@ git add -u ./azure-pipelines.yml
 git add ./RESULTS/${id}/prism_data.json
 git status
 git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "upload extracted data of sub branch ${id}"
-pushed_successfully=false
-while [[ !(${pushed_successfully}) ]]
-do
+
+pushed_successfully="loop"
+while [[ ${pushed_successfully} -eq "loop" ]]; do
 	git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
 	git merge origin/${parent_branch_name}
-	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully=true
+	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully="leave"
 done
 
 count_results=0
@@ -50,6 +50,8 @@ for D in */ ; do
 	number=$(echo ${D} | sed -E 's/\///')
 	echo number: ${number}
 	file_name=${id}/prism_data.json
+	echo HCeck for file: ${file_name}
+	ls -la ${D}
 	if [[ -f "${file_name}" ]]; then
 		count_results=$((count_results+1))
 	fi
