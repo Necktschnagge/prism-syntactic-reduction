@@ -56,6 +56,7 @@ count_results=0
 count_subdirs=0
 
 cd ./RESULTS
+ls -R
 for D in */ ; do
 	echo iterator: ${D}
 	number=$(echo ${D} | sed -E 's/\///')
