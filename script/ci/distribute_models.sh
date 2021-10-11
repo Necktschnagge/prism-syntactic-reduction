@@ -40,7 +40,7 @@ for D in */ ; do
 	git add *
 	echo added git files.
 	git status
-	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "Automatic upload of generated models"
+	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "upload one reduced model: (${number})"
 	git status
 	git branch
 	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${sub_branch_name}

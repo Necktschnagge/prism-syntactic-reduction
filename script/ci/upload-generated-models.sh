@@ -10,6 +10,6 @@ git switch -c ${git_branch_for_results} #switch to new branch pointing to curren
 cp script/ci/azure-yml/distribute-generated-models.yml azure-pipelines.yml
 git add *
 git status
-git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "Automatic upload of generated models"
+git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "Automatic upload of all generated models"
 git status
 git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${git_branch_for_results}
