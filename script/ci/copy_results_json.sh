@@ -30,6 +30,7 @@ git branch -r
 
 id=$(cat "./RESULTS/prism_model/id.txt")
 cp ./RESULTS/prism_model/prism_data.json ./RESULTS/${id}/prism_data.json
+rm -r ./RESULTS/prism_model/
 git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
 git switch -c ${parent_branch_name} origin/${parent_branch_name}
 git status
