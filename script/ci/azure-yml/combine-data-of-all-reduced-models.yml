@@ -1,0 +1,61 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+    - '*'
+    exclude:
+    - artifacts
+
+
+stages:
+ - stage: combine_data
+ 
+   jobs:
+    - job: Ubuntu_Cloud
+    
+      strategy:
+        matrix:
+          ubuntu_20_04:
+            imageName: 'ubuntu-20.04'
+            the_name: 'Azure Pipelines'
+      pool:
+        vmImage: $(imageName)
+        name: $(the_name)
+      
+      timeoutInMinutes: 180
+
+      steps:
+       - script: git submodule update --init --recursive
+         displayName: "Init Git Submodules"
+         condition: succeeded()
+#       - script: sudo apt-get update && sudo apt-get install libboost-all-dev libtbb-dev
+#         displayName: "Linux: Install Boost"
+#         condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
+#       - script: brew install boost
+#         displayName: "Mac: Install Boost"
+#         condition: and(succeeded(), eq( variables['Agent.OS'], 'Darwin' ))
+#       - script:  choco install boost-msvc-14.2 #nuget install boost_regex-vc142 -Version 1.76.0
+#         displayName: "Windows: Install Boost"#
+#         condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
+#       - script: cmake -S . -B ./build/ 
+#         displayName: "CMake: Create Project"
+#         condition: succeeded()
+#       - script: cmake --build ./build
+#         displayName: "CMake: Compile and Link"
+#         condition: succeeded()
+#       - script: cd artifacts/prism-sttt17/prism/bin/ && ./prism '../../../../RESULTS/prism_model/reduced_model.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g | tee ../../../../RESULTS/prism_model/log.txt
+#         displayName: 'Run PRISM on reduced_model'
+#         condition: succeeded()
+#       - script: ./build/tools/prism-log-extractor/Prism-Log-Extractor RESULTS/prism_model/log.txt RESULTS/prism_model/prism_data.json
+#         displayName: 'Extract data from PRISM log'
+#         condition: succeeded()
+#       - script: cat RESULTS/prism_model/log.txt
+#         displayName: 'Show log'
+#         condition: succeeded()
+#       - script: cat RESULTS/prism_model/prism_data.json
+#         displayName: 'Show extract data'
+#         condition: succeeded()
