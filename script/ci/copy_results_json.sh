@@ -47,6 +47,7 @@ while [[ ${pushed_successfully} -eq 0 ]]; do
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge origin/${parent_branch_name}
 	echo push ...
 	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully=1
+	sleep 5s
 done
 
 count_results=0
@@ -57,7 +58,7 @@ for D in */ ; do
 	echo iterator: ${D}
 	number=$(echo ${D} | sed -E 's/\///')
 	echo number: ${number}
-	file_name=${id}/prism_data.json
+	file_name=./${id}/prism_data.json
 	echo HCeck for file: ${file_name}
 	ls -la ${D}
 	if [[ -f ${file_name} ]]; then
