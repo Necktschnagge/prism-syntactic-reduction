@@ -25,10 +25,13 @@ user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -
 
 #./RESULTS/prism_model/id.txt
 git remote
+echo list all branches on remote...
+git branch -r
+
 id=$(cat "./RESULTS/prism_model/id.txt")
 cp ./RESULTS/prism_model/prism_data.json ./RESULTS/${id}/prism_data.json
 git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
-git switch -c ${parent_branch_name}
+git switch -c ${parent_branch_name} origin/${parent_branch_name}
 git status
 rm ./azure-pipelines.yml
 git add -u ./azure-pipelines.yml
