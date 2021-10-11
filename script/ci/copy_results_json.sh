@@ -41,8 +41,11 @@ git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@exam
 
 pushed_successfully=0
 while [[ ${pushed_successfully} -eq 0 ]]; do
+	echo fetch ...
 	git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
+	echo merge ...
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge origin/${parent_branch_name}
+	echo push ...
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully=1
 done
 
