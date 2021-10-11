@@ -20,11 +20,11 @@ stages:
       strategy:
         matrix:
           ubuntu_20_04:
-            imageName: 'ubuntu-20.04'
-            the_name: 'Azure Pipelines'
+            image_name: 'ubuntu-20.04'
+            agent_pool_name: 'Azure Pipelines'
       pool:
-        vmImage: $(imageName)
-        name: $(the_name)
+        vmImage: $(image_name)
+        name: $(agent_pool_name)
       
       timeoutInMinutes: 180
 
