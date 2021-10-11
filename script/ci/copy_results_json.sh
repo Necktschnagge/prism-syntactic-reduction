@@ -42,12 +42,13 @@ git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@exam
 pushed_successfully=0
 while [[ ${pushed_successfully} -eq 0 ]]; do
 	echo fetch ...
-	git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
+	git fetch origin
 	echo merge ...
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge origin/${parent_branch_name}
-	echo pull ...
-	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" pull origin ${parent_branch_name}
+	echo rebase ...
+	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" rebase origin/${parent_branch_name}
 	echo push ...
+	###use rebase instead!!!!
 	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully=1
 	sleep 5s
 done

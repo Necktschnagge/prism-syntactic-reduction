@@ -26,7 +26,7 @@ stages:
         vmImage: $(image_name)
         name: $(agent_pool_name)
       
-      timeoutInMinutes: 5 #only for debugging
+      timeoutInMinutes: 300
 
       steps:
        - script: git submodule update --init --recursive
