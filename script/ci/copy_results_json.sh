@@ -17,7 +17,12 @@ user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -
 #git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${git_branch_for_results}
 
 
-cd ./RESULTS
+#./RESULTS/prism_model/id.txt
+id=$(cat "./RESULTS/prism_model/id.txt")
+cp ./RESULTS/prism_model/prism_data.json ./RESULTS/${id}/prism_data.json
+
+git checkout --track origin/newsletter
+
 ls -la
 #for D in `find . -type d`
 #do
@@ -25,7 +30,7 @@ for D in */ ; do
 	echo iterator: ${D}
 	number=$(echo ${D} | sed -E 's/\///')
 	echo number: ${number}
-	sub_branch_name=${branch_name}+++{number}
+	sub_branch_name=${branch_name}-${number}
 	git switch -c ${sub_branch_name} #switch to new branch pointing to current HEAD
 	echo switched branch
 	cp ../script/ci/azure-yml/run-prism-on-one-model.yml ../azure-pipelines.yml
