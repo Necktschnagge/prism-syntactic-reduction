@@ -56,15 +56,14 @@ count_results=0
 count_subdirs=0
 
 cd ./RESULTS
-ls -R
 for D in */ ; do
 	echo iterator: ${D}
 	number=$(echo ${D} | sed -E 's/\///')
 	echo number: ${number}
-	file_name=./${id}/prism_data.json
-	echo HCeck for file: ${file_name}
+	file_name=./${number}/prism_data.json
+	echo Check for file: ${file_name}
 	ls -la ${D}
-	if test -f abc.txt; then
+	if [[ -f ${file_name} ]]; then
 		count_results=$((count_results+1))
 	fi
 	count_subdirs=$((count_subdirs+1))
