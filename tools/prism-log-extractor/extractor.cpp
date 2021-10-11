@@ -21,7 +21,8 @@ namespace {
 
 using regex_iterator = boost::regex_iterator<std::string::const_iterator>;
 
-const auto R_NUMBER_OF_STATES{ boost::regex(R"x(States:\s*([0-9]+)\s+\(([0-9]+)\s+initial\))x") };
+const auto R_NUMBER_OF_STATES{ boost::regex(R"x(States:\s*([0-9]+)\s+\(([0-9]+)\s+initial\)\s*[\r\n]+?)x") };
+const auto R_NUMBER_OF_TRANSITIONS{ boost::regex(R"x(Transitions:\s*([0-9]+)\s*[\r\n]+?)x") };
 const auto R_RESULT_DEFINITION{ boost::regex(R"x(Result: (\[[0-9.]*,[0-9.]*\]|[0-9.]*))x") };
 const auto R_RESULT_RANGE_DEFINITION{ boost::regex(R"x(Result: \[([0-9.]*),([0-9.]*)\])x") };
 const auto R_RESULT_VALUE_DEFINITION{ boost::regex(R"x(Result: ([0-9.]*))x") };
@@ -148,7 +149,7 @@ std::tuple<uint64_t, uint64_t> extract_number_of_states(const std::string& prism
 	standard_logger().info("Reading values...");
 	boost::match_results<std::string::const_iterator> m; // boost::smatch
 
-	if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_TRANSITION_MATRIX_INFORMATION))) {
+	if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_NUMBER_OF_STATES))) {
 		states = std::stoull(m[1]);
 		initial = std::stoull(m[2]);
 	}
