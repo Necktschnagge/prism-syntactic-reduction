@@ -25,7 +25,7 @@ for D in */ ; do
 	echo iterator: ${D}
 	number=$(echo ${D} | sed -E 's/\///')
 	echo number: ${number}
-	sub_branch_name=${branch_name}+++{number}
+	sub_branch_name=${branch_name}+++${number}
 	git switch -c ${sub_branch_name} #switch to new branch pointing to current HEAD
 	echo switched branch
 	cp ../script/ci/azure-yml/run-prism-on-one-model.yml ../azure-pipelines.yml
