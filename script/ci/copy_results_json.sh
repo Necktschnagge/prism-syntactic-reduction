@@ -1,4 +1,4 @@
-git_username=${1}
+it_username=${1}
 git_access_token=${2}
 branch_name=$(echo ${3} | sed -E 's/refs\/heads\///')
 
@@ -26,8 +26,8 @@ user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -
 #./RESULTS/prism_model/id.txt
 id=$(cat "./RESULTS/prism_model/id.txt")
 cp ./RESULTS/prism_model/prism_data.json ./RESULTS/${id}/prism_data.json
-#git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
-git checkout https://${git_username}:${git_access_token}@github.com/${user_repo_id}/${parent_branch_name}
+git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
+git checkout ${parent_branch_name}
 rm ./azure-pipelines.yml
 git add -u ./azure-pipelines.yml
 git add ./RESULTS/${id}/prism_data.json
