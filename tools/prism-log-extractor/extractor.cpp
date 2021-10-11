@@ -161,6 +161,41 @@ std::tuple<uint64_t, uint64_t> extract_number_of_states(const std::string& prism
 	return std::make_tuple(states, initial);
 }
 
+
+uint64_t extract_number_of_transitions(const std::string& prism_log_content) {
+	uint64_t transitions{ 0 };
+
+
+	standard_logger().info("Searching number of states...");
+
+	std::list<std::pair<std::string::const_iterator, std::string::const_iterator>> result_locations;
+
+	auto search_result = regex_iterator(prism_log_content.cbegin(), prism_log_content.cend(), boost::regex(R_NUMBER_OF_TRANSITIONS));
+
+	while (search_result != regex_iterator()) {
+		result_locations.push_back(std::make_pair(search_result->prefix().end(), search_result->suffix().begin()));
+		++search_result;
+	}
+
+	standard_logger().info(std::string("Found ") + std::to_string(result_locations.size()) + " transition number clauses.");
+	if (result_locations.size() != 1) {
+		auto error_message = std::string("Expected 1 but found ") + std::to_string(result_locations.size()) + " transition number clauses.";
+		throw std::logic_error(error_message);
+	}
+	standard_logger().info("Reading values...");
+	boost::match_results<std::string::const_iterator> m; // boost::smatch
+
+	if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_NUMBER_OF_TRANSITIONS))) {
+		transitions = std::stoull(m[1]);
+	}
+	else {
+		throw std::logic_error("Internal software error.");
+	}
+	standard_logger().info(std::string("Recognized transitions=") + std::to_string(transitions));
+
+	return transitions;
+}
+
 void prepare_files(int argc, char** argv, std::string& prism_log_content, std::ofstream& extracted_output_file) {
 #ifdef debug_local
 	std::string prism_log_file_path{ R"(C:\Users\F-NET-ADMIN\Desktop\some_prism_log.txt)" };
@@ -201,13 +236,18 @@ nlohmann::json analyze(const std::string& prism_log_content) {
 	auto [count_states, initial_states] = extract_number_of_states(prism_log_content);
 	standard_logger().info("Searching number of states   ...DONE!");
 
+	standard_logger().info("Searching number of transitions...");
+	auto count_transitions = extract_number_of_transitions(prism_log_content);
+	standard_logger().info("Searching number of transitions   ...DONE!");
+
 
 	standard_logger().info("Building json...");
 
 	nlohmann::json result;
 	result["result"] = { {"min", min}, {"max", max} };
 	result["nodes"] = nodes;
-	result["states"] = { {"count", min}, {"initial", max} };
+	result["states"] = { {"count", count_states}, {"initial", initial_states} };
+	result["count_transitions"] = count_transitions;
 
 	standard_logger().info("Built up the following json:");
 	std::cout << "\n\n" << result.dump(3) << "\n\n";
