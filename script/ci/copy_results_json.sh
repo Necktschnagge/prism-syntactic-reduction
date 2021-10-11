@@ -4,7 +4,7 @@ branch_name=$(echo ${3} | sed -E 's/refs\/heads\///')
 
 
 
-parent_branch_name=$(echo ${branch_name} | sed -E 's/\+\+\+\d*//')
+parent_branch_name=$(echo ${branch_name} | perl -pe 's/\+\+\+\d*//g')
 
 
 
