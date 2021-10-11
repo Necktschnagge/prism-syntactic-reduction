@@ -28,7 +28,7 @@ git remote
 id=$(cat "./RESULTS/prism_model/id.txt")
 cp ./RESULTS/prism_model/prism_data.json ./RESULTS/${id}/prism_data.json
 git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
-git switch -c ${parent_branch_name} origin/${parent_branch_name}
+git switch -c ${parent_branch_name}
 git status
 rm ./azure-pipelines.yml
 git add -u ./azure-pipelines.yml
@@ -39,8 +39,8 @@ git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@exam
 pushed_successfully=0
 while [[ ${pushed_successfully} -eq 0 ]]; do
 	git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
-	git merge origin/${parent_branch_name}
-	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully=1
+	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge origin/${parent_branch_name}
+	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully=1
 done
 
 count_results=0
