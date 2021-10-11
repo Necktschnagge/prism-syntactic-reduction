@@ -36,11 +36,11 @@ git add ./RESULTS/${id}/prism_data.json
 git status
 git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "upload extracted data of sub branch ${id}"
 
-pushed_successfully="loop"
-while [[ ${pushed_successfully} -eq "loop" ]]; do
+pushed_successfully=0
+while [[ ${pushed_successfully} -eq 0 ]]; do
 	git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
 	git merge origin/${parent_branch_name}
-	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully="leave"
+	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name} && pushed_successfully=1
 done
 
 count_results=0
