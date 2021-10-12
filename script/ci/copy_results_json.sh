@@ -80,6 +80,7 @@ if [[ count_results -eq count_subdirs ]]; then
 	git status
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "upload azure-pipelines.yml for combining all results"
 	git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${parent_branch_name}
+	#./script/ci/delete-ci-branches.sh # there might be parallel runs, this may cause interruptions on them
 fi
 
 
