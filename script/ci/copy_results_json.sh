@@ -30,6 +30,7 @@ git branch -r
 
 id=$(cat "./RESULTS/prism_model/id.txt")
 cp ./RESULTS/prism_model/prism_data.json ./RESULTS/${id}/prism_data.json
+cp ./RESULTS/prism_model/log.txt ./RESULTS/${id}/log.txt
 rm -r ./RESULTS/prism_model/
 git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id}
 git switch -c ${parent_branch_name} origin/${parent_branch_name}
@@ -37,6 +38,7 @@ git status
 rm ./azure-pipelines.yml
 git add -u ./azure-pipelines.yml
 git add ./RESULTS/${id}/prism_data.json
+git add ./RESULTS/${id}/log.txt
 git status
 git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "upload extracted data of sub branch ${id}"
 
