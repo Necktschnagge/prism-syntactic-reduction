@@ -66,10 +66,10 @@ int main(int argc, char** argv)
 	const auto arg_directory_string = std::string(argv[1]);
 
 	standard_logger().info(std::string("Given path which will be used:") + std::filesystem::path(arg_directory_string).string());
-	
+
 	const std::string CURRENT_PATH_CHAR_STRING{ path_to_string(std::filesystem::current_path()) };
 	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING);
-	
+
 	const auto results_directory = std::filesystem::path(arg_directory_string);//std::filesystem::path(run_directory_string).parent_path() /
 
 	standard_logger().info(std::string("Running on results directory:   ") + results_directory.string());
@@ -90,14 +90,14 @@ int main(int argc, char** argv)
 	for (std::size_t i = 0; i < COUNT_MODELS; ++i) {
 		std::ifstream prism_data_istream = std::ifstream(results_directory / std::to_string(i) / "prism_data.json");
 		auto prism_data = nlohmann::json::parse(prism_data_istream);
-		standard_logger().info(std::string("Read prism data:\n\n") + prism_data.dump(3));
-		const auto COUNT_TRANSITIONS{ prism_data["count_transitions"] };
+		//standard_logger().info(std::string("Read prism data:\n\n") + prism_data.dump(3));
+		const std::size_t COUNT_TRANSITIONS{ prism_data["count_transitions"] };
 		distribution_of_transitions.try_emplace(COUNT_TRANSITIONS, 0);
 		++distribution_of_transitions[COUNT_TRANSITIONS];
-		const auto COUNT_STATES{ prism_data["states"]["count"] };
+		const std::size_t COUNT_STATES{ prism_data["states"]["count"] };
 		distribution_of_states.try_emplace(COUNT_STATES, 0);
 		++distribution_of_states[COUNT_STATES];
-		const auto COUNT_NODES{ prism_data["nodes"] };
+		const std::size_t COUNT_NODES{ prism_data["nodes"] };
 		distribution_of_nodes.try_emplace(COUNT_NODES, 0);
 		++distribution_of_nodes[COUNT_NODES];
 	}
@@ -107,51 +107,50 @@ int main(int argc, char** argv)
 		double average{ 0 };
 		ss << "Distribution of transitions :\n";
 		for (const auto& pair : distribution_of_transitions) {
-			ss << pair.first << "   :   " << pair.second;
+			ss << pair.first << "   :   " << pair.second << "\n";
 			average += pair.first * pair.second;
 		}
 		standard_logger().info(ss.str());
 		average /= static_cast<double>(meta["count_partitionings"]);
 		double variance{ 0 };
 		for (const auto& pair : distribution_of_nodes) {
-			ss << pair.first << "   :   " << pair.second;
-			average += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
+			variance += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
 		}
 		variance /= static_cast<double>(meta["count_partitionings"]);
 		standard_logger().info(std::string("average:  ") + std::to_string(average));
-		standard_logger().info(std::string("variance:  ") + std::to_string(variance));	}
+		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
+	}
 	{
 		std::stringstream ss;
 		double average{ 0 };
 		ss << "Distribution of states :\n";
 		for (const auto& pair : distribution_of_states) {
-			ss << pair.first << "   :   " << pair.second;
+			ss << pair.first << "   :   " << pair.second << "\n";
 			average += pair.first * pair.second;
 		}
 		standard_logger().info(ss.str());
-		average /= static_cast<double>(meta["count_partitionings"]);
+		average = average / static_cast<double>(meta["count_partitionings"]);
 		double variance{ 0 };
 		for (const auto& pair : distribution_of_nodes) {
-			ss << pair.first << "   :   " << pair.second;
-			average += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
+			variance += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
 		}
 		variance /= static_cast<double>(meta["count_partitionings"]);
 		standard_logger().info(std::string("average:  ") + std::to_string(average));
-		standard_logger().info(std::string("variance:  ") + std::to_string(variance));	}
+		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
+	}
 	{
 		std::stringstream ss;
 		double average{ 0 };
 		ss << "Distribution of nodes :\n";
 		for (const auto& pair : distribution_of_nodes) {
-			ss << pair.first << "   :   " << pair.second;
+			ss << pair.first << "   :   " << pair.second << "\n";
 			average += pair.first * pair.second;
 		}
 		standard_logger().info(ss.str());
 		average /= static_cast<double>(meta["count_partitionings"]);
 		double variance{ 0 };
 		for (const auto& pair : distribution_of_nodes) {
-			ss << pair.first << "   :   " << pair.second;
-			average += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
+			variance += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
 		}
 		variance /= static_cast<double>(meta["count_partitionings"]);
 		standard_logger().info(std::string("average:  ") + std::to_string(average));
@@ -239,4 +238,4 @@ int main(int argc, char** argv)
 #endif
 	standard_logger().info("");
 	standard_logger().info("Finished.");
-	}
+}
