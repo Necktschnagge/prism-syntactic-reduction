@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 	{
 		std::stringstream ss;
 		double average{ 0 };
-		ss << "Distribution of transitions :\n";
+		ss << "\n\n\nDistribution of transitions :\n";
 		for (const auto& pair : distribution_of_transitions) {
 			ss << pair.first << "   :   " << pair.second << "\n";
 			average += pair.first * pair.second;
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 	{
 		std::stringstream ss;
 		double average{ 0 };
-		ss << "Distribution of states :\n";
+		ss << "\n\n\nDistribution of states :\n";
 		for (const auto& pair : distribution_of_states) {
 			ss << pair.first << "   :   " << pair.second << "\n";
 			average += pair.first * pair.second;
@@ -141,7 +141,7 @@ int main(int argc, char** argv)
 	{
 		std::stringstream ss;
 		double average{ 0 };
-		ss << "Distribution of nodes :\n";
+		ss << "\n\n\nDistribution of nodes :\n";
 		for (const auto& pair : distribution_of_nodes) {
 			ss << pair.first << "   :   " << pair.second << "\n";
 			average += pair.first * pair.second;
