@@ -23,7 +23,7 @@ for filename in ./res/all_configs/*.json; do
 	cp ${filename} ./res/config.json
 	cp ./script/ci/azure-yml/create-all-models-for-one-specific-config-json.yml azure-pipelines.yml
 
-	sub_branch_name=${branch_name_ci}+++${number}
+	sub_branch_name=${branch_name_ci}+++${filename}
 	git switch -c ${sub_branch_name} #switch to new branch pointing to current HEAD
 	git add ./res/config.json
 	git add ./azure-pipelines.yml
