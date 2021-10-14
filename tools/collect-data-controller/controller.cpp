@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 	const auto run_directory_string = std::string(argv[0]);
 	const auto arg_directory_string = std::string(argv[1]);
 	const auto results_directory = std::filesystem::canonical(std::filesystem::path(run_directory_string).parent_path() / std::filesystem::path(arg_directory_string));
-	
+
 	standard_logger().info(std::string("Running on results directory:   ") + results_directory.string());
 
 	auto meta_json_istream = std::ifstream(results_directory / "meta.json");
@@ -91,13 +91,13 @@ int main(int argc, char** argv)
 			average += pair.first * pair.second;
 		}
 		standard_logger().info(ss.str());
-		average /= meta["count_partitionings"];
+		average /= static_cast<double>(meta["count_partitionings"]);
 		double variance{ 0 };
 		for (const auto& pair : distribution_of_nodes) {
 			ss << pair.first << "   :   " << pair.second;
 			average += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
 		}
-		variance /= meta["count_partitionings"];
+		variance /= static_cast<double>(meta["count_partitionings"]);
 		standard_logger().info(std::string("average:  ") + std::to_string(average));
 		standard_logger().info(std::string("variance:  ") + std::to_string(variance));	}
 	{
@@ -109,13 +109,13 @@ int main(int argc, char** argv)
 			average += pair.first * pair.second;
 		}
 		standard_logger().info(ss.str());
-		average /= meta["count_partitionings"];
+		average /= static_cast<double>(meta["count_partitionings"]);
 		double variance{ 0 };
 		for (const auto& pair : distribution_of_nodes) {
 			ss << pair.first << "   :   " << pair.second;
 			average += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
 		}
-		variance /= meta["count_partitionings"];
+		variance /= static_cast<double>(meta["count_partitionings"]);
 		standard_logger().info(std::string("average:  ") + std::to_string(average));
 		standard_logger().info(std::string("variance:  ") + std::to_string(variance));	}
 	{
@@ -127,13 +127,13 @@ int main(int argc, char** argv)
 			average += pair.first * pair.second;
 		}
 		standard_logger().info(ss.str());
-		average /= meta["count_partitionings"];
+		average /= static_cast<double>(meta["count_partitionings"]);
 		double variance{ 0 };
 		for (const auto& pair : distribution_of_nodes) {
 			ss << pair.first << "   :   " << pair.second;
 			average += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
 		}
-		variance /= meta["count_partitionings"];
+		variance /= static_cast<double>(meta["count_partitionings"]);
 		standard_logger().info(std::string("average:  ") + std::to_string(average));
 		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
 	}
@@ -219,4 +219,4 @@ int main(int argc, char** argv)
 #endif
 	standard_logger().info("");
 	standard_logger().info("Finished.");
-}
+	}
