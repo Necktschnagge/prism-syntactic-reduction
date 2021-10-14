@@ -1373,7 +1373,7 @@ void write_max_local_groupings(const std::filesystem::path & directory, const st
 
 void write_all_partitionings(const std::filesystem::path & directory, const std::vector<std::vector<collapse_node::big_int>>&all_partitionings_with_minimal_size) {
 	std::filesystem::create_directories(directory);
-	auto file = std::ofstream((directory / "all_partitions.json").c_str());
+	auto file = std::ofstream((directory / "all_partitionings.json").c_str());
 
 	nlohmann::json json;
 	auto& j_partitions{ json["partitionings"] };
