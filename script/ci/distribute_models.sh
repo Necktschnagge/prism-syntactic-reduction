@@ -17,8 +17,8 @@ user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -
 #git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${git_branch_for_results}
 
 
-prism_command=$(jq '.prism_command' ./res/config.json)
-echo Loaded prism command from json: ${prism_command}
+prism_command=$(jq -r '.prism_command' ./res/config.json)
+echo Loaded prism command from3json: ${prism_command}
 
 cd ./RESULTS
 ls -la
