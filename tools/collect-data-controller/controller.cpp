@@ -10,6 +10,7 @@
 #include <iostream>
 #include <exception>
 #include <fstream>
+#include <sstream>
 
 #include <cstdlib>
 #include <filesystem>
