@@ -107,14 +107,14 @@ uint64_t extract_number_of_nodes(const std::string& prism_log_content) {
 	}
 
 	standard_logger().info(std::string("Found ") + std::to_string(result_locations.size()) + " transition matrix information clauses.");
-	if (result_locations.size() != 1) {
-		auto error_message = std::string("Expected 1 but found ") + std::to_string(result_locations.size()) + " transition matrix information clauses.";
+	if (0 < result_locations.size() && result_locations.size() <= 2) {
+		auto error_message = std::string("Expected 1 or 2 but found ") + std::to_string(result_locations.size()) + " transition matrix information clauses.";
 		throw std::logic_error(error_message);
 	}
 	standard_logger().info("Reading values...");
 	boost::match_results<std::string::const_iterator> m; // boost::smatch
 
-	if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_TRANSITION_MATRIX_INFORMATION))) {
+	if (boost::regex_match(result_locations.back().first, result_locations.back().second, m, boost::regex(R_TRANSITION_MATRIX_INFORMATION))) {
 		nodes = std::stoull(m[1]);
 	}
 	else {
