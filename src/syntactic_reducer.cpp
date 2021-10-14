@@ -1480,6 +1480,8 @@ int cli(int argc, char** argv) {
 		if (c == '/') transformed_prism_command.push_back('\\');
 		transformed_prism_command.push_back(c);
 	}
+	standard_logger().info("transformed json");
+	standard_logger().info(transformed_prism_command);
 	config["prism_command"] = transformed_prism_command;
 
 	/* Load model */
