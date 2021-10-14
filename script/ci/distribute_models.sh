@@ -17,6 +17,9 @@ user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -
 #git push https://${git_username}:${git_access_token}@github.com/${user_repo_id} ${git_branch_for_results}
 
 
+prism_command=$(jq '.prism_command' ./res/config.json)
+echo Loaded prism command from json: ${prism_command}
+
 cd ./RESULTS
 ls -la
 #for D in `find . -type d`
@@ -29,6 +32,7 @@ for D in */ ; do
 	git switch -c ${sub_branch_name} #switch to new branch pointing to current HEAD
 	echo switched branch
 	cp ../script/ci/azure-yml/run-prism-on-one-model.yml ../azure-pipelines.yml
+	perl -pi -e "s/%%%INSERT_PRISM_COMMAND_HERE%%%/${prism_command}/g" ../azure-pipelines.yml
 	echo copied azure-yml
     cp -r ${D} prism_model
 	echo ${number} > prism_model/id.txt

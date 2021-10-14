@@ -47,7 +47,7 @@ stages:
        - script: cmake --build ./build
          displayName: "CMake: Compile and Link"
          condition: succeeded()
-       - script: cd artifacts/prism-sttt17/prism/bin/ && ./prism '../../../../RESULTS/prism_model/reduced_model.prism' -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -mtbdd -cuddmaxmem 10g | tee ../../../../RESULTS/prism_model/log.txt
+       - script: cd artifacts/prism-sttt17/prism/bin/ && %%%INSERT_PRISM_COMMAND_HERE%%% | tee ../../../../RESULTS/prism_model/log.txt
          displayName: 'Run PRISM on reduced_model'
          condition: succeeded()
        - script: ./build/tools/prism-log-extractor/Prism-Log-Extractor RESULTS/prism_model/log.txt RESULTS/prism_model/prism_data.json
