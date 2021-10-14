@@ -45,19 +45,19 @@ const int no = 2;
 const int error = 3;
 
 const int c = 4;
+global cf : [0 .. 18] init 0;
+global y_cfblk2_3546411412 : [0 .. 4] init 1;
+global y_cfblk3_3585546805 : [0 .. 4] init 1;
+global y_cfblk4_3624682198 : [0 .. 4] init 1;
+global y_cfblk5_3663817591 : [0 .. 4] init 1;
+global redundancy_model4_cfblk2_0 : [0 .. 4] init 4;
+global y_cfblk2_3546411412_2 : [0 .. 4] init 1;
+global redundancy_model4_cfblk3_2 : [0 .. 4] init 4;
+global y_cfblk3_3585546805_2 : [0 .. 4] init 1;
+global redundancy_model4_cfblk4_3 : [0 .. 4] init 0;
+global y_cfblk4_3624682198_2 : [0 .. 4] init 1;
 
 module control_flowerror_propagation
-    cf : [0 .. 18] init cfblk2_Output_1;
-    y_cfblk2_3546411412 : [0 .. 4] init ok;
-    y_cfblk3_3585546805 : [0 .. 4] init ok;
-    y_cfblk4_3624682198 : [0 .. 4] init ok;
-    y_cfblk5_3663817591 : [0 .. 4] init ok;
-    redundancy_model4_cfblk2_0 : [0 .. 4] init c;
-    y_cfblk2_3546411412_2 : [0 .. 4] init ok;
-    redundancy_model4_cfblk3_2 : [0 .. 4] init c;
-    y_cfblk3_3585546805_2 : [0 .. 4] init ok;
-    redundancy_model4_cfblk4_3 : [0 .. 4] init v;
-    y_cfblk4_3624682198_2 : [0 .. 4] init ok;
     
     [cfblk2_Output_1] cf = cfblk2_Output_1 -> 1.0:(cf' = check_redandancy0) & (y_cfblk2_3546411412' = ok);
     [cfblk5_Output_2] cf = cfblk5_Output_2 & y_cfblk2_3546411412 = ok -> 0.9690030399039999:(cf' = cfblk1_Output_3) & (y_cfblk5_3663817591' = ok) + 3.0996960095999997e-2:(cf' = cfblk1_Output_3) & (y_cfblk5_3663817591' = error);
@@ -98,6 +98,6 @@ endmodule
 formula failure = y_cfblk5_3663817591 = error;
 
 rewards "time"
-    true : 1;
+    0=0 : 1;
 endrewards
 
