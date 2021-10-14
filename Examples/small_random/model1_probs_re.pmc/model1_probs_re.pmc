@@ -68,22 +68,22 @@ const int error = 3;
 
 const int c = 4;
 
-global cf : [0 .. 29] init cfblk4_Output_1;
-global y_cfblk1_2642350696 : [0 .. 4] init ok;
-global y_cfblk3_2720621482 : [0 .. 4] init ok;
-global y_cfblk4_2759756875 : [0 .. 4] init ok;
-global y_cfblk5_2798892268 : [0 .. 4] init ok;
-global x_cfblk4_1_4177988455 : [0 .. 4] init ok;
-global x_cfblk1_1_303584548 : [0 .. 4] init ok;
-global x_cfblk5_1_1174489129 : [0 .. 4] init ok;
-global redundancy_model1_cfblk4_0 : [0 .. 4] init no;
-global y_cfblk4_2759756875_2 : [0 .. 4] init ok;
-global redundancy_model1_cfblk1_2 : [0 .. 4] init no;
-global y_cfblk1_2642350696_2 : [0 .. 4] init ok;
-global redundancy_model1_cfblk3_3 : [0 .. 4] init v;
-global y_cfblk3_2720621482_2 : [0 .. 4] init ok;
-global x_cfblk4_1_4177988455_2 : [0 .. 4] init ok;
-global x_cfblk1_1_303584548_2 : [0 .. 4] init ok;
+global cf : [0 .. 29] init 0;
+global y_cfblk1_2642350696 : [0 .. 4] init 1;
+global y_cfblk3_2720621482 : [0 .. 4] init 1;
+global y_cfblk4_2759756875 : [0 .. 4] init 1;
+global y_cfblk5_2798892268 : [0 .. 4] init 1;
+global x_cfblk4_1_4177988455 : [0 .. 4] init 1;
+global x_cfblk1_1_303584548 : [0 .. 4] init 1;
+global x_cfblk5_1_1174489129 : [0 .. 4] init 1;
+global redundancy_model1_cfblk4_0 : [0 .. 4] init 1;
+global y_cfblk4_2759756875_2 : [0 .. 4] init 1;
+global redundancy_model1_cfblk1_2 : [0 .. 4] init 1;
+global y_cfblk1_2642350696_2 : [0 .. 4] init 1;
+global redundancy_model1_cfblk3_3 : [0 .. 4] init 0;
+global y_cfblk3_2720621482_2 : [0 .. 4] init 1;
+global x_cfblk4_1_4177988455_2 : [0 .. 4] init 1;
+global x_cfblk1_1_303584548_2 : [0 .. 4] init 1;
 
 module control_flowerror_propagation
 
@@ -159,6 +159,6 @@ endmodule
 formula failure = x_cfblk5_1_1174489129 = error;
 
 rewards "time"
-    true : 1;
+    1=1 : 1;
 endrewards
 
