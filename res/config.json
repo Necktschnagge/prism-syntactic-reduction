@@ -7,5 +7,5 @@
 			"y_Integrator_44480461",
 			"x_cfblk5_1_1174489129"
 		],
-	"prism_command" : "./prism \'../../../../RESULTS/prism_model/reduced_model.prism\' -pf \'filter(printall, Pmax=? [ F<100 \"deadlock\" ], \"init\")\' -mtbdd -cuddmaxmem 10g"
+	"prism_command" : "./prism '../../../../RESULTS/prism_model/reduced_model.prism' -pf 'filter(printall, Pmax=? [ F<100 \"deadlock\" ], \"init\")' -mtbdd -cuddmaxmem 10g"
 }
