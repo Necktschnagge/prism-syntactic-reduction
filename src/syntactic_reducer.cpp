@@ -1388,6 +1388,16 @@ void write_all_partitionings(const std::filesystem::path & directory, const std:
 	file << json.dump(3);
 }
 
+void write_meta_json(const std::filesystem::path & directory, std::size_t number_of_partitionings) {
+	std::filesystem::create_directories(directory);
+	auto file = std::ofstream((directory / "meta.json").c_str());
+
+	nlohmann::json json;
+	json["count_partitionings"] = number_of_partitionings;
+
+	file << json.dump(3);
+}
+
 void write_model_to_file(const std::filesystem::path & directory, const file_token & model) {
 	std::filesystem::create_directories(directory);
 	auto file = std::ofstream((directory / "reduced_model.prism").c_str());
@@ -1600,6 +1610,9 @@ int cli(int argc, char** argv) {
 
 	// all_partitions.json
 	write_all_partitionings(results_directory, all_partitionings_with_minimal_size);
+	
+	// meta.json
+	write_meta_json(results_directory, all_partitionings_with_minimal_size.size());
 
 	for (std::size_t i{ 0 }; i < all_partitionings_with_minimal_size.size(); ++i) {
 		file_token reduced_model = construct_reduced_model(ftoken, all_partitionings_with_minimal_size[i], all_var_names, var_name, const_table, live_vars, graph);
