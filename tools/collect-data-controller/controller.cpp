@@ -51,9 +51,9 @@ int main(int argc, char** argv)
 
 	if (argc != 2) return 1;
 
-	const auto run_directory_string = std::string(argv[0]);
+	//const auto run_directory_string = std::string(argv[0]);
 	const auto arg_directory_string = std::string(argv[1]);
-	const auto results_directory = std::filesystem::canonical(std::filesystem::path(run_directory_string).parent_path() / std::filesystem::path(arg_directory_string));
+	const auto results_directory = std::filesystem::canonical(std::filesystem::path(arg_directory_string));//std::filesystem::path(run_directory_string).parent_path() /
 
 	standard_logger().info(std::string("Running on results directory:   ") + results_directory.string());
 
