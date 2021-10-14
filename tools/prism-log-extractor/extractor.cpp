@@ -142,14 +142,14 @@ std::tuple<uint64_t, uint64_t> extract_number_of_states(const std::string& prism
 	}
 
 	standard_logger().info(std::string("Found ") + std::to_string(result_locations.size()) + " state number clauses.");
-	if (result_locations.size() != 1) {
-		auto error_message = std::string("Expected 1 but found ") + std::to_string(result_locations.size()) + " state number clauses.";
+	if (!(0 < result_locations.size() && result_locations.size() <= 2)) {
+		auto error_message = std::string("Expected 1 or 2 but found ") + std::to_string(result_locations.size()) + " state number clauses.";
 		throw std::logic_error(error_message);
 	}
 	standard_logger().info("Reading values...");
 	boost::match_results<std::string::const_iterator> m; // boost::smatch
 
-	if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_NUMBER_OF_STATES))) {
+	if (boost::regex_match(result_locations.back().first, result_locations.back().second, m, boost::regex(R_NUMBER_OF_STATES))) {
 		states = std::stoull(m[1]);
 		initial = std::stoull(m[2]);
 	}
@@ -178,14 +178,14 @@ uint64_t extract_number_of_transitions(const std::string& prism_log_content) {
 	}
 
 	standard_logger().info(std::string("Found ") + std::to_string(result_locations.size()) + " transition number clauses.");
-	if (result_locations.size() != 1) {
-		auto error_message = std::string("Expected 1 but found ") + std::to_string(result_locations.size()) + " transition number clauses.";
+	if (!(0 < result_locations.size() && result_locations.size() <= 2)) {
+		auto error_message = std::string("Expected 1 or 2 but found ") + std::to_string(result_locations.size()) + " transition number clauses.";
 		throw std::logic_error(error_message);
 	}
 	standard_logger().info("Reading values...");
 	boost::match_results<std::string::const_iterator> m; // boost::smatch
 
-	if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_NUMBER_OF_TRANSITIONS))) {
+	if (boost::regex_match(result_locations.back().first, result_locations.back().second, m, boost::regex(R_NUMBER_OF_TRANSITIONS))) {
 		transitions = std::stoull(m[1]);
 	}
 	else {
