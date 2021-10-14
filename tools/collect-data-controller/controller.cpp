@@ -14,6 +14,8 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <locale>
+#include <codecvt>
 
 //#define debug_local
 
@@ -44,6 +46,14 @@ void init_logger() {
 	spdlog::register_logger(standard_logger);
 }
 
+const auto path_to_string = [](auto path) {
+	if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
+		return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(path.c_str());
+	}
+	else {
+		return std::string(path.c_str());
+	}
+};
 
 int main(int argc, char** argv)
 {
@@ -53,6 +63,12 @@ int main(int argc, char** argv)
 
 	//const auto run_directory_string = std::string(argv[0]);
 	const auto arg_directory_string = std::string(argv[1]);
+
+	standard_logger().info(std::string("Given path which will be used:") + std::filesystem::path(arg_directory_string).string());
+	
+	const std::string CURRENT_PATH_CHAR_STRING{ path_to_string(std::filesystem::current_path()) };
+	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING);
+	
 	const auto results_directory = std::filesystem::canonical(std::filesystem::path(arg_directory_string));//std::filesystem::path(run_directory_string).parent_path() /
 
 	standard_logger().info(std::string("Running on results directory:   ") + results_directory.string());
