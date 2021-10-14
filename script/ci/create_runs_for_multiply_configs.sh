@@ -1,6 +1,6 @@
 git_username=${1}
 git_access_token=${2}
-branch_name=$(echo ${3} | sed -E 's/refs\/heads\///')
+#branch_name=$(echo ${3} | sed -E 's/refs\/heads\///')
 
 git_hash_last_commit=$(git rev-parse HEAD)
 branch_name_ci="ci-distributed-json-${git_hash_last_commit}"

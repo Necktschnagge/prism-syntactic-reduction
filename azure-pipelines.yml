@@ -168,7 +168,7 @@ stages:
       condition: eq(variables['Build.Reason'], 'IndividualCI')
       timeoutInMinutes: 180
       steps:      
-       - script: ./script/ci/create_runs_for_multiply_configs.sh
+       - script: ./script/ci/create_runs_for_multiply_configs.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)"
          displayName: "Create all runs for diffrent JSONs"
          condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
 
