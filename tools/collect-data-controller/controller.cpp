@@ -58,6 +58,7 @@ const auto path_to_string = [](auto path) {
 int main(int argc, char** argv)
 {
 	init_logger();
+	standard_logger().flush_on(spdlog::level::info);
 
 	if (argc != 2) return 1;
 
@@ -69,13 +70,14 @@ int main(int argc, char** argv)
 	const std::string CURRENT_PATH_CHAR_STRING{ path_to_string(std::filesystem::current_path()) };
 	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING);
 	
-	const auto results_directory = std::filesystem::canonical(std::filesystem::path(arg_directory_string));//std::filesystem::path(run_directory_string).parent_path() /
+	const auto results_directory = std::filesystem::path(arg_directory_string);//std::filesystem::path(run_directory_string).parent_path() /
 
 	standard_logger().info(std::string("Running on results directory:   ") + results_directory.string());
 
 	auto meta_json_istream = std::ifstream(results_directory / "meta.json");
 
 	nlohmann::json meta = nlohmann::json::parse(meta_json_istream);
+	standard_logger().info("Successfully parsed meta json.");
 
 	std::map<std::size_t, std::size_t> distribution_of_transitions;
 	std::map<std::size_t, std::size_t> distribution_of_states;
@@ -88,6 +90,7 @@ int main(int argc, char** argv)
 	for (std::size_t i = 0; i < COUNT_MODELS; ++i) {
 		std::ifstream prism_data_istream = std::ifstream(results_directory / std::to_string(i) / "prism_data.json");
 		auto prism_data = nlohmann::json::parse(prism_data_istream);
+		standard_logger().info(std::string("Read prism data:\n\n") + prism_data.dump(3));
 		const auto COUNT_TRANSITIONS{ prism_data["count_transitions"] };
 		distribution_of_transitions.try_emplace(COUNT_TRANSITIONS, 0);
 		++distribution_of_transitions[COUNT_TRANSITIONS];

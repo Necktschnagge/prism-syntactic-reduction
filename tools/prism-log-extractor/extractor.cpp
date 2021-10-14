@@ -269,7 +269,7 @@ int main(int argc, char** argv)
 
 		standard_logger().info("Extracting information...");
 
-		nlohmann::json result{ analyze(prism_log_content) };
+		nlohmann::json result = analyze(prism_log_content);
 
 		standard_logger().info("Writing extracted json file...");
 
