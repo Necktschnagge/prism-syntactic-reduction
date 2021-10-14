@@ -1474,7 +1474,13 @@ int cli(int argc, char** argv) {
 		return 1;
 	}
 	standard_logger().info(std::string("Successfully loaded config json:\n\n") + config.dump(3) + "\n");
-
+	std::string prism_command = config["prism_command"];
+	std::string transformed_prism_command{};
+	for (const auto& c : prism_command) {
+		if (c == '/') transformed_prism_command.push_back('\\');
+		transformed_prism_command.push_back(c);
+	}
+	config["prism_command"] = transformed_prism_command;
 
 	/* Load model */
 	standard_logger().info("Loading model...");
@@ -1629,6 +1635,11 @@ int cli(int argc, char** argv) {
 		auto ofile = std::ofstream("reduced_model.prism");
 		print_model_to_stream(reduced_file, ofile);
 		*/
+
+	std::ofstream config_json_ofstream;
+	config_json_ofstream.open(config_json_path);
+	config_json_ofstream << config.dump(3);
+	
 	return 0;
 }
 
