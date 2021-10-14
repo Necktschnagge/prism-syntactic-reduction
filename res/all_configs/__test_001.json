@@ -1,7 +1,6 @@
 {
 	"model_path" : "../Examples/rewrite_model1_probs_re.pmc",
 	"result_dir" : "../RESULTS",
-	"ignore" : "D:\\mona-intenso-raid\\Repos\\prism-syntactic-reduction\\Examples\\rewrite_model1_probs_re.pmc",
 	"exclude_vars" :
 		[
 			"y_Integrator_44480461",
