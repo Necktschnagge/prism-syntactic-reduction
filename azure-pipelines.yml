@@ -85,7 +85,7 @@ stages:
 
  - stage: build
    dependsOn: prebuild_artifacts
-   condition: false #### remove before merging into master
+   #condition: false #### remove before merging into master
    jobs:
     - job: Cloud
       strategy:
