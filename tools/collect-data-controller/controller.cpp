@@ -49,22 +49,92 @@ int main(int argc, char** argv)
 	init_logger();
 
 	if (argc != 2) return 1;
-	
+
 	const auto directory_string = std::string(argv[1]);
 	const auto results_directory = std::filesystem::path(directory_string);
 
+	auto meta_json_istream = std::ifstream(results_directory / "meta.json");
+
+	nlohmann::json meta = nlohmann::json::parse(meta_json_istream);
+
+	std::map<std::size_t, std::size_t> distribution_of_transitions;
+	std::map<std::size_t, std::size_t> distribution_of_states;
+	std::map<std::size_t, std::size_t> distribution_of_nodes;
 
 
+	standard_logger().info("Reading result json files...");
 
-	standard_logger().info("Listing arguments...");
-	for (int i = 0; i < argc; ++i) std::cout << i << "   " << argv[i] << "\n";
-
-	if (argc != 4) {
-		standard_logger().error("Expected 1 application path and 3 arguments.");
-		return 1;
+	const std::size_t COUNT_MODELS{ meta["count_partitionings"] };
+	for (std::size_t i = 0; i < COUNT_MODELS; ++i) {
+		std::ifstream prism_data_istream = std::ifstream(results_directory / std::to_string(i) / "prism_data.json");
+		auto prism_data = nlohmann::json::parse(prism_data_istream);
+		const auto COUNT_TRANSITIONS{ prism_data["count_transitions"] };
+		distribution_of_transitions.try_emplace(COUNT_TRANSITIONS, 0);
+		++distribution_of_transitions[COUNT_TRANSITIONS];
+		const auto COUNT_STATES{ prism_data["states"]["count"] };
+		distribution_of_states.try_emplace(COUNT_STATES, 0);
+		++distribution_of_states[COUNT_STATES];
+		const auto COUNT_NODES{ prism_data["nodes"] };
+		distribution_of_nodes.try_emplace(COUNT_NODES, 0);
+		++distribution_of_nodes[COUNT_NODES];
 	}
 
-	const std::string ORIGINAL_MODEL_FILE_NAME{ "model_original.prism" };
+	{
+		std::stringstream ss;
+		double average{ 0 };
+		ss << "Distribution of transitions :\n";
+		for (const auto& pair : distribution_of_transitions) {
+			ss << pair.first << "   :   " << pair.second;
+			average += pair.first * pair.second;
+		}
+		standard_logger().info(ss.str());
+		average /= meta["count_partitionings"];
+		double variance{ 0 };
+		for (const auto& pair : distribution_of_nodes) {
+			ss << pair.first << "   :   " << pair.second;
+			average += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
+		}
+		variance /= meta["count_partitionings"];
+		standard_logger().info(std::string("average:  ") + std::to_string(average));
+		standard_logger().info(std::string("variance:  ") + std::to_string(variance));	}
+	{
+		std::stringstream ss;
+		double average{ 0 };
+		ss << "Distribution of states :\n";
+		for (const auto& pair : distribution_of_states) {
+			ss << pair.first << "   :   " << pair.second;
+			average += pair.first * pair.second;
+		}
+		standard_logger().info(ss.str());
+		average /= meta["count_partitionings"];
+		double variance{ 0 };
+		for (const auto& pair : distribution_of_nodes) {
+			ss << pair.first << "   :   " << pair.second;
+			average += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
+		}
+		variance /= meta["count_partitionings"];
+		standard_logger().info(std::string("average:  ") + std::to_string(average));
+		standard_logger().info(std::string("variance:  ") + std::to_string(variance));	}
+	{
+		std::stringstream ss;
+		double average{ 0 };
+		ss << "Distribution of nodes :\n";
+		for (const auto& pair : distribution_of_nodes) {
+			ss << pair.first << "   :   " << pair.second;
+			average += pair.first * pair.second;
+		}
+		standard_logger().info(ss.str());
+		average /= meta["count_partitionings"];
+		double variance{ 0 };
+		for (const auto& pair : distribution_of_nodes) {
+			ss << pair.first << "   :   " << pair.second;
+			average += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
+		}
+		variance /= meta["count_partitionings"];
+		standard_logger().info(std::string("average:  ") + std::to_string(average));
+		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
+	}
+
 #if false
 	std::string original_model_path_string{ argv[1] };
 	std::string syntactic_reducer_path_string{ argv[2] };
@@ -97,7 +167,7 @@ int main(int argc, char** argv)
 	in : modle path, artifact output path
 	out: json path containing all information about created files.
 	*/
-	std::string command_call_syntactic_reducer = syntactic_reducer_path.string() + " " + copied_original_model_path.string() + " " + artifact_path.string() + logs.write_next() ;
+	std::string command_call_syntactic_reducer = syntactic_reducer_path.string() + " " + copied_original_model_path.string() + " " + artifact_path.string() + logs.write_next();
 	standard_logger().info("Call Syntactic-Reducer...");
 	standard_logger().info(command_call_syntactic_reducer);
 	system(command_call_syntactic_reducer.c_str());
