@@ -5,7 +5,7 @@ if [[ -z "${remote_name}" ]]; then
 	remote_name=origin
 fi
 echo ${remote_name}
-git fetch
+git fetch --all --prune
 #git branch -r | grep ${remote_name}/ci-generate-models- | while read line 
 git branch -r | grep ${remote_name}\/ci-generate-models-.* | while read line 
 do
