@@ -20,10 +20,12 @@ user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -
 id=0
 for filename in ./res/all_configs/*.json; do
 	echo considering file: ${filename}
+	branch_extension=$(echo ${filename} | cut -c 18 | rev | cut -c 5 | rev)
+	echo considering file: ${branch_extension}
 	cp ${filename} ./res/config.json
 	cp ./script/ci/azure-yml/create-all-models-for-one-specific-config-json.yml azure-pipelines.yml
 
-	sub_branch_name=${branch_name_ci}+++${filename}
+	sub_branch_name=${branch_name_ci}+++${branch_extension}
 	git switch -c ${sub_branch_name} #switch to new branch pointing to current HEAD
 	git add ./res/config.json
 	git add ./azure-pipelines.yml

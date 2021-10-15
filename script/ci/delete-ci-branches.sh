@@ -7,7 +7,7 @@ fi
 echo ${remote_name}
 git fetch
 #git branch -r | grep ${remote_name}/ci-generate-models- | while read line 
-git branch -r | grep ${remote_name}\/ci-generate-models-.*\+\+\+ | while read line 
+git branch -r | grep ${remote_name}\/ci-generate-models-.* | while read line 
 do
 	echo Delte branch: ${line}
 	branch_name=$(echo ${line} | sed -E "s/${remote_name}\///")
