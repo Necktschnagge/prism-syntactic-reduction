@@ -220,7 +220,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::endmodule_keyword;
 	}
 };
@@ -231,7 +231,7 @@ public:
 
 	using primitive_regex_token::primitive_regex_token;
 	def_standard_clone()
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::type_specifier;
 	}
 };
@@ -243,7 +243,7 @@ public:
 	using primitive_regex_token::primitive_regex_token;
 
 	def_standard_clone()
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::left_square_brace;
 	}
 };
@@ -252,9 +252,9 @@ class left_brace_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
-	
+
 	def_standard_clone()
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::left_brace;
 	}
 };
@@ -266,7 +266,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::right_square_brace;
 	}
 };
@@ -278,7 +278,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::right_brace;
 	}
 };
@@ -290,7 +290,7 @@ public:
 
 	def_standard_clone()
 
-	long long get_ll() {
+		long long get_ll() {
 		return std::stoll(str());
 	}
 
@@ -313,7 +313,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::dot_dot;
 	}
 };
@@ -325,7 +325,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::spaces;
 	}
 
@@ -337,7 +337,7 @@ public:
 	using primitive_regex_token::primitive_regex_token;
 
 	def_standard_clone()
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::spaces_plus;
 	}
 
@@ -370,7 +370,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::formula;
 	}
 
@@ -383,7 +383,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::identifier;
 	}
 
@@ -428,7 +428,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::semicolon;
 	}
 
@@ -441,7 +441,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::colon;
 	}
 
@@ -454,7 +454,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::ascii_arrow;
 	}
 
@@ -467,7 +467,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::plus;
 	}
 
@@ -480,7 +480,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::or_sign;
 	}
 
@@ -493,7 +493,7 @@ public:
 
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::and_sign;
 	}
 
@@ -503,10 +503,10 @@ class comparison_operator_token : public primitive_regex_token {
 public:
 
 	using primitive_regex_token::primitive_regex_token;
-	
+
 	def_standard_clone()
 
-	virtual boost::regex primitive_regex() const final override {
+		virtual boost::regex primitive_regex() const final override {
 		return const_regexes::primitives::comparison_operator;
 	}
 
@@ -2177,7 +2177,7 @@ public:
 	dtmc_body(const dtmc_body& another) : token(another) {
 		std::transform(another.local_children.cbegin(), another.local_children.cend(), std::back_inserter(local_children),
 			[&](const std::shared_ptr<token>& original) { return
-			clone_shared_ptr(original); 
+			clone_shared_ptr(original);
 			});
 	}
 
@@ -2294,6 +2294,59 @@ public:
 };
 
 using dtmc_token = primitive_regex_token_template<&const_regexes::primitives::dtmc>;
+
+template<class ... _Tokens>
+class compound_token : public token {
+	using _tuple = tuple<_Tokens...>;
+	_tuple sub_tokens;
+
+	static compound_token<_Tokens...> parse_string(std::string::const_iterator begin, std::string::const_iterator end) {
+		if constexpr (sizeof ...(_Tokens) == 0) {
+			if (begin != end) {
+				// throw cannot parse
+			}
+			return compound_token<_Tokens...>();
+		}
+		else {
+			std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> candidates_for_first_sub_token =
+				std::tuple_element<0, _tuple>::type::find_all_candidates(begin, end, START_AT_FRONT);
+			// for each check if extension yields a correct parsed compound token, also check the first one if candidate is real existence
+			// -> =1 should yield a correctly parsed token -> then return this one
+		}
+
+		// find separations by finding all candidates for sub tokens -> might be more possibilities
+		// try parse every separation candidate, =1 should be successful, otherwise cannot parse error or ambiguous parse error
+		// 
+		// parse it completely, recursive
+		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+		return x_token();
+	}
+
+	static std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+		// add options: anywhere, start_at_begin, end_at_end
+		// 
+		// 
+		// use calls for sub tokens, calc all combinations....
+		// list all subsection where an x_token might be parsed., might be empty.
+	}
+
+};
+
+class x_token : public token {
+
+	static x_token parse_string(std::string::const_iterator begin, std::string::const_iterator end) {
+		// parse it completely, recursive
+		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+		return x_token();
+	}
+
+	static std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+		// list all subsection where an x_token might be parsed., might be empty.
+	}
+
+
+};
+
 
 
 class file_token : public token {
