@@ -29,6 +29,11 @@ class file_token;
 class unique_consts {
 public:
 	std::set<std::string> keywords;
+
+	const std::string* get_unique_keyword(const std::string& key) {
+		auto [iter, inserted] = keywords.insert(key);
+		return &(*iter);
+	}
 };
 
 class token_annotation {
@@ -137,9 +142,9 @@ class compound_token : public token {
 };
 */
 
-class primitive_string_token : public token {
+class general_string_token : public token {
 public:
-	using type = primitive_string_token;
+	using type = general_string_token;
 private:
 
 	std::string _string;
@@ -148,7 +153,7 @@ private:
 
 public:
 
-	static type parse_string(string_const_iterator begin, string_const_iterator end, const std::string& pattern) {
+	static type parse_string(string_const_iterator begin, string_const_iterator end, const std::string& pattern, std::shared_ptr<std::string> file_content) {
 
 		// parse it completely, recursive
 		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
@@ -164,31 +169,37 @@ public:
 			};
 
 			if (jter == end) {
-				std::string details_message_1{ "Gotten input already ended but pattern still provides remaining characters:\n" };
+				std::string details_message_1;
+				details_message_1 += "Error when parsing general_string_token:\n";
+				details_message_1 += "Gotten input already ended but pattern still provides remaining characters:\n";
 				details_message_1 += "input:   " + std::string(begin, end) + "\n";
 				details_message_1 += "         " + std::string(std::distance(begin, end), ' ') + "^\n";
 				details_message_1 += "pattern: " + n_more(pattern.cbegin(), iter, pattern.cend(), 10) + "\n";
 				details_message_1 += "         " + std::string(std::distance(begin, end), ' ') + "^\n";
-				throw not_matching(details_message_1);
+				throw not_matching(details_message_1, file_content, jter);
 			}
 			if (iter == pattern.cend()) {
-				std::string details_message_2{ "Pattern already ended but gotten input still provides remaining characters:\n" };
+				std::string details_message_2;
+				details_message_2 += "Error when parsing general_string_token:\n";
+				details_message_2 += "Pattern already ended but gotten input still provides remaining characters:\n";
 				details_message_2 += "input:   " + n_more(begin, jter, end, 10) + "\n";
 				details_message_2 += "         " + std::string(pattern.size(), ' ') + "^\n";
 				details_message_2 += "pattern: " + pattern + "\n";
 				details_message_2 += "         " + std::string(pattern.size(), ' ') + "^\n";
 
-				throw not_matching(details_message_2);
+				throw not_matching(details_message_2, file_content, jter);
 			}
 
 			if (*jter != *iter) {
-				std::string details_message_3{ "Pattern and input do not match at certain position:\n" };
+				std::string details_message_3;
+				details_message_3 += "Error when parsing general_string_token:\n";
+				details_message_3 += "Pattern and input do not match at certain position:\n";
 				details_message_3 += "input:   " + n_more(begin, jter, end, 10) + "\n";
 				details_message_3 += "         " + std::string(std::distance(begin, jter), ' ') + "^\n";
 				details_message_3 += "pattern: " + n_more(pattern.cbegin(), iter, pattern.cend(), 10) + "\n";
 				details_message_3 += "         " + std::string(std::distance(begin, iter), ' ') + "^\n";
 
-				throw not_matching(details_message_3);
+				throw not_matching(details_message_3, file_content, jter);
 			}
 			++jter;
 			++iter;
@@ -241,6 +252,42 @@ public:
 
 	virtual token_ref_vector children() override {
 		return token_ref_vector();
+	}
+
+};
+
+template <const std::string* _String_Ptr>
+class string_token : public general_string_token {
+public:
+	using type = string_token;
+
+	constexpr static const std::string* _string_ptr{ _String_Ptr };
+
+private:
+	type() : general_string_token(*_string_ptr) {}
+
+public:
+
+	static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+
+		const std::string& pattern{ *_string_ptr };
+		try {
+			general_string_token = general_string_token::parse_string(begin, end, pattern, file_content);
+		}
+		catch (const not_matching& e) {
+			std::string error_message;
+			error_message += "Error when parsing string_token<" + *_string_ptr + ">:\nCaused here:\n";
+			error_message += e.what();
+			throw not_matching(error_message, file_content, begin);
+		}
+
+		return type();
+	}
+
+	static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+		const std::string& pattern{ *_string_ptr };
+
+		return general_string_token::find_all_candidates(begun, end, pattern);
 	}
 
 };
