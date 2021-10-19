@@ -11,6 +11,7 @@
 #include <numeric> // std::accumulate
 #include <string>
 #include <type_traits> // std::remove_pointer
+#include <string_view>
 
 #define def_standard_clone() std::shared_ptr<token> clone() const override { return std::make_shared<std::remove_const<std::remove_reference<decltype(*this)>::type>::type>(*this); }
 
@@ -25,13 +26,23 @@ class token;
 
 class file_token;
 
+class token_annotation {
+public:
+	std::shared_ptr<std::string> _original_file;
+	std::string::const_iterator _begin;
+	std::string::const_iterator _end;
+};
+
 class token {
 public:
 	using string_const_iterator = std::string::const_iterator;
 	using regex_iterator = boost::regex_iterator<std::string::const_iterator>;
 	using token_list = std::list<std::shared_ptr<token>>; //###remove
+	using token_const_ref_vector = std::vector<const token&>; // again rename! but keep
+	using token_ref_vector = std::vector<token&>; // again rename! but keep
 
-	struct utils {
+	
+	//struct utils {
 		template <class _MatchResults>
 		static string_const_iterator match_begin(const _MatchResults& m) {
 			return m.prefix().end();
@@ -41,14 +52,16 @@ public:
 		static string_const_iterator match_end(const _MatchResults& m) {
 			return m.suffix().begin();
 		}
-	};
+	//};
 
 protected:
 
-	std::shared_ptr<const std::string> _file_content; //###remove
-	string_const_iterator _begin; //###remove
-	string_const_iterator _end; //###remove
+	std::shared_ptr<std::string> _file_content; //###remove
+	string_const_iterator _cbegin; //###remove
+	string_const_iterator _cend; //###remove
 	const token* _parent;  //###remove
+
+	token_annotation annotations;
 
 public:
 
@@ -56,9 +69,11 @@ public:
 
 	virtual std::string to_string() const = 0; // reviewed
 
-	virtual token_list children() const = 0;
+	virtual token_const_ref_vector children() const = 0; // reviewed
+	virtual token_ref_vector children() = 0; // reviewed
 
-	virtual std::shared_ptr<token> clone() const = 0;
+	//virtual token_list children() const = 0; 
+
 
 	token(std::shared_ptr<const std::string> file_content, string_const_iterator begin, string_const_iterator end) : _file_content(file_content), _begin(begin), _end(end), _parent(this) {}
 	token(const token& parent_token, string_const_iterator begin, string_const_iterator end) : _file_content(parent_token._file_content), _begin(begin), _end(end), _parent(&parent_token) {}
@@ -83,32 +98,10 @@ public:
 		return result;
 	}
 
-private:
-
-	virtual void parse_non_primitive() = 0;
-
-public:
-
-	void parse() {
-		if (!is_primitive()) {
-			parse_non_primitive();
-		}
-		auto got_children = children();
-		for (auto& child : got_children) {
-			if (child) child->parse();
-		}
-	}
-
-	string_const_iterator cbegin() const { return _begin; }
-
-	string_const_iterator cend() const { return _end; }
-
-	std::string str() const { return std::string(cbegin(), cend()); }
-
 };
 
 
-
+/*
 template<class ... _Tokens>
 class compound_token : public token {
 	using _tuple = tuple<_Tokens...>;
@@ -130,7 +123,7 @@ class compound_token : public token {
 
 		// find separations by finding all candidates for sub tokens -> might be more possibilities
 		// try parse every separation candidate, =1 should be successful, otherwise cannot parse error or ambiguous parse error
-		// 
+		//
 		// parse it completely, recursive
 		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
 		return x_token();
@@ -138,22 +131,25 @@ class compound_token : public token {
 
 	static std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
 		// add options: anywhere, start_at_begin, end_at_end
-		// 
-		// 
+		//
+		//
 		// use calls for sub tokens, calc all combinations....
 		// list all subsection where an x_token might be parsed., might be empty.
 	}
 
 };
+*/
 
 class primitive_string_token : public token {
 public:
 	using type = primitive_string_token;
 private:
+
+	std::string _string;
+
 	type(const std::string& string) : _string(string) {}
 
 public:
-
 
 	static type parse_string(string_const_iterator begin, string_const_iterator end, const std::string& pattern) {
 
@@ -204,13 +200,29 @@ public:
 		return type(pattern);
 	}
 
-	static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+	static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end, const std::string& pattern) {
 		// list all subsection where an x_token might be parsed., might be empty.
+		const auto sv = std::string_view(begin, end); // does it really use existing range?
+
+		std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> results;
+
+		std::string_view::size_type start{ 0 };
+		while (true) {
+			const auto pos = sv.find(pattern);
+
+			if (pos == sv.npos) break;
+
+			results.push_back(
+				std::make_pair(
+					std::next(begin, pos),
+					std::next(begin, pos + pattern.size())
+				)
+			);
+
+			start = pos + 1;
+		}
+
 	}
-
-private:
-	std::string _string;
-
 
 public:
 	virtual bool operator==(const token& another) const override {
@@ -225,6 +237,14 @@ public:
 
 	virtual std::string to_string() const override {
 		return _string;
+	}
+
+	virtual token_const_ref_vector children() const override {
+		return token_const_ref_vector();
+	}
+
+	virtual token_ref_vector children() override {
+		return token_ref_vector();
 	}
 
 };
