@@ -15,16 +15,6 @@
 
 #define def_standard_clone() std::shared_ptr<token> clone() const override { return std::make_shared<std::remove_const<std::remove_reference<decltype(*this)>::type>::type>(*this); }
 
-template <class T>
-std::shared_ptr<T> copy_shared_ptr(const std::shared_ptr<T>& ptr) {
-	if (ptr)
-		return std::make_shared<T>(*ptr.get());
-	return std::shared_ptr<T>();
-}
-
-class token;
-
-class file_token;
 
 class unique_consts {
 public:
@@ -311,7 +301,7 @@ private:
 
 public:
 
-	static type parse_string(string_const_iterator begin, string_const_iterator end, const  std::string& regex, std::shared_ptr<std::string> file_content) {
+	static type parse_string(string_const_iterator begin, string_const_iterator end, const std::string& regex, std::shared_ptr<std::string> file_content) {
 
 		// parse it completely, recursive
 		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
@@ -389,11 +379,11 @@ public:
 
 		const std::string& pattern{ *_string_ptr };
 		try {
-			general_regex_token test = general_regex_token::parse_string(begin, end, pattern, file_content);
+			general_regex_token test = general_regex_token::parse_string(begin, end, *_regex_string_ptr, file_content);
 		}
 		catch (const not_matching& e) {
 			std::string error_message;
-			error_message += "Error when parsing string_token<" + *_string_ptr + ">:\nCaused here:\n";
+			error_message += "Error when parsing regex_token<" + *_string_ptr + ">:\nCaused here:\n";
 			error_message += e.what();
 			throw not_matching(error_message, file_content, begin);
 		}
@@ -402,129 +392,39 @@ public:
 	}
 
 	static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
-		const std::string& pattern{ *_string_ptr };
-
-		return general_string_token::find_all_candidates(begin, end, pattern);
+		return general_regex_token::find_all_candidates(begin, end, *_regex_string_ptr);
 	}
 
 };
 
 
-inline std::shared_ptr<token> clone_shared_ptr(const std::shared_ptr<token>& ptr) {
-	if (ptr)
-		return ptr->clone();
-	return std::shared_ptr<token>();
-}
-
-
-class primitive_regex_token : public token {
-
-	virtual boost::regex primitive_regex() const = 0;
-
-public:
-
-	primitive_regex_token(const primitive_regex_token& another) :
-		token(another)
-	{}
-
-	virtual token_list children() const override {
-		return token_list();
-	}
-
-	using token::token;
-
-	virtual void parse_non_primitive() final override {}
-
-	virtual bool is_primitive() const final override { return true; }
-
-	virtual bool is_sound() const final override {
-		return boost::regex_match(cbegin(), cend(), primitive_regex());
-	}
-
+struct keywords {
+	using const_token = string_token<&const_regexes::strings::keywords::CONST_>;
+	using endmodule_token = string_token<&const_regexes::strings::keywords::ENDMODULE>;
+	using endrewards_token = string_token<&const_regexes::strings::keywords::ENDREWARDS>;
+	using global_token = string_token<&const_regexes::strings::keywords::GLOBAL>;
+	using module_token = string_token<&const_regexes::strings::keywords::MODULE>;
+	using rewards_token = string_token<&const_regexes::strings::keywords::REWARDS>;
 };
 
-class const_token : public primitive_regex_token {
-public:
 
-	using primitive_regex_token::primitive_regex_token;
 
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<const_token>(*this);
-	}
 
-	virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::const_keyword;
-	}
-};
 
-class global_token : public primitive_regex_token {
-public:
 
-	using primitive_regex_token::primitive_regex_token;
+////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
+////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
+////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
+////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
+////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
+////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
+////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
+////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
+////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
 
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<global_token>(*this);
-	}
 
-	virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::global_keyword;
-	}
-};
+#if false
 
-class module_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<module_token>(*this);
-	}
-
-	virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::module_keyword;
-	}
-};
-
-class rewards_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<rewards_token>(*this);
-	}
-
-	virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::rewards_keyword;
-	}
-};
-
-class endrewards_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<endrewards_token>(*this);
-	}
-
-	virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::endrewards_keyword;
-	}
-};
-
-class endmodule_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	def_standard_clone()
-
-		virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::endmodule_keyword;
-	}
-};
-//### try to do this as a template? using pointer?
 
 class type_specifier_token : public primitive_regex_token {
 public:
@@ -2663,3 +2563,4 @@ private:
 
 };
 
+#endif

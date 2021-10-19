@@ -44,22 +44,6 @@ bool compare_colorings(std::map<std::string, int>& c1, std::map<std::string, int
 	return __compare_helper__(c1, c2) && __compare_helper__(c2, c1);
 }
 
-void print_model_to_stream(const file_token& reduced_file, std::ostream& ofile) {
-	token::token_list to_be_printed = reduced_file.children();
-	while (!to_be_printed.empty()) {
-		const auto element = to_be_printed.front();
-		to_be_printed.pop_front();
-		if (element->is_primitive()) {
-			ofile << element->str();
-		}
-		else {
-			const auto got_children = element->children();
-			to_be_printed.insert(to_be_printed.begin(), got_children.begin(), got_children.end());
-		}
-	}
-}
-
-
 // state of cf variables |-> (must be recalculated, variables that are live there (current state), changes since last calculation)
 using liveness_tuple = std::tuple<bool, std::vector<std::string>, std::vector<std::string>>;
 using live_var_map = std::map<int, liveness_tuple>;
