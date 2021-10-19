@@ -27,45 +27,42 @@ class file_token;
 
 class token {
 public:
-	using iterator = std::string::const_iterator;
+	using string_const_iterator = std::string::const_iterator;
 	using regex_iterator = boost::regex_iterator<std::string::const_iterator>;
-	using token_list = std::list<std::shared_ptr<token>>;
+	using token_list = std::list<std::shared_ptr<token>>; //###remove
 
-	template <class _MatchResults>
-	static iterator match_begin(const _MatchResults& m) {
-		return m.prefix().end();
-	}
+	struct utils {
+		template <class _MatchResults>
+		static string_const_iterator match_begin(const _MatchResults& m) {
+			return m.prefix().end();
+		}
 
-	template <class _MatchResults>
-	static iterator match_end(const _MatchResults& m) {
-		return m.suffix().begin();
-	}
+		template <class _MatchResults>
+		static string_const_iterator match_end(const _MatchResults& m) {
+			return m.suffix().begin();
+		}
+	};
 
 protected:
 
-	std::shared_ptr<const std::string> _file_content;
-	iterator _begin;
-	iterator _end;
-	const token* _parent;
-
-	/*const token* root() const {
-		return this == _parent ? this : _parent->root();
-	}
-
-	const file_token* root_file_token() const {
-		return dynamic_cast<const file_token*>(root());
-	}
-	*/
+	std::shared_ptr<const std::string> _file_content; //###remove
+	string_const_iterator _begin; //###remove
+	string_const_iterator _end; //###remove
+	const token* _parent;  //###remove
 
 public:
+
+	virtual bool operator==(const token& another) const = 0; // reviewed
+
+	virtual std::string to_string() const = 0; // reviewed
 
 	virtual token_list children() const = 0;
 
 	virtual std::shared_ptr<token> clone() const = 0;
 
-	token(std::shared_ptr<const std::string> file_content, iterator begin, iterator end) : _file_content(file_content), _begin(begin), _end(end), _parent(this) {}
-	token(const token& parent_token, iterator begin, iterator end) : _file_content(parent_token._file_content), _begin(begin), _end(end), _parent(&parent_token) {}
-	token(const token* parent_token, iterator begin, iterator end) : _file_content(parent_token->_file_content), _begin(begin), _end(end), _parent(parent_token) {}
+	token(std::shared_ptr<const std::string> file_content, string_const_iterator begin, string_const_iterator end) : _file_content(file_content), _begin(begin), _end(end), _parent(this) {}
+	token(const token& parent_token, string_const_iterator begin, string_const_iterator end) : _file_content(parent_token._file_content), _begin(begin), _end(end), _parent(&parent_token) {}
+	token(const token* parent_token, string_const_iterator begin, string_const_iterator end) : _file_content(parent_token->_file_content), _begin(begin), _end(end), _parent(parent_token) {}
 
 	token(const token& another) {
 		_file_content = another._file_content;
@@ -102,13 +99,137 @@ public:
 		}
 	}
 
-	iterator cbegin() const { return _begin; }
+	string_const_iterator cbegin() const { return _begin; }
 
-	iterator cend() const { return _end; }
+	string_const_iterator cend() const { return _end; }
 
 	std::string str() const { return std::string(cbegin(), cend()); }
 
 };
+
+
+
+template<class ... _Tokens>
+class compound_token : public token {
+	using _tuple = tuple<_Tokens...>;
+	_tuple sub_tokens;
+
+	static compound_token<_Tokens...> parse_string(std::string::const_iterator begin, std::string::const_iterator end) {
+		if constexpr (sizeof ...(_Tokens) == 0) {
+			if (begin != end) {
+				// throw cannot parse
+			}
+			return compound_token<_Tokens...>();
+		}
+		else {
+			std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> candidates_for_first_sub_token =
+				std::tuple_element<0, _tuple>::type::find_all_candidates(begin, end, START_AT_FRONT);
+			// for each check if extension yields a correct parsed compound token, also check the first one if candidate is real existence
+			// -> =1 should yield a correctly parsed token -> then return this one
+		}
+
+		// find separations by finding all candidates for sub tokens -> might be more possibilities
+		// try parse every separation candidate, =1 should be successful, otherwise cannot parse error or ambiguous parse error
+		// 
+		// parse it completely, recursive
+		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+		return x_token();
+	}
+
+	static std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+		// add options: anywhere, start_at_begin, end_at_end
+		// 
+		// 
+		// use calls for sub tokens, calc all combinations....
+		// list all subsection where an x_token might be parsed., might be empty.
+	}
+
+};
+
+class primitive_string_token : public token {
+public:
+	using type = primitive_string_token;
+private:
+	type(const std::string& string) : _string(string) {}
+
+public:
+
+
+	static type parse_string(string_const_iterator begin, string_const_iterator end, const std::string& pattern) {
+
+		// parse it completely, recursive
+		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+		string_const_iterator iter = pattern.cbegin();
+		string_const_iterator jter = begin;
+
+		while (jter != end && iter != pattern.cend()) {
+
+			const auto n_more = [](string_const_iterator begin, string_const_iterator iter, string_const_iterator end, const std::iterator_traits<string_const_iterator>::difference_type& n) {
+				if (std::distance(iter, end) <= n)
+					return std::string(begin, end);
+				return std::string(begin, std::next(iter, n)) + "...";
+			};
+
+			if (jter == end) {
+				std::string details_message_1{ "Gotten input already ended but pattern still provides remaining characters:\n" };
+				details_message_1 += "input:   " + std::string(begin, end) + "\n";
+				details_message_1 += "         " + std::string(std::distance(begin, end), ' ') + "^\n";
+				details_message_1 += "pattern: " + n_more(pattern.cbegin(), iter, pattern.cend(), 10) + "\n";
+				details_message_1 += "         " + std::string(std::distance(begin, end), ' ') + "^\n";
+				throw not_matching(details_message_1);
+			}
+			if (iter == pattern.cend()) {
+				std::string details_message_2{ "Pattern already ended but gotten input still provides remaining characters:\n" };
+				details_message_2 += "input:   " + n_more(begin, jter, end, 10) + "\n";
+				details_message_2 += "         " + std::string(pattern.size(), ' ') + "^\n";
+				details_message_2 += "pattern: " + pattern + "\n";
+				details_message_2 += "         " + std::string(pattern.size(), ' ') + "^\n";
+
+				throw not_matching(details_message_2);
+			}
+
+			if (*jter != *iter) {
+				std::string details_message_3{ "Pattern and input do not match at certain position:\n" };
+				details_message_3 += "input:   " + n_more(begin, jter, end, 10) + "\n";
+				details_message_3 += "         " + std::string(std::distance(begin, jter), ' ') + "^\n";
+				details_message_3 += "pattern: " + n_more(pattern.cbegin(), iter, pattern.cend(), 10) + "\n";
+				details_message_3 += "         " + std::string(std::distance(begin, iter), ' ') + "^\n";
+
+				throw not_matching(details_message_3);
+			}
+			++jter;
+			++iter;
+		}
+
+		return type(pattern);
+	}
+
+	static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+		// list all subsection where an x_token might be parsed., might be empty.
+	}
+
+private:
+	std::string _string;
+
+
+public:
+	virtual bool operator==(const token& another) const override {
+		try {
+			const type& down_casted = dynamic_cast<const type&>(another);
+			return to_string() == another.to_string();
+		}
+		catch (const std::bad_cast& e) {
+			return false;
+		}
+	}
+
+	virtual std::string to_string() const override {
+		return _string;
+	}
+
+};
+
+
 
 inline std::shared_ptr<token> clone_shared_ptr(const std::shared_ptr<token>& ptr) {
 	if (ptr)
@@ -576,8 +697,8 @@ public:
 	}
 
 	virtual void parse_non_primitive() final override {
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		auto search_equals_operator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::equals);
 		if (search_equals_operator != regex_iterator()) {
@@ -780,8 +901,8 @@ public:
 	}
 
 	virtual void parse_non_primitive() final override {
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		std::vector<std::string> comparison_operators{ "!=", "<=", ">=", "=", "<", ">" };
 
@@ -790,7 +911,7 @@ public:
 			if (search_comparator == regex_iterator()) continue;
 			// found comparator here:
 			_root_operator = std::make_shared<comparison_operator_token>(this, search_comparator->prefix().end(), search_comparator->suffix().begin());
-			auto process_expression = [this](std::shared_ptr<space_token>& _leading_separator, std::shared_ptr<identifier_or_number>& _expression, std::shared_ptr<space_token> _trailing_separator, iterator rest_begin, iterator rest_end) {
+			auto process_expression = [this](std::shared_ptr<space_token>& _leading_separator, std::shared_ptr<identifier_or_number>& _expression, std::shared_ptr<space_token> _trailing_separator, string_const_iterator rest_begin, string_const_iterator rest_end) {
 				auto search_leading_spaces = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
 				parse_error::assert_true(search_leading_spaces != regex_iterator(), R"(Could not find leading spaces in equation token.)");
 				parse_error::assert_true(search_leading_spaces->prefix().end() == rest_begin, R"(Could not find leading spaces in equation token but elsewhere.)");
@@ -915,15 +1036,15 @@ public:
 	}
 
 	virtual void parse_non_primitive() final override {
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		// search all braces
-		std::vector<std::pair<iterator, int64_t>> open_braces;
+		std::vector<std::pair<string_const_iterator, int64_t>> open_braces;
 		int64_t count{ 0 };
 		if (rest_begin == rest_end) throw parse_error("Empty condition.");
 		if (*rest_begin != '(') open_braces.push_back({ rest_begin,0 });
-		for (iterator it = rest_begin; it != rest_end; ++it) {
+		for (string_const_iterator it = rest_begin; it != rest_end; ++it) {
 			if (*it == '(') {
 				++count;
 				open_braces.push_back({ it,count });
@@ -980,7 +1101,7 @@ public:
 		}
 
 		auto search_separators_outside_braces = [&](const boost::regex& r_separator) {
-			std::vector<std::pair<iterator, iterator>> separator_positions;
+			std::vector<std::pair<string_const_iterator, string_const_iterator>> separator_positions;
 			auto tracer = open_braces.cbegin();
 			for (auto search_separator = regex_iterator(rest_begin, rest_end, r_separator); search_separator != regex_iterator(); ++search_separator) {
 				auto pos = search_separator->prefix().end();
@@ -1006,13 +1127,13 @@ public:
 			return false; // no splitters
 		};
 		//search | not inside braces
-		std::vector<std::pair<iterator, iterator>> or_positions = search_separators_outside_braces(const_regexes::primitives::or_sign);
+		std::vector<std::pair<string_const_iterator, string_const_iterator>> or_positions = search_separators_outside_braces(const_regexes::primitives::or_sign);
 		if (split_using_separators(or_positions, static_cast<or_token*>(nullptr))) {
 			_type = type::OR;
 			return;
 		}
 		//search & not inside braces
-		std::vector<std::pair<iterator, iterator>> and_positions = search_separators_outside_braces(const_regexes::primitives::and_sign);
+		std::vector<std::pair<string_const_iterator, string_const_iterator>> and_positions = search_separators_outside_braces(const_regexes::primitives::and_sign);
 		if (split_using_separators(and_positions, (and_token*)nullptr)) {
 			_type = type::AND;
 			return;
@@ -1158,8 +1279,8 @@ public:
 	}
 
 	virtual void parse_non_primitive() override {
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::formula);
 		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "formula" in formula definition.)");
@@ -1266,8 +1387,8 @@ public:
 	}
 
 	virtual void parse_non_primitive() override {
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::const_keyword);
 		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "const" in const definition.)");
@@ -1418,8 +1539,8 @@ public:
 	virtual void parse_non_primitive() override {
 		/* global cf : [0 .. 142]; */
 		/* global cf : [0 .. 142] init 2; */
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::global_keyword);
 		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "global" in global definition.)");
@@ -1673,8 +1794,8 @@ public:
 
 	virtual void parse_non_primitive() override {
 
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		auto search_left_square_brace = regex_iterator(rest_begin, rest_end, const_regexes::primitives::left_square_brace);
 		parse_error::assert_true(search_left_square_brace != regex_iterator(), R"(Could not find left square brace in transition.)");
@@ -1866,8 +1987,8 @@ public:
 
 	virtual void parse_non_primitive() override {
 
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::module_keyword);
 		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "module" in module definition.)");
@@ -1994,8 +2115,8 @@ public:
 	}
 
 	virtual void parse_non_primitive() override {
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::rewards_keyword);
 		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "rewards" in reward definition.)");
@@ -2124,8 +2245,8 @@ public:
 	}
 
 	virtual void parse_non_primitive() override {
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::init_keyword);
 		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "init" in init definition.)");
@@ -2187,8 +2308,8 @@ private:
 	virtual void parse_non_primitive() override {
 		token_list& result{ local_children };
 
-		iterator rest_begin{ cbegin() };
-		iterator rest_end{ cend() };
+		string_const_iterator rest_begin{ cbegin() };
+		string_const_iterator rest_end{ cend() };
 
 		using clause_searcher = std::pair<boost::regex, regex_iterator>;
 
@@ -2294,59 +2415,6 @@ public:
 };
 
 using dtmc_token = primitive_regex_token_template<&const_regexes::primitives::dtmc>;
-
-template<class ... _Tokens>
-class compound_token : public token {
-	using _tuple = tuple<_Tokens...>;
-	_tuple sub_tokens;
-
-	static compound_token<_Tokens...> parse_string(std::string::const_iterator begin, std::string::const_iterator end) {
-		if constexpr (sizeof ...(_Tokens) == 0) {
-			if (begin != end) {
-				// throw cannot parse
-			}
-			return compound_token<_Tokens...>();
-		}
-		else {
-			std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> candidates_for_first_sub_token =
-				std::tuple_element<0, _tuple>::type::find_all_candidates(begin, end, START_AT_FRONT);
-			// for each check if extension yields a correct parsed compound token, also check the first one if candidate is real existence
-			// -> =1 should yield a correctly parsed token -> then return this one
-		}
-
-		// find separations by finding all candidates for sub tokens -> might be more possibilities
-		// try parse every separation candidate, =1 should be successful, otherwise cannot parse error or ambiguous parse error
-		// 
-		// parse it completely, recursive
-		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
-		return x_token();
-	}
-
-	static std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
-		// add options: anywhere, start_at_begin, end_at_end
-		// 
-		// 
-		// use calls for sub tokens, calc all combinations....
-		// list all subsection where an x_token might be parsed., might be empty.
-	}
-
-};
-
-class x_token : public token {
-
-	static x_token parse_string(std::string::const_iterator begin, std::string::const_iterator end) {
-		// parse it completely, recursive
-		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
-		return x_token();
-	}
-
-	static std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
-		// list all subsection where an x_token might be parsed., might be empty.
-	}
-
-
-};
-
 
 
 class file_token : public token {
