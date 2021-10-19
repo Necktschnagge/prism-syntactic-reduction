@@ -62,18 +62,18 @@ public:
 	using token_const_ref_vector = std::vector<const token&>;
 	using token_ref_vector = std::vector<token&>;
 
+protected:
+	struct utils {
+		template <class _MatchResults> //###remove???
+		static string_const_iterator match_begin(const _MatchResults& m) {
+			return m.prefix().end();
+		}
 
-	//struct utils {
-	template <class _MatchResults> //###remove???
-	static string_const_iterator match_begin(const _MatchResults& m) {
-		return m.prefix().end();
-	}
-
-	template <class _MatchResults>
-	static string_const_iterator match_end(const _MatchResults& m) {
-		return m.suffix().begin();
-	}
-	//};
+		template <class _MatchResults>
+		static string_const_iterator match_end(const _MatchResults& m) {
+			return m.suffix().begin();
+		}
+	};
 
 protected:
 
@@ -162,7 +162,7 @@ public:
 
 		while (jter != end && iter != pattern.cend()) {
 
-			const auto n_more = [](string_const_iterator begin, string_const_iterator iter, string_const_iterator end, const std::iterator_traits<string_const_iterator>::difference_type& n) {
+			const auto n_more = [](string_const_iterator begin, string_const_iterator iter, string_const_iterator end, const std::iterator_traits<string_const_iterator>::difference_type& n = 10) {
 				if (std::distance(iter, end) <= n)
 					return std::string(begin, end);
 				return std::string(begin, std::next(iter, n)) + "...";
@@ -174,7 +174,7 @@ public:
 				details_message_1 += "Gotten input already ended but pattern still provides remaining characters:\n";
 				details_message_1 += "input:   " + std::string(begin, end) + "\n";
 				details_message_1 += "         " + std::string(std::distance(begin, end), ' ') + "^\n";
-				details_message_1 += "pattern: " + n_more(pattern.cbegin(), iter, pattern.cend(), 10) + "\n";
+				details_message_1 += "pattern: " + n_more(pattern.cbegin(), iter, pattern.cend()) + "\n";
 				details_message_1 += "         " + std::string(std::distance(begin, end), ' ') + "^\n";
 				throw not_matching(details_message_1, file_content, jter);
 			}
@@ -182,7 +182,7 @@ public:
 				std::string details_message_2;
 				details_message_2 += "Error when parsing general_string_token:\n";
 				details_message_2 += "Pattern already ended but gotten input still provides remaining characters:\n";
-				details_message_2 += "input:   " + n_more(begin, jter, end, 10) + "\n";
+				details_message_2 += "input:   " + n_more(begin, jter, end) + "\n";
 				details_message_2 += "         " + std::string(pattern.size(), ' ') + "^\n";
 				details_message_2 += "pattern: " + pattern + "\n";
 				details_message_2 += "         " + std::string(pattern.size(), ' ') + "^\n";
@@ -194,9 +194,9 @@ public:
 				std::string details_message_3;
 				details_message_3 += "Error when parsing general_string_token:\n";
 				details_message_3 += "Pattern and input do not match at certain position:\n";
-				details_message_3 += "input:   " + n_more(begin, jter, end, 10) + "\n";
+				details_message_3 += "input:   " + n_more(begin, jter, end) + "\n";
 				details_message_3 += "         " + std::string(std::distance(begin, jter), ' ') + "^\n";
-				details_message_3 += "pattern: " + n_more(pattern.cbegin(), iter, pattern.cend(), 10) + "\n";
+				details_message_3 += "pattern: " + n_more(pattern.cbegin(), iter, pattern.cend()) + "\n";
 				details_message_3 += "         " + std::string(std::distance(begin, iter), ' ') + "^\n";
 
 				throw not_matching(details_message_3, file_content, jter);
@@ -210,13 +210,18 @@ public:
 
 	static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end, const std::string& pattern) {
 		// list all subsection where an x_token might be parsed., might be empty.
-		const auto sv = std::string_view(begin, end); // does it really use existing range?
+
+		const auto sv = std::string(begin, end); // does it really use existing range?
+
+		if constexpr (false) { // C++ 20 not yet supported, use one day:
+			//const auto sv = std::string_view(begin, end); // does it really use existing range?
+		}
 
 		std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> results;
 
-		std::string_view::size_type start{ 0 };
+		std::string::size_type start{ 0 };
 		while (true) {
-			const auto pos = sv.find(pattern);
+			const auto pos = sv.find(pattern, start);
 
 			if (pos == sv.npos) break;
 
@@ -229,6 +234,8 @@ public:
 
 			start = pos + 1;
 		}
+
+		return results;
 	}
 
 public:
@@ -272,7 +279,7 @@ public:
 
 		const std::string& pattern{ *_string_ptr };
 		try {
-			general_string_token = general_string_token::parse_string(begin, end, pattern, file_content);
+			general_string_token test = general_string_token::parse_string(begin, end, pattern, file_content);
 		}
 		catch (const not_matching& e) {
 			std::string error_message;
@@ -287,11 +294,120 @@ public:
 	static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
 		const std::string& pattern{ *_string_ptr };
 
-		return general_string_token::find_all_candidates(begun, end, pattern);
+		return general_string_token::find_all_candidates(begin, end, pattern);
 	}
 
 };
 
+class general_regex_token : public token {
+public:
+	using type = general_regex_token;
+private:
+
+	std::string _content;
+	std::string _regex;
+
+	type(const std::string& content, const std::string& regex) : _content(content), _regex(regex) {}
+
+public:
+
+	static type parse_string(string_const_iterator begin, string_const_iterator end, const  std::string& regex, std::shared_ptr<std::string> file_content) {
+
+		// parse it completely, recursive
+		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+
+		const bool matching = boost::regex_match(begin, end, boost::regex(regex));
+		if (!matching) {
+			std::string error_message;
+			error_message += "Input does not match regex:\n";
+			error_message += "regex: " + regex + "\n";
+			error_message += "begin of input sequence:\n";
+			error_message += not_matching::get_position_description(file_content, begin);
+			error_message += not_matching::show_position(file_content, begin);
+			error_message += " end  of input sequence:\n";
+			error_message += not_matching::get_position_description(file_content, end);
+			error_message += not_matching::show_position(file_content, end);
+			throw not_matching(error_message, file_content, begin);
+		}
+
+		return type(std::string(begin, end), regex);
+	}
+
+	static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end, const std::string& regex) {
+		// list all subsection where an x_token might be parsed., might be empty.
+
+		std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> results;
+
+		for (auto it = regex_iterator(begin, end, boost::regex(regex)); it != regex_iterator(); ++it) {
+			results.emplace_back(utils::match_begin(*it), utils::match_end(*it));
+		}
+
+		return results;
+	}
+
+public:
+	virtual bool operator==(const token& another) const override {
+		try {
+			const type& down_casted = dynamic_cast<const type&>(another);
+			return to_string() == another.to_string();
+		}
+		catch (const std::bad_cast& e) {
+			return false;
+		}
+	}
+
+	virtual std::string to_string() const override {
+		return _content;
+	}
+
+	virtual token_const_ref_vector children() const override {
+		return token_const_ref_vector();
+	}
+
+	virtual token_ref_vector children() override {
+		return token_ref_vector();
+	}
+
+};
+
+template <const std::string* _Regex_String_Ptr>
+class regex_token : public general_regex_token {
+public:
+	using type = regex_token;
+
+	constexpr static const std::string* _regex_string_ptr{ _Regex_String_Ptr };
+
+private:
+
+	std::string _content;
+
+	type(const std::string& content) : general_regex_token(content, *_regex_string_ptr) {}
+
+public:
+
+	static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+
+		const std::string& pattern{ *_string_ptr };
+		try {
+			general_regex_token test = general_regex_token::parse_string(begin, end, pattern, file_content);
+		}
+		catch (const not_matching& e) {
+			std::string error_message;
+			error_message += "Error when parsing string_token<" + *_string_ptr + ">:\nCaused here:\n";
+			error_message += e.what();
+			throw not_matching(error_message, file_content, begin);
+		}
+
+		return type(std::string(begin, end));
+	}
+
+	static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+		const std::string& pattern{ *_string_ptr };
+
+		return general_string_token::find_all_candidates(begin, end, pattern);
+	}
+
+};
 
 
 inline std::shared_ptr<token> clone_shared_ptr(const std::shared_ptr<token>& ptr) {

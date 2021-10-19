@@ -45,6 +45,38 @@ class not_matching : public parse_error {
 	std::shared_ptr<std::string> _file_content;
 	std::string::const_iterator _error_position;
 
+public:
+
+	static std::string show_position(std::shared_ptr<std::string> file_content, std::string::const_iterator error_position, std::size_t n = 20) {
+		if (!file_content) return "[ Fatal: Could not get information on error location! ]\n";
+
+		std::string view;
+		std::string::const_iterator iter{ file_content->cbegin() };
+		std::size_t line{ 1 };
+		std::size_t column{ 1 };
+		std::string this_line{};
+		while (iter != error_position) {
+			this_line.push_back(*iter);
+
+			if (*iter == '\n') {
+				++line;
+				column = 0;
+				this_line.clear();
+			}
+			++column;
+		}
+		this_line.push_back(*iter++); // at error position
+		while (n > 0 && *iter != '\n' && iter != file_content->cend()) {
+			this_line.push_back(*iter);
+			--n;
+			++iter;
+		}
+		std::string position_message;
+		position_message += this_line + "\n";
+		position_message += std::string(column - 1, ' ') + "^\n";
+		return position_message;
+	}
+
 	static std::string get_position_description(std::shared_ptr<std::string> file_content, std::string::const_iterator error_position) {
 		if (!file_content) return "[ Fatal: Could not get information on error location! ]\n";
 		std::string::const_iterator iter{ file_content->cbegin() };
@@ -64,8 +96,6 @@ class not_matching : public parse_error {
 		position_message += ", position " + std::to_string(std::size_t(1) + std::distance(file_content->cbegin(), error_position)) + ":\n";
 		return position_message;
 	}
-
-public:
 
 	not_matching(const std::string& actual, const std::string& expected_description) :
 		parse_error(std::string("Got:   ") + actual + "\nExpected:   " + expected_description),
