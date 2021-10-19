@@ -26,40 +26,51 @@ class token;
 
 class file_token;
 
+class unique_consts {
+public:
+	std::set<std::string> keywords;
+};
+
 class token_annotation {
 public:
 	std::shared_ptr<std::string> _original_file;
 	std::string::const_iterator _begin;
 	std::string::const_iterator _end;
+
+	token_annotation() {}
+
+	token_annotation(
+		std::shared_ptr<std::string> original_file,
+		std::string::const_iterator begin,
+		std::string::const_iterator end
+	) : _original_file(original_file),
+		_begin(begin),
+		_end(end)
+	{}
+
 };
 
 class token {
 public:
 	using string_const_iterator = std::string::const_iterator;
 	using regex_iterator = boost::regex_iterator<std::string::const_iterator>;
-	using token_list = std::list<std::shared_ptr<token>>; //###remove
-	using token_const_ref_vector = std::vector<const token&>; // again rename! but keep
-	using token_ref_vector = std::vector<token&>; // again rename! but keep
+	using token_const_ref_vector = std::vector<const token&>;
+	using token_ref_vector = std::vector<token&>;
 
-	
+
 	//struct utils {
-		template <class _MatchResults>
-		static string_const_iterator match_begin(const _MatchResults& m) {
-			return m.prefix().end();
-		}
+	template <class _MatchResults> //###remove???
+	static string_const_iterator match_begin(const _MatchResults& m) {
+		return m.prefix().end();
+	}
 
-		template <class _MatchResults>
-		static string_const_iterator match_end(const _MatchResults& m) {
-			return m.suffix().begin();
-		}
+	template <class _MatchResults>
+	static string_const_iterator match_end(const _MatchResults& m) {
+		return m.suffix().begin();
+	}
 	//};
 
 protected:
-
-	std::shared_ptr<std::string> _file_content; //###remove
-	string_const_iterator _cbegin; //###remove
-	string_const_iterator _cend; //###remove
-	const token* _parent;  //###remove
 
 	token_annotation annotations;
 
@@ -70,34 +81,20 @@ public:
 	virtual std::string to_string() const = 0; // reviewed
 
 	virtual token_const_ref_vector children() const = 0; // reviewed
+
 	virtual token_ref_vector children() = 0; // reviewed
 
-	//virtual token_list children() const = 0; 
+	token() : annotations() {}
 
+	token(
+		std::shared_ptr<std::string> original_file,
+		std::string::const_iterator begin,
+		std::string::const_iterator end
+	) : annotations(original_file, begin, end) {}
 
-	token(std::shared_ptr<const std::string> file_content, string_const_iterator begin, string_const_iterator end) : _file_content(file_content), _begin(begin), _end(end), _parent(this) {}
-	token(const token& parent_token, string_const_iterator begin, string_const_iterator end) : _file_content(parent_token._file_content), _begin(begin), _end(end), _parent(&parent_token) {}
-	token(const token* parent_token, string_const_iterator begin, string_const_iterator end) : _file_content(parent_token->_file_content), _begin(begin), _end(end), _parent(parent_token) {}
-
-	token(const token& another) {
-		_file_content = another._file_content;
-		_begin = another._begin;
-		_end = another._end;
-		_parent = this;
+	inline void annotate(std::shared_ptr<std::string> original_file, std::string::const_iterator begin, std::string::const_iterator end) {
+		annotations = token_annotation(original_file, begin, end);
 	}
-
-	virtual bool is_primitive() const = 0;
-	virtual bool is_sound() const = 0;
-
-	bool is_sound_recursive() const {
-		auto got_children = children();
-		auto result = is_sound() && std::accumulate(got_children.cbegin(), got_children.cend(), true, [](auto acc, auto& child) { return acc && child->is_sound_recursive(); });
-		if (!result) {
-			standard_logger().error("here");
-		}
-		return result;
-	}
-
 };
 
 
@@ -221,7 +218,6 @@ public:
 
 			start = pos + 1;
 		}
-
 	}
 
 public:
