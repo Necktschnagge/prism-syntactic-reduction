@@ -49,8 +49,9 @@ class token {
 public:
 	using string_const_iterator = std::string::const_iterator;
 	using regex_iterator = boost::regex_iterator<std::string::const_iterator>;
-	using token_const_ref_vector = std::vector<const token&>;
-	using token_ref_vector = std::vector<token&>;
+	//using const_token_ptr_vector = std::vector<const token*>;
+	using const_token_ptr_vector = std::vector<const token*>;
+	using token_ptr_vector = std::vector<token*>;
 
 protected:
 	struct utils {
@@ -75,9 +76,13 @@ public:
 
 	virtual std::string to_string() const = 0; // reviewed
 
-	virtual token_const_ref_vector children() const = 0; // reviewed
+	virtual std::string type_info() const = 0; // reviewed
 
-	virtual token_ref_vector children() = 0; // reviewed
+	static std::string static_type_info() {
+		return "TOKEN_BASE_CLASS";
+	}
+
+	virtual const_token_ptr_vector children() const = 0; // reviewed
 
 	token() : annotations() {}
 
@@ -90,47 +95,34 @@ public:
 	inline void annotate(std::shared_ptr<std::string> original_file, std::string::const_iterator begin, std::string::const_iterator end) {
 		annotations = token_annotation(original_file, begin, end);
 	}
-};
-
-
-/*
-template<class ... _Tokens>
-class compound_token : public token {
-	using _tuple = tuple<_Tokens...>;
-	_tuple sub_tokens;
-
-	static compound_token<_Tokens...> parse_string(std::string::const_iterator begin, std::string::const_iterator end) {
-		if constexpr (sizeof ...(_Tokens) == 0) {
-			if (begin != end) {
-				// throw cannot parse
-			}
-			return compound_token<_Tokens...>();
-		}
-		else {
-			std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> candidates_for_first_sub_token =
-				std::tuple_element<0, _tuple>::type::find_all_candidates(begin, end, START_AT_FRONT);
-			// for each check if extension yields a correct parsed compound token, also check the first one if candidate is real existence
-			// -> =1 should yield a correctly parsed token -> then return this one
-		}
-
-		// find separations by finding all candidates for sub tokens -> might be more possibilities
-		// try parse every separation candidate, =1 should be successful, otherwise cannot parse error or ambiguous parse error
-		//
-		// parse it completely, recursive
-		// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
-		return x_token();
-	}
-
-	static std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
-		// add options: anywhere, start_at_begin, end_at_end
-		//
-		//
-		// use calls for sub tokens, calc all combinations....
-		// list all subsection where an x_token might be parsed., might be empty.
-	}
 
 };
-*/
+
+template<class _Token>
+bool check_match(const std::string& test_string) {
+
+	try {
+		_Token test = _Token::parse_string(test_string.cbegin(), test_string.cend(), std::shared_ptr<std::string>());
+		return true;
+	}
+	catch (const not_matching& e) {
+		return false;
+	}
+
+}
+
+template<class _Token>
+bool check_match(const std::string::const_iterator& test_string_begin, const std::string::const_iterator& test_string_end) {
+
+	try {
+		_Token test = _Token::parse_string(test_string_begin, test_string_end, std::shared_ptr<std::string>());
+		return true;
+	}
+	catch (const not_matching& e) {
+		return false;
+	}
+
+}
 
 class general_string_token : public token {
 public:
@@ -226,13 +218,29 @@ public:
 		}
 
 		return results;
+
+	}
+
+	/**
+		@brief Returns [true, iter] if [begin,iter] matches pattern, otherwise [false, end] if input ended before pattern was read, [false, iter] in any other case where at position iter the match failed for the first time.
+	*/
+	static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end, const std::string& pattern) {
+		std::string::const_iterator iter = begin;
+		std::string::const_iterator jter = pattern.cbegin();
+		while (jter != pattern.cend()) {
+			if (iter == end) return std::make_pair(false, end); // input ended
+			if (*iter != *jter) return std::make_pair(false, iter); // missmatch
+			++iter;
+			++jter;
+		}
+		return std::make_pair(true, iter);
 	}
 
 public:
 	virtual bool operator==(const token& another) const override {
 		try {
 			const type& down_casted = dynamic_cast<const type&>(another);
-			return to_string() == another.to_string();
+			return _string == down_casted._string;
 		}
 		catch (const std::bad_cast& e) {
 			return false;
@@ -243,18 +251,24 @@ public:
 		return _string;
 	}
 
-	virtual token_const_ref_vector children() const override {
-		return token_const_ref_vector();
+	virtual std::string type_info() const override {
+		return std::string("GENERAL_STRING_TOKEN(\"") + _string + "\")";
 	}
 
-	virtual token_ref_vector children() override {
-		return token_ref_vector();
+	static std::string static_type_info() {
+		return "GENERAL_STRING_TOKEN()";
+	}
+
+	virtual const_token_ptr_vector children() const override {
+		return const_token_ptr_vector();
 	}
 
 };
 
 template <const std::string* _String_Ptr>
 class string_token : public general_string_token {
+	static_assert(_String_Ptr != nullptr, "Not allowed: string_token<nullptr>");
+
 public:
 	using type = string_token;
 
@@ -287,6 +301,21 @@ public:
 		return general_string_token::find_all_candidates(begin, end, pattern);
 	}
 
+	/**
+	@brief Returns [true, iter] if [begin,iter] matches pattern, otherwise [false, end] if input ended before pattern was read, [false, iter] in any other case where at position iter the match failed for the first time.
+	*/
+	static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end) {
+		const std::string& pattern{ *_string_ptr };
+		return general_string_token::has_front_candidate(bergin, end, pattern);
+	}
+
+	virtual std::string type_info() const override {
+		type::static_type_info();
+	}
+
+	static std::string static_type_info() {
+		return std::string("STRING_TOKEN<\"") + *_string_ptr + "\">";
+	}
 };
 
 class general_regex_token : public token {
@@ -335,11 +364,26 @@ public:
 		return results;
 	}
 
+	/**
+	@brief Returns [true, iter] if [begin,iter] matches pattern, otherwise [false, iter] if found a match at later position, [false, end] if no match at all.
+	*/
+	static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end, const std::string& regex) {
+
+		auto it = regex_iterator(begin, end, boost::regex(regex));
+
+		if (it == regex_iterator()) return std::make_pair(false, end);
+
+		if (utils::match_begin(*it) != begin) return std::make_pair(false, utils::match_begin(*it));
+
+		return std::make_pair(true, utils::match_end(*it));
+
+	}
+
 public:
 	virtual bool operator==(const token& another) const override {
 		try {
 			const type& down_casted = dynamic_cast<const type&>(another);
-			return to_string() == another.to_string();
+			return _regex == down_casted._regex && _content == down_casted._content;
 		}
 		catch (const std::bad_cast& e) {
 			return false;
@@ -350,18 +394,23 @@ public:
 		return _content;
 	}
 
-	virtual token_const_ref_vector children() const override {
-		return token_const_ref_vector();
+	virtual std::string type_info() const override {
+		return std::string("GENERAL_REGEX_TOKEN(\"") + _regex + "\")";
 	}
 
-	virtual token_ref_vector children() override {
-		return token_ref_vector();
+	static std::string static_type_info() {
+		return "GENERAL_REGEX_TOKEN()";
+	}
+
+	virtual const_token_ptr_vector children() const override {
+		return const_token_ptr_vector();
 	}
 
 };
 
 template <const std::string* _Regex_String_Ptr>
 class regex_token : public general_regex_token {
+	static_assert(_Regex_String_Ptr != nullptr, "Not allowed: regex_token<nullptr>");
 public:
 	using type = regex_token;
 
@@ -395,22 +444,494 @@ public:
 		return general_regex_token::find_all_candidates(begin, end, *_regex_string_ptr);
 	}
 
+	/**
+		@brief Returns [true, iter] if [begin,iter] matches pattern, otherwise [false, iter] if found a match at later position, [false, end] if no match at all.
+	*/
+	static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end) {
+
+		return general_regex_token::has_front_candidate(begin, end, *_regex_string_ptr);
+
+	}
+
+	virtual std::string type_info() const override {
+		return type::static_type_info();
+	}
+
+	static std::string static_type_info() {
+		return std::string("REGEX_TOKEN<\"") + *_regex_string_ptr + "\">";
+	}
+
 };
 
+struct keyword_tokens {
 
-struct keywords {
 	using const_token = string_token<&const_regexes::strings::keywords::CONST_>;
 	using endmodule_token = string_token<&const_regexes::strings::keywords::ENDMODULE>;
 	using endrewards_token = string_token<&const_regexes::strings::keywords::ENDREWARDS>;
 	using global_token = string_token<&const_regexes::strings::keywords::GLOBAL>;
 	using module_token = string_token<&const_regexes::strings::keywords::MODULE>;
 	using rewards_token = string_token<&const_regexes::strings::keywords::REWARDS>;
+
+};
+
+struct delimiter_tokens {
+
+	using dot_dot_token = string_token<&const_regexes::strings::delimiter::dot_dot>;
+	using left_parenthesis_token = string_token<&const_regexes::strings::delimiter::left_parenthesis>;
+	using left_square_bracket_token = string_token<&const_regexes::strings::delimiter::left_square_bracket>;
+	using right_parenthesis_token = string_token<&const_regexes::strings::delimiter::right_parenthesis>;
+	using right_square_bracket_token = string_token<&const_regexes::strings::delimiter::right_square_bracket>;
+
+};
+
+struct regular_tokens {
+
+	using line_feed_token = regex_token<&const_regexes::strings::regulars::line_feed>;
+	using natural_number_token = regex_token<&const_regexes::strings::regulars::natural_number>;
+	using single_space_token = regex_token<&const_regexes::strings::regulars::single_space>;
+	using type_specifier_token = regex_token<&const_regexes::strings::regulars::type_specifier>;
+
 };
 
 
+struct primitive_clauses {
+
+};
+
+struct regular_extensions {
+
+	template<class _Token>
+	class kleene_star : public token {
+	public:
+		using type = kleene_star<_Token>;
+	private:
+
+		std::vector<_Token> _sub_tokens;
+
+		type(std::vector<_Token>&& sub_tokens) : _sub_tokens(std::forward<std::vector<_Token>>(sub_tokens)) {}
+
+	public:
+
+		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+
+			// parse it completely, recursive
+			// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+
+			std::vector<_Token> sub_tokens;
+
+			string_const_iterator iter = begin;
+			while (iter != end) {
+				std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(iter, end);
+				const bool& has_front_match{ pair.first };
+				const std::string::const_iterator& end_of_match_candidate{ pair.second };
+
+				if (!has_front_match) {
+					std::string messsage;
+					message += "Input cannot be parsed as Kleene star component:\n";
+					message += "Cannot get a next submatch from here:\n";
+					message += not_matching::get_position_description(file_content, iter);
+					message += not_matching::show_position(file_content, iter);
+					message += "End of input sequence:\n";
+					message += not_matching::get_position_description(file_content, end);
+					message += not_matching::show_position(file_content, end);
+
+					throw not_matching(message, file_content, begin);
+				}
+
+				try {
+					sub_tokens.push_back(_Token::parse_string(iter, end_of_match_candidate, file_content));
+				}
+				catch (const not_matching& e) {
+					std::string message;
+					message += "Error when parsing a match candidate as submatch of Kleene star component:\n";
+					message += "Cannot parse next submatch from here:\n";
+					message += not_matching::get_position_description(file_content, iter);
+					message += not_matching::show_position(file_content, iter);
+					message += "End of match candidate:\n";
+					message += not_matching::get_position_description(file_content, end_of_match_candidate);
+					message += not_matching::show_position(file_content, end_of_match_candidate);
+					message += "Caused here:\n";
+					message += e.what();
+					throw not_matching(message, file_content, begin);
+				}
+				iter = end_of_match_candidate;
+			}
+
+			return type(std::move(sub_tokens));
+
+		}
+
+		static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+			// list all subsection where an x_token might be parsed., might be empty. (maximal kleene expansions from every starting position)
+
+			std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> results;
+
+			string_const_iterator begin_match = begin;
+		outer_again:
+			string_const_iterator iter = begin_match;
+			while (begin_match != end) {
+				while (iter != end) {
+					std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(iter, end);
+					const bool& has_front_match{ pair.first };
+					const std::string::const_iterator& end_of_match_candidate{ pair.second };
+
+					if (!has_front_match) { // on front only the empty match, try starting from next position
+						results.emplace_back(begin_match, iter);
+						++begin_match;
+						goto outer_again;
+					}
+
+					try {
+						_Token test = _Token::parse_string(iter, end_of_match_candidate, file_content);
+					}
+					catch (const not_matching& e) {
+						results.emplace_back(begin_match, iter);
+						++begin_match;
+						goto outer_again;
+					}
+					iter = end_of_match_candidate;
+				}
+				results.emplace_back(begin_match, iter);
+				++begin_match;
+				goto outer_again;
+			}
+			results.emplace_back(begin_match, begin_match);
+			return results;
+		}
 
 
+		/**
+		@brief Returns [true, iter] where [begin, iter] matches pattern and is the longest possible match, might be [true, begin] if found no front match but the empty match.
+		*/
+		static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end) {
 
+			if (begin == end) return std::make_pair(true, begin);
+
+			string_const_iterator iter = begin;
+			while (iter != end) {
+				std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(iter, end);
+				const bool& has_front_match{ pair.first };
+				const std::string::const_iterator& end_of_match_candidate{ pair.second };
+
+				if (!has_front_match) { // on front only the empty match, try starting from next position
+					return std::make_pair(true, iter);
+				}
+
+				try {
+					_Token test = _Token::parse_string(iter, end_of_match_candidate, file_content);
+				}
+				catch (const not_matching& e) {
+					return std::make_pair(true, iter);
+				}
+				iter = end_of_match_candidate;
+			}
+			return std::make_pair(true, iter);
+
+
+		}
+
+
+	public:
+		virtual bool operator==(const token& another) const override {
+			try {
+				const type& down_casted = dynamic_cast<const type&>(another);
+				return _sub_tokens == down_casted._sub_tokens;
+			}
+			catch (const std::bad_cast& e) {
+				return false;
+			}
+		}
+
+		virtual std::string to_string() const override {
+			std::string result;
+			for (const auto& sub : _sub_tokens) result.push_back(sub.to_string());
+			return result;
+		}
+
+		virtual std::string type_info() const override {
+			return type::static_type_info();
+		}
+
+		static std::string static_type_info() {
+			return std::string("KLEENE_STAR<") + _Token::static_type_info() + ">";
+		}
+
+		virtual const_token_ptr_vector children() const override {
+			auto result = const_token_ptr_vector();
+			for (std::size_t i{ 0 }; i < _sub_tokens; ++i) {
+				result.push_back(&_sub_tokens[i]);
+			}
+			return result;
+		}
+
+		typename std::vector<_Token>::size_type size() const {
+			return _sub_tokens.size();
+		}
+
+		typename std::vector<_Token>::reference operator[](typename std::vector<_Token>::size_type index) {
+			return _sub	_tokens[index];
+		}
+	};
+
+	template<class _Token>
+	class kleene_plus : public token {
+	public:
+		using type = kleene_plus<_Token>;
+	private:
+
+		std::vector<_Token> _sub_tokens;
+
+		type(std::vector<_Token>&& sub_tokens) : _sub_tokens(std::forward<std::vector<_Token>>(sub_tokens)) {}
+
+	public:
+
+		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+
+			// parse it completely, recursive
+			// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+
+			std::vector<_Token> sub_tokens;
+
+			if (begin == end) {
+				try {
+					sub_tokens.push_back(_Token::parse_string(begin, end, file_content));
+				}
+				catch (const not_matching& e) {
+					std::string messsage;
+					message += "Empty input cannot be parsed as Kleene plus component where sub component does not match empty input:\n";
+					message += "Caused here:\n";
+					messsage += e.what();
+					throw not_matching(message, file_content, begin);
+				}
+				return type(std::move(sub_tokens));
+			}
+
+			string_const_iterator iter = begin;
+			while (iter != end) {
+				std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(iter, end);
+				const bool& has_front_match{ pair.first };
+				const std::string::const_iterator& end_of_match_candidate{ pair.second };
+
+				if (!has_front_match) {
+					std::string messsage;
+					message += "Input cannot be parsed as Kleene plus component:\n";
+					message += "Cannot get a next submatch from here:\n";
+					message += not_matching::get_position_description(file_content, iter);
+					message += not_matching::show_position(file_content, iter);
+					message += "End of input sequence:\n";
+					message += not_matching::get_position_description(file_content, end);
+					message += not_matching::show_position(file_content, end);
+
+					throw not_matching(message, file_content, begin);
+				}
+
+				try {
+					sub_tokens.push_back(_Token::parse_string(iter, end_of_match_candidate, file_content));
+				}
+				catch (const not_matching& e) {
+					std::string message;
+					message += "Error when parsing a match candidate as submatch of Kleene plus component:\n";
+					message += "Cannot parse next submatch from here:\n";
+					message += not_matching::get_position_description(file_content, iter);
+					message += not_matching::show_position(file_content, iter);
+					message += "End of match candidate:\n";
+					message += not_matching::get_position_description(file_content, end_of_match_candidate);
+					message += not_matching::show_position(file_content, end_of_match_candidate);
+					message += "Caused here:\n";
+					message += e.what();
+					throw not_matching(message, file_content, begin);
+				}
+				iter = end_of_match_candidate;
+			}
+
+			return type(std::move(sub_tokens));
+
+		}
+
+		static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+			// list all subsection where an x_token might be parsed., might be empty. (maximal kleene expansions from every starting position)
+
+			std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> results;
+
+			string_const_iterator begin_match = begin;
+		outer_again:
+			string_const_iterator iter = begin_match;
+			while (begin_match != end) {
+				while (iter != end) {
+					std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(iter, end);
+					const bool& has_front_match{ pair.first };
+					const std::string::const_iterator& end_of_match_candidate{ pair.second };
+
+					if (!has_front_match) { // no further match from iter on
+						if (begin_match != iter || check_match<_Token>(begin_match, iter)) { // if the matched string is not "" OR the sub token can be ""
+							results.emplace_back(begin_match, iter);
+						}
+						++begin_match;
+						goto outer_again;
+
+					}
+
+					try {
+						_Token test = _Token::parse_string(iter, end_of_match_candidate, file_content);
+					}
+					catch (const not_matching& e) {
+						if (begin_match != iter || check_match<_Token>(begin_match, iter)) { // if the matched string is not "" OR the sub token can be ""
+							results.emplace_back(begin_match, iter);
+						}
+						++begin_match;
+						goto outer_again;
+					}
+					iter = end_of_match_candidate;
+				}
+				if (begin_match != iter || check_match<_Token>(begin_match, iter)) { // if the matched string is not "" OR the sub token can be ""
+					results.emplace_back(begin_match, iter);
+				}
+				++begin_match;
+				goto outer_again;
+			}
+			if (check_match<_Token>(begin_match, begin_match)) { // if the sub token can be ""
+				results.emplace_back(begin_match, begin_match);
+			}
+			return results;
+		}
+
+
+		/**
+		@brief Returns [true, iter] where [begin, iter] matches pattern and is the longest possible match, might be [true, begin] if found no front match but the empty match, but returns [false, X] if no such match is found.
+		*/
+		static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end) {
+
+			if (begin == end) {
+				if (check_match<_Token>(begin, end)) { // if the sub token can be ""
+					return std::make_pair(true, begin);
+				}
+				else {
+					return std::make_pair(false, begin);
+				}
+			}
+
+			string_const_iterator iter = begin;
+			while (iter != end) {
+				std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(iter, end);
+				const bool& has_front_match{ pair.first };
+				const std::string::const_iterator& end_of_match_candidate{ pair.second };
+
+				if (!has_front_match) { // no match on front (starting from iter position)
+					if (begin != iter || check_match<_Token>(begin, iter)) { // if the matched string is not "" OR the sub token can be ""
+						return std::make_pair(true, iter);
+					}
+					else {
+						return std::make_pair(false, iter); // here: iter == begin 
+					}
+				}
+
+				try {
+					_Token test = _Token::parse_string(iter, end_of_match_candidate, file_content);
+				}
+				catch (const not_matching& e) {
+					if (begin != iter || check_match<_Token>(begin, iter)) { // if the matched string is not "" OR the sub token can be ""
+						return std::make_pair(true, iter);
+					}
+					else {
+						return std::make_pair(false, iter); // here: iter == begin 
+					}
+				}
+				iter = end_of_match_candidate;
+			}
+			// here: iter != begin; ( -> skipping the if clause )
+			return std::make_pair(true, iter);
+		}
+
+
+	public:
+		virtual bool operator==(const token& another) const override {
+			try {
+				const type& down_casted = dynamic_cast<const type&>(another);
+				return _sub_tokens == down_casted._sub_tokens;
+			}
+			catch (const std::bad_cast& e) {
+				return false;
+			}
+		}
+
+		virtual std::string to_string() const override {
+			std::string result;
+			for (const auto& sub : _sub_tokens) result.push_back(sub.to_string());
+			return result;
+		}
+
+		virtual std::string type_info() const override {
+			return type::static_type_info();
+		}
+
+		static std::string static_type_info() {
+			return std::string("KLEENE_PLUS<") + _Token::static_type_info() + ">";
+		}
+
+		virtual const_token_ptr_vector children() const override {
+			auto result = const_token_ptr_vector();
+			for (std::size_t i{ 0 }; i < _sub_tokens; ++i) {
+				result.push_back(&_sub_tokens[i]);
+			}
+			return result;
+		}
+
+		typename std::vector<_Token>::size_type size() const {
+			return _sub_tokens.size();
+		}
+
+		typename std::vector<_Token>::reference operator[](typename std::vector<_Token>::size_type index) {
+			return _sub_tokens[index];
+		}
+	};
+
+	/*
+	template<class ... _Tokens>
+	class compound_token : public token {
+		using _tuple = tuple<_Tokens...>;
+		_tuple sub_tokens;
+
+		static compound_token<_Tokens...> parse_string(std::string::const_iterator begin, std::string::const_iterator end) {
+			if constexpr (sizeof ...(_Tokens) == 0) {
+				if (begin != end) {
+					// throw cannot parse
+				}
+				return compound_token<_Tokens...>();
+			}
+			else {
+				std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> candidates_for_first_sub_token =
+					std::tuple_element<0, _tuple>::type::find_all_candidates(begin, end, START_AT_FRONT);
+				// for each check if extension yields a correct parsed compound token, also check the first one if candidate is real existence
+				// -> =1 should yield a correctly parsed token -> then return this one
+			}
+
+			// find separations by finding all candidates for sub tokens -> might be more possibilities
+			// try parse every separation candidate, =1 should be successful, otherwise cannot parse error or ambiguous parse error
+			//
+			// parse it completely, recursive
+			// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+			return x_token();
+		}
+
+		static std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+			// add options: anywhere, start_at_begin, end_at_end
+			//
+			//
+			// use calls for sub tokens, calc all combinations....
+			// list all subsection where an x_token might be parsed., might be empty.
+		}
+
+	};
+	*/
+};
+
+struct simple_derived {
+
+	using maybe_spaces_token = regular_extensions::kleene_star<regular_tokens::single_space_token>;
+	using spaces_token = regular_extensions::kleene_plus<regular_tokens::single_space_token>;
+
+
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
 ////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
@@ -426,122 +947,6 @@ struct keywords {
 #if false
 
 
-class type_specifier_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-	def_standard_clone()
-		virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::type_specifier;
-	}
-};
-
-
-class left_square_brace_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	def_standard_clone()
-		virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::left_square_brace;
-	}
-};
-
-class left_brace_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	def_standard_clone()
-		virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::left_brace;
-	}
-};
-
-class right_square_brace_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	def_standard_clone()
-
-		virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::right_square_brace;
-	}
-};
-
-class right_brace_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	def_standard_clone()
-
-		virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::right_brace;
-	}
-};
-
-class natural_number_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	def_standard_clone()
-
-		long long get_ll() {
-		return std::stoll(str());
-	}
-
-	void modify(std::string natural_number) {
-		const auto sptr = std::make_shared<std::string>(natural_number);
-		_file_content = sptr;
-		_begin = sptr->begin();
-		_end = sptr->end();
-	}
-
-	virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::natural_number;
-	}
-};
-
-class two_dots_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	def_standard_clone()
-
-		virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::dot_dot;
-	}
-};
-
-class space_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	def_standard_clone()
-
-		virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::spaces;
-	}
-
-};
-
-class spaces_plus_token : public primitive_regex_token {
-public:
-
-	using primitive_regex_token::primitive_regex_token;
-
-	def_standard_clone()
-		virtual boost::regex primitive_regex() const final override {
-		return const_regexes::primitives::spaces_plus;
-	}
-
-};
 
 template <const boost::regex* _Regex>
 class primitive_regex_token_template : public primitive_regex_token {
