@@ -1149,51 +1149,12 @@ namespace regular_extensions {
 		using tuple = std::tuple<_Tokens...>;
 	private:
 
-		template<class _Token>
-		struct sub_parse_struct {
-			using value_type = _Token;
-
-			bool parsed_successfully;
-			std::unique_ptr<_Token> _Token_if_successfully;
-			std::string error_message_if_not_successfully;
-
-			sub_parse_struct() = default;
-			sub_parse_struct(sub_parse_struct&&) = default;
-
-			inline bool operator == (const sub_parse_struct<_Token>& another) const {
-				return parsed_successfully == another.parsed_successfully &&
-					(!_Token_if_successfully && !another._Token_if_successfully || _Token_if_successfully && another._Token_if_successfully && *_Token_if_successfully == *another._Token_if_successfully) &&
-					error_message_if_not_successfully == another.error_message_if_not_successfully;
-			}
-		};
-
 		std::tuple<_Tokens...> _sub_tokens;
 
 		type(std::tuple<_Tokens...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
 
-		template <class _Token>
-		struct helper {
-			template <class _Function >
-			//static parse_wrapper(_Token(*parse_function)(string_const_iterator, string_const_iterator, std::shared_ptr<std::string>), string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
-			static sub_parse_struct<_Token> parse_wrapper(_Function parse_function, string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
-				sub_parse_struct<_Token> result;
-				try {
-					result._Token_if_successfully.reset(new _Token(parse_function(begin, end, file_content)));
-					//return std::pair<bool, std::unique_ptr<_Token>>(true, std::move(std::unique_ptr()));
-					//return std::make_pair(true, std::make_unique<_Token>()); //###
-					result.parsed_successfully = true;
-				}
-				catch (const parse_error& e) {
-					result.parsed_successfully = false;
-					result.error_message_if_not_successfully = e.what();
-				}
-				return result;
-			}
-		};
-
 		using candidate_vector = std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>>;
-	public:
-
+		
 		// Convert vector into a tuple
 		template<class tuple_type>
 		struct to_tuple_helper {
@@ -1204,6 +1165,8 @@ namespace regular_extensions {
 				return std::make_tuple(std::tuple_element<I, tuple_type>::type::parse_string(all_component_splittings[I].first, all_component_splittings[I].second, file_content) ...);
 			}
 		};
+
+	public:
 
 		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
