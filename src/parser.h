@@ -1460,7 +1460,7 @@ namespace regular_extensions {
 
 		std::optional<_Token> _sub_token;
 
-		type(std::optional<_Token>&& sub_token) : _sub_tokens(std::forward<std::optional<_Token>>(sub_token)) {}
+		optional(std::optional<_Token>&& sub_token) : _sub_tokens(std::forward<std::optional<_Token>>(sub_token)) {}
 
 	public:
 
