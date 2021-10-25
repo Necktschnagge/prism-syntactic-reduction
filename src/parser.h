@@ -1421,7 +1421,7 @@ namespace regular_extensions {
 
 		virtual std::string to_string() const override {
 			std::string result;
-			//std::apply([&result](auto&& ... args) { (((args.parsed_successfully) ? result += args._Token_if_successfully->to_string() : result), ...); }, _sub_tokens);
+			std::apply([&result](auto&& ... args) { (( result += args.to_string()), ...); }, _sub_tokens);
 			return result;
 		}
 
@@ -1431,20 +1431,16 @@ namespace regular_extensions {
 
 		static std::string static_type_info() {
 			std::string result;
-			result += std::string("ALTERNATIVE<");
-			/*((result += _Tokens::static_type_info() + ", "), ...);
+			result += std::string("COMPOUND<");
+			((result += _Tokens::static_type_info() + ", "), ...);
 			result.erase(result.size() - 2);
 			result += ">";
-			*/
 			return result;
 		}
 
 		virtual const_token_ptr_vector children() const override {
 			auto result = const_token_ptr_vector();
-			//std::apply([&result](auto&& ... element) { ((element.parsed_successfully ? result.push_back(element._Token_if_successfully.get()) : false), ...); }, _sub_tokens);
-			/*for (std::size_t i{ 0 }; i < _sub_tokens; ++i) { //### ergänzen
-				result.push_back(&_sub_tokens[i]);
-			}*/
+			std::apply([&result](auto&& ... element) { (( result.push_back(&element) ), ...); }, _sub_tokens);
 			return result;
 		}
 
