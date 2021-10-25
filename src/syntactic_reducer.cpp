@@ -1663,10 +1663,21 @@ int cli(int argc, char** argv) {
 		using token_type = regular_extensions::kleene_star<regular_tokens::single_space_token>;
 		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
 	}
-	{
-		auto text = std::make_shared<std::string>(R"()");
+	try {
+		auto text = std::make_shared<std::string>(R"(	)");
 		using token_type = regular_extensions::kleene_plus<regular_tokens::single_space_token>;
 		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
+	}
+	try {
+		auto text = std::make_shared<std::string>(R"(init)");
+		using token_type = regular_extensions::alternative<regular_tokens::single_space_token, keyword_tokens::init_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
 	}
 
 	return 0;
