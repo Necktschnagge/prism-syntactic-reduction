@@ -896,7 +896,7 @@ namespace regular_extensions {
 				}
 
 				try {
-					_Token test = _Token::parse_string(iter, end_of_match_candidate, file_content);
+					_Token test = _Token::parse_string(iter, end_of_match_candidate, std::shared_ptr<std::string>());
 				}
 				catch (const parse_error& e) {
 					if (begin != iter || check_match<_Token>(begin, iter)) { // if the matched string is not "" OR the sub token can be ""
@@ -1060,7 +1060,7 @@ namespace regular_extensions {
 
 			std::list<std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>>> splitted_results;
 
-			((splitted_reults.push_back(_Tokens::find_all_candidates(begin, end))), ...);
+			((splitted_results.push_back(_Tokens::find_all_candidates(begin, end))), ...);
 
 			while (!splitted_results.empty()) {
 				results.insert(results.cend(), splitted_results.front().cbegin(), splitted_results.front().cend());
@@ -1508,7 +1508,7 @@ namespace regular_extensions {
 
 			if (begin == end) return std::make_pair(true, begin);
 
-			std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(iter, end);
+			std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(begin, end);
 
 			if (pair.first) return pair;
 
