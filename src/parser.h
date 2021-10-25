@@ -1407,7 +1407,7 @@ namespace regular_extensions {
 			if (correctly_parsed_collected.empty())
 				return std::make_pair(false, begin);
 			else
-				return std::make_pair(true, *std::max_element(correctly_parsed_collected.cbegin(), correctly_parsed_collected.cend()))
+				return std::make_pair(true, *std::max_element(correctly_parsed_collected.cbegin(), correctly_parsed_collected.cend()));
 		}
 
 
