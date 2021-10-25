@@ -1404,8 +1404,6 @@ namespace regular_extensions {
 				}
 			}
 
-			return correctly_parsed_collected;
-
 			if (correctly_parsed_collected.empty())
 				return std::make_pair(false, begin);
 			else
@@ -1460,7 +1458,7 @@ namespace regular_extensions {
 
 		std::optional<_Token> _sub_token;
 
-		optional(std::optional<_Token>&& sub_token) : _sub_tokens(std::forward<std::optional<_Token>>(sub_token)) {}
+		optional(std::optional<_Token>&& sub_token) : _sub_token(std::forward<std::optional<_Token>>(sub_token)) {}
 
 	public:
 
