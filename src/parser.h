@@ -739,7 +739,7 @@ namespace regular_extensions {
 		}
 
 		typename std::vector<_Token>::reference operator[](typename std::vector<_Token>::size_type index) {
-			return _sub	_tokens[index];
+			return _sub_tokens[index];
 		}
 	};
 
@@ -751,7 +751,7 @@ namespace regular_extensions {
 
 		std::vector<_Token> _sub_tokens;
 
-		type(std::vector<_Token>&& sub_tokens) : _sub_tokens(std::forward<std::vector<_Token>>(sub_tokens)) {}
+		kleene_plus(std::vector<_Token>&& sub_tokens) : _sub_tokens(std::forward<std::vector<_Token>>(sub_tokens)) {}
 
 	public:
 
@@ -983,7 +983,7 @@ namespace regular_extensions {
 
 		std::tuple<sub_parse_struct<_Tokens>...> _sub_tokens;
 
-		type(std::tuple<sub_parse_struct<_Tokens>...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
+		alternative(std::tuple<sub_parse_struct<_Tokens>...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
 
 		template <class _Token>
 		struct helper {
