@@ -687,7 +687,7 @@ namespace regular_extensions {
 				}
 
 				try {
-					_Token test = _Token::parse_string(iter, end_of_match_candidate, file_content);
+					_Token test = _Token::parse_string(iter, end_of_match_candidate, std::shared_ptr<std::string>());
 				}
 				catch (const parse_error& e) {
 					return std::make_pair(true, iter);
@@ -1094,7 +1094,7 @@ namespace regular_extensions {
 
 			for (const auto& item : collect) {
 				if (item.first) {
-					result.first = iterm.first;
+					result.first = item.first;
 					if (item.second > result.second)
 						result.second = item.second;
 				}
