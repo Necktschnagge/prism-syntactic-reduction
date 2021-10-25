@@ -842,7 +842,7 @@ namespace regular_extensions {
 					}
 
 					try {
-						_Token test = _Token::parse_string(iter, end_of_match_candidate, file_content);
+						_Token test = _Token::parse_string(iter, end_of_match_candidate, std::shared_ptr<<std::string>());
 					}
 					catch (const parse_error& e) {
 						if (begin_match != iter || check_match<_Token>(begin_match, iter)) { // if the matched string is not "" OR the sub token can be ""
