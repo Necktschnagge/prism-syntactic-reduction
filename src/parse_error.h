@@ -65,8 +65,8 @@ public:
 			}
 			++column;
 		}
-		this_line.push_back(*iter++); // at error position
-		while (n > 0 && *iter != '\n' && iter != file_content->cend()) {
+		++n; // also print error position itself
+		while (iter != file_content->cend() && n > 0 && *iter != '\n') {
 			this_line.push_back(*iter);
 			--n;
 			++iter;

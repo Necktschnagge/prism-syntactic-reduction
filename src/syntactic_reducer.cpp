@@ -44,6 +44,8 @@ bool compare_colorings(std::map<std::string, int>& c1, std::map<std::string, int
 	return __compare_helper__(c1, c2) && __compare_helper__(c2, c1);
 }
 
+#if false //using old parser
+
 // state of cf variables |-> (must be recalculated, variables that are live there (current state), changes since last calculation)
 using liveness_tuple = std::tuple<bool, std::vector<std::string>, std::vector<std::string>>;
 using live_var_map = std::map<int, liveness_tuple>;
@@ -618,7 +620,7 @@ void find_local_groupings(
 		}
 
 		next_free_index = 11;
-	}
+		}
 
 
 	while (true) {
@@ -789,7 +791,7 @@ void find_local_groupings(
 		++next_free_index;
 
 	}
-}
+	}
 
 enum class selected : char {
 	YES, NO, UNDECIDED
@@ -1594,7 +1596,7 @@ int cli(int argc, char** argv) {
 
 	// all_partitions.json
 	write_all_partitionings(results_directory, all_partitionings_with_minimal_size);
-	
+
 	// meta.json
 	write_meta_json(results_directory, all_partitionings_with_minimal_size.size());
 
@@ -1638,11 +1640,38 @@ int cli(int argc, char** argv) {
 	std::ofstream config_json_ofstream;
 	config_json_ofstream.open(config_json_path);
 	config_json_ofstream << config.dump(3);
-	
+
 	return 0;
 }
+#else 
+int cli(int argc, char** argv) {
+	standard_logger().info("This is Syntactic Reducer 1.0\n\n");
+	//standard_logger().info(std::string("Running config json: ") + argv[0]);
 
+	standard_logger().info("Testing new parser bottom up...");
+	{
+		auto text = std::make_shared<std::string>("init");
+		keyword_tokens::init_token parsed_token = keyword_tokens::init_token::parse_string(text->cbegin(), text->cend(), text);
+	}
+	{
+		auto text = std::make_shared<std::string>("	");
+		regular_tokens::single_space_token parsed_token = regular_tokens::single_space_token::parse_string(text->cbegin(), text->cend(), text);
+	}
+	{
+		auto text = std::make_shared<std::string>(R"(	 	
+	 )");
+		using token_type = regular_extensions::kleene_star<regular_tokens::single_space_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+	}
+	{
+		auto text = std::make_shared<std::string>(R"()");
+		using token_type = regular_extensions::kleene_plus<regular_tokens::single_space_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+	}
 
+	return 0;
+}
+#endif
 
 int main(int argc, char** argv)
 {
