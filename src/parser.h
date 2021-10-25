@@ -1156,7 +1156,7 @@ namespace regular_extensions {
 
 		std::tuple<_Tokens...> _sub_tokens;
 
-		type(std::tuple<_Tokens...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
+		compound(std::tuple<_Tokens...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
 
 		using candidate_vector = std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>>;
 
