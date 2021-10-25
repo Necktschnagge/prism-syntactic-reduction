@@ -965,11 +965,13 @@ namespace regular_extensions {
 			bool parsed_successfully;
 			std::unique_ptr<_Token> _Token_if_successfully;
 			std::string error_message_if_not_successfully;
+
+			sub_parse_struct(sub_parse_struct&& another) = default;
 		};
 
 		std::tuple<sub_parse_struct<_Tokens>...> _sub_tokens;
 
-		type(std::tuple<std::pair<bool, std::unique_ptr<_Tokens>>...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
+		type(std::tuple<sub_parse_struct<_Tokens>...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
 
 		template <class _Token>
 		struct helper {
