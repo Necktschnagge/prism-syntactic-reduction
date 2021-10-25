@@ -15,6 +15,7 @@ public:
 			inline static const auto colon{ std::string(R"(:)") };
 			inline static const auto dot_dot{ std::string(R"(..)") };
 			inline static const auto double_quote{ std::string(R"(")") };
+			inline static const auto double_slash{ std::string(R"(//)") };
 			inline static const auto equals_sign{ std::string(R"(=)") };
 			inline static const auto greater{ std::string(R"(>)") };
 			inline static const auto greater_or_equal{ std::string(R"(>=)") };
@@ -33,11 +34,13 @@ public:
 		class keywords {
 		public:
 			inline static const auto CONST_{ std::string(R"(const)") };
+			inline static const auto DTMC{ std::string(R"(dtmc)") };
 			inline static const auto ENDMODULE{ std::string(R"(endmodule)") };
 			inline static const auto ENDREWARDS{ std::string(R"(endrewards)") };
 			inline static const auto FORMULA{ std::string(R"(formula)") };
 			inline static const auto GLOBAL{ std::string(R"(global)") };
 			inline static const auto INIT{ std::string(R"(init)") };
+			inline static const auto INT{ std::string(R"(int)") };
 			inline static const auto MODULE{ std::string(R"(module)") };
 			inline static const auto REWARDS{ std::string(R"(rewards)") };
 		};
@@ -45,7 +48,9 @@ public:
 
 		class regulars {
 		public:
+			inline static const auto anything_but_newline{ std::string(R"([^\n])") };
 			inline static const auto comparison_operator{ std::string(R"(!=|=||<=|>=|<|>)") };
+			inline static const auto float_number{ std::string(R"([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)") };
 			inline static const auto identifier{ std::string(R"([_a-zA-Z][_a-zA-Z0-9']*)") };
 			inline static const auto line_feed{ std::string(R"(\n)") };
 			inline static const auto natural_number{ std::string(R"(([1-9][0-9]*)|0)") };
@@ -54,7 +59,6 @@ public:
 
 
 			inline static const auto endinit_keyword{ std::string(R"(endinit)") };
-			inline static const auto dtmc{ std::string(R"(dtmc)") };
 			inline static const auto digit{ std::string(R"(\d)") };
 			inline static const auto right_square_brace{ std::string(R"(\])") };
 			inline static const auto right_brace{ std::string(R"(\))") };

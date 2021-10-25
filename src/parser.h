@@ -513,11 +513,13 @@ public:
 namespace keyword_tokens {
 
 	using const_token = string_token<&const_regexes::strings::keywords::CONST_>;
+	using dtmc_token = string_token<&const_regexes::strings::keywords::DTMC>;
 	using endmodule_token = string_token<&const_regexes::strings::keywords::ENDMODULE>;
 	using endrewards_token = string_token<&const_regexes::strings::keywords::ENDREWARDS>;
 	using formula_token = string_token<&const_regexes::strings::keywords::FORMULA>;
 	using global_token = string_token<&const_regexes::strings::keywords::GLOBAL>;
 	using init_token = string_token<&const_regexes::strings::keywords::INIT>;
+	using int_token = string_token<&const_regexes::strings::keywords::INT>;
 	using module_token = string_token<&const_regexes::strings::keywords::MODULE>;
 	using rewards_token = string_token<&const_regexes::strings::keywords::REWARDS>;
 
@@ -530,6 +532,7 @@ namespace delimiter_tokens {
 	using colon_token = string_token<&const_regexes::strings::delimiter::colon>;
 	using dot_dot_token = string_token<&const_regexes::strings::delimiter::dot_dot>;
 	using double_quote_token = string_token<&const_regexes::strings::delimiter::double_quote>;
+	using double_slash_token = string_token<&const_regexes::strings::delimiter::double_slash>;
 	using equals_token = string_token<&const_regexes::strings::delimiter::equals_sign>;
 	using greater_or_equal_token = string_token<&const_regexes::strings::delimiter::greater_or_equal>;
 	using greater_token = string_token<&const_regexes::strings::delimiter::greater>;
@@ -548,7 +551,9 @@ namespace delimiter_tokens {
 
 namespace regular_tokens {
 
+	using anything_but_newline_token = regex_token<&const_regexes::strings::regulars::anything_but_newline>; //## do it as regular_extensions::alternative<...>
 	using comparison_operator_token = regex_token<&const_regexes::strings::regulars::comparison_operator>; //## do it as regular_extensions::alternative<...>
+	using float_number_token = regex_token<&const_regexes::strings::regulars::float_number>;
 	using identifier_token = regex_token<&const_regexes::strings::regulars::identifier>;
 	using line_feed_token = regex_token<&const_regexes::strings::regulars::line_feed>;
 	using natural_number_token = regex_token<&const_regexes::strings::regulars::natural_number>;
@@ -1154,7 +1159,7 @@ namespace regular_extensions {
 		type(std::tuple<_Tokens...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
 
 		using candidate_vector = std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>>;
-		
+
 		// Convert vector into a tuple
 		template<class tuple_type>
 		struct to_tuple_helper {
@@ -1421,7 +1426,7 @@ namespace regular_extensions {
 
 		virtual std::string to_string() const override {
 			std::string result;
-			std::apply([&result](auto&& ... args) { (( result += args.to_string()), ...); }, _sub_tokens);
+			std::apply([&result](auto&& ... args) { ((result += args.to_string()), ...); }, _sub_tokens);
 			return result;
 		}
 
@@ -1440,11 +1445,109 @@ namespace regular_extensions {
 
 		virtual const_token_ptr_vector children() const override {
 			auto result = const_token_ptr_vector();
-			std::apply([&result](auto&& ... element) { (( result.push_back(&element) ), ...); }, _sub_tokens);
+			std::apply([&result](auto&& ... element) { ((result.push_back(&element)), ...); }, _sub_tokens);
 			return result;
 		}
 
 
+	};
+
+	template<class _Token>
+	class optional : public token {
+	public:
+		using type = optional<_Token>;
+	private:
+
+		std::optional<_Token> _sub_token;
+
+		type(std::optional<_Token>&& sub_token) : _sub_tokens(std::forward<std::optional<_Token>>(sub_token)) {}
+
+	public:
+
+		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+
+			// parse it completely, recursive
+			// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+
+			if (begin == end)
+				return type(std::optional<_Token>());
+
+			std::optional<_Token> sub_token;
+
+			try {
+				sub_token = std::make_optional<_Token>(_Token::parse(begin, end, file_content));
+			}
+			catch (const parse_error& e) {
+				std::string message;
+				message += "Nonempty input cannot be parsed as optional component:\n";
+				message += e.what();
+				throw not_matching(message, file_content, begin);
+			}
+			return type(sub_token);
+		}
+
+		static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+			// list all subsection where an x_token might be parsed., might be empty. (maximal kleene expansions from every starting position)
+
+			std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> results;
+
+			for (auto iter = begin; iter != end; ++iter)
+				results.emplace_back(iter, iter);
+
+			std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> rest{
+				_Token::find_all_candidates(begin, end);
+			};
+
+			results.insert(results.cend(), rest.cbegin(), rest.cend());
+			return results;
+		}
+
+
+		/**
+		@brief Returns [true, iter] where [begin, iter] matches pattern and is the longest possible match, might be [true, begin] if found no front match but the empty match.
+		*/
+		static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end) {
+
+			if (begin == end) return std::make_pair(true, begin);
+
+			std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(iter, end);
+
+			if (pair.first) return pair;
+
+			return std::make_pair(true, begin);
+		}
+
+
+	public:
+		virtual bool operator==(const token& another) const override {
+			try {
+				const type& down_casted = dynamic_cast<const type&>(another);
+				return _sub_token == down_casted._sub_token;
+			}
+			catch (const std::bad_cast&) {
+				return false;
+			}
+		}
+
+		virtual std::string to_string() const override {
+			std::string result;
+			if (_sub_token.has_value()) result += _sub_token.value().to_string();
+			return result;
+		}
+
+		virtual std::string type_info() const override {
+			return type::static_type_info();
+		}
+
+		static std::string static_type_info() {
+			return std::string("OPTIONAL<") + _Token::static_type_info() + ">";
+		}
+
+		virtual const_token_ptr_vector children() const override {
+			auto result = const_token_ptr_vector();
+			if (_sub_token.has_value()) result.push_back(&_sub_token.value());
+			return result;
+		}
 	};
 
 	/*
@@ -1491,9 +1594,29 @@ struct simple_derived {
 
 	using maybe_spaces_token = regular_extensions::kleene_star<regular_tokens::single_space_token>;
 	using spaces_token = regular_extensions::kleene_plus<regular_tokens::single_space_token>;
+	using comment_line_ending = regular_extensions::compound<delimiter_tokens::double_slash_token, regular_extensions::kleene_star<regular_tokens::anything_but_newline_token>>;
+	//using any_ignorable_line_ending = regular_extensions::compound< regular_extensions::kleene_star<>, delimiter_tokens::double_slash_token, regular_extensions::kleene_star<regular_tokens::anything_but_newline_token>>;
+
+};
+
+struct higher_clauses {
+	using const_definition = regular_extensions::compound<
+		keyword_tokens::const_token,
+		regular_extensions::kleene_plus<regular_tokens::single_space_token>,
+		keyword_tokens::int_token,
+		regular_extensions::kleene_plus<regular_tokens::single_space_token>,
+		regular_tokens::identifier_token,
+		regular_extensions::kleene_star<regular_tokens::single_space_token>,
+		delimiter_tokens::equals_token,
+		regular_extensions::kleene_star<regular_tokens::single_space_token>,
+		regular_tokens::natural_number_token,
+		regular_extensions::kleene_star<regular_tokens::single_space_token>,
+		delimiter_tokens::semicolon_token
+	>;
 
 
 };
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
 ////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
@@ -1507,40 +1630,6 @@ struct simple_derived {
 
 
 #if false
-
-
-class float_token : public token {
-public:
-
-	using token::token;
-
-	float_token(const float_token& another) : token(another) {}
-
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<float_token>(*this);
-	}
-
-
-	virtual void parse_non_primitive() final override {}
-
-	virtual token_list children() const override {
-		return token_list();
-	}
-
-	virtual bool is_primitive() const final override { return true; }
-
-	virtual bool is_sound() const final override {
-		try {
-			double x = std::stod(std::string(cbegin(), cend()));
-		}
-		catch (...) {
-			return false;
-		}
-		return true;
-	}
-
-};
-
 class expression_token : public token {
 
 public:
@@ -1631,7 +1720,9 @@ public:
 	}
 
 };
+#endif
 
+#if false
 class number_token : public token {
 
 public:
@@ -1669,6 +1760,13 @@ public:
 		return std::stoi(str());
 	}
 };
+
+#endif
+
+
+
+#if false
+
 
 class identifier_or_number : public token {
 
