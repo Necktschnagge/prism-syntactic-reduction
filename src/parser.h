@@ -1494,9 +1494,7 @@ namespace regular_extensions {
 			for (auto iter = begin; iter != end; ++iter)
 				results.emplace_back(iter, iter);
 
-			std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> rest{
-				_Token::find_all_candidates(begin, end);
-			};
+			std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> rest{ _Token::find_all_candidates(begin, end) };
 
 			results.insert(results.cend(), rest.cbegin(), rest.cend());
 			return results;
