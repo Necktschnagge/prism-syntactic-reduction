@@ -114,11 +114,13 @@ private:
 
 	//type(const std::string& string) : _string(string) {}
 
-	std::string _exception;
+	std::string _exception_message;
+
 
 public:
 
-	type(const std::string& exception) : _exception(exception) {}
+	template< class ... Args>
+	type(const std::string& exception_message, Args&& ... parent_class_arguments) : _Token(std::forward<Args>(parent_class_arguments) ...), _exception_message(exception_message) {}
 
 	virtual bool operator==(const token& another) const override {
 		return false;
@@ -140,7 +142,7 @@ public:
 		return token::const_token_ptr_vector();
 	}
 
-	inline std::string get_exception() { return _exception; }
+	inline std::string get_exception() { return _exception_message; }
 };
 
 template<class _Token>
@@ -699,7 +701,7 @@ namespace regular_extensions {
 				const type& down_casted = dynamic_cast<const type&>(another);
 				return _sub_tokens == down_casted._sub_tokens;
 			}
-			catch (const std::bad_cast& ) {
+			catch (const std::bad_cast&) {
 				return false;
 			}
 		}
@@ -912,7 +914,7 @@ namespace regular_extensions {
 				const type& down_casted = dynamic_cast<const type&>(another);
 				return _sub_tokens == down_casted._sub_tokens;
 			}
-			catch (const std::bad_cast& ) {
+			catch (const std::bad_cast&) {
 				return false;
 			}
 		}
@@ -956,7 +958,16 @@ namespace regular_extensions {
 		using type = alternative<_Tokens...>;
 	private:
 
-		std::tuple<std::pair<bool, std::unique_ptr<_Tokens>>...> _sub_tokens;
+		template<class _Token>
+		struct sub_parse_struct {
+			using value_type = _Token;
+
+			bool parsed_successfully;
+			std::unique_ptr<_Token> _Token_if_successfully;
+			std::string error_message_if_not_successfully;
+		};
+
+		std::tuple<sub_parse_struct<_Tokens>...> _sub_tokens;
 
 		type(std::tuple<std::pair<bool, std::unique_ptr<_Tokens>>...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
 
@@ -964,14 +975,17 @@ namespace regular_extensions {
 		struct helper {
 			template <class _Function >
 			//static parse_wrapper(_Token(*parse_function)(string_const_iterator, string_const_iterator, std::shared_ptr<std::string>), string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
-			static std::pair<bool, std::unique_ptr<_Token>> parse_wrapper(_Function parse_function, string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+			static sub_parse_struct<_Token> parse_wrapper(_Function parse_function, string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+				return  std::make_pair(false, std::make_unique<error_token<_Token>>("", std::string(begin, end)));
+#if false
 				try {
-					//return std::pair<bool, std::unique_ptr<_Token>>(true, std::unique_ptr(new _Token(parse_function(begin, end, file_content))));
-					return std::make_pair(true, std::make_unique<_Token>()); //###
+					//return std::pair<bool, std::unique_ptr<_Token>>(true, std::move(std::unique_ptr(new _Token(parse_function(begin, end, file_content)))));
+					//return std::make_pair(true, std::make_unique<_Token>()); //###
 				}
 				catch (const parse_error& e) {
 					return  std::make_pair(false, std::make_unique<error_token<_Token>>(e.what()));
 				}
+#endif
 			}
 		};
 
@@ -983,10 +997,11 @@ namespace regular_extensions {
 			// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
 
 			//std::tuple<std::pair<bool, std::unique_ptr<_Tokens>>...> parsed{ helper<_Tokens>::parse_wrapper(_Tokens::parse_string, begin, end, file_content)... };
-			std::tuple<std::pair<bool, std::unique_ptr<_Tokens>>...> parsed { helper<_Tokens>::parse_wrapper(_Tokens::parse_string, begin, end, file_content)... };
+
+			std::tuple<sub_parse_struct<_Tokens>...> parsed; // { helper<_Tokens>::parse_wrapper(_Tokens::parse_string, begin, end, file_content)... };
 
 			std::size_t count_matches{ 0 };
-			std::apply([&count_matches](auto&& ... pairs) {(((pairs.first) ? ++count_matches : count_matches), ...); }, parsed);
+			std::apply([&count_matches](auto&& ... sub_parse) {(((sub_parse.parsed_successfully) ? ++count_matches : count_matches), ...); }, parsed);
 
 			if (count_matches == 0) {
 				std::string message;
@@ -997,9 +1012,9 @@ namespace regular_extensions {
 					((
 						message +=
 						"candidate type: " +
-						decltype(pairs.second)::element_type::static_type_info() +
+						std::remove_reference_t<decltype(pairs)>::value_type::static_type_info() +
 						"\nError for possible alternative caused here:\n" +
-						dynamic_cast<error_token<decltype(pairs.second)::element_type>&>(*pairs.second).get_exception()
+						pairs.error_message_if_not_successfully
 						), ...);
 					}, parsed);
 				throw not_matching(message, file_content, begin);
@@ -1012,12 +1027,12 @@ namespace regular_extensions {
 
 				std::apply([&](auto&& ... pairs) {
 					((
-						(pairs.first) ?
-							message +=
-								"candidate type: " +
-								 decltype(pairs.second)::element_type::static_type_info()
+						(pairs.parsed_successfully) ?
+						message +=
+						"candidate type: " +
+						std::remove_reference_t<decltype(pairs)>::value_type::static_type_info()
 						: message
-					), ...);
+						), ...);
 					}, parsed);
 				throw ambiguous_matches(message, file_content, begin);
 			}
@@ -1110,7 +1125,7 @@ namespace regular_extensions {
 
 		virtual std::string to_string() const override {
 			std::string result;
-			std::apply([&result](auto&& ... args) { (((args.first) ? result += args.second->to_string() : result), ...); }, _sub_tokens);
+			std::apply([&result](auto&& ... args) { (((args.parsed_successfully) ? result += args._Token_if_successfully->to_string() : result), ...); }, _sub_tokens);
 			return result;
 		}
 
