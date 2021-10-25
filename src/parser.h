@@ -1136,7 +1136,7 @@ namespace regular_extensions {
 
 		virtual const_token_ptr_vector children() const override {
 			auto result = const_token_ptr_vector();
-			std::apply([&result](auto&& ... element) { ((element.parsed_successfully ? result.push_back(element._Token_if_successfully.get()) : false), ...); }, _sub_tokens);
+			std::apply([&result](auto&& ... element) { ((element.parsed_successfully ? result.push_back(element._Token_if_successfully.get()) : void()), ...); }, _sub_tokens);
 			/*for (std::size_t i{ 0 }; i < _sub_tokens; ++i) { //### ergänzen
 				result.push_back(&_sub_tokens[i]);
 			}*/
