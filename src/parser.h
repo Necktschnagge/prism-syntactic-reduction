@@ -179,7 +179,7 @@ private:
 	std::string _string;
 
 protected:
-	type(const std::string& string) : _string(string) {}
+	general_string_token(const std::string& string) : _string(string) {}
 
 public:
 	static type parse_string(string_const_iterator begin, string_const_iterator end, const std::string& pattern, std::shared_ptr<std::string> file_content) {
@@ -323,7 +323,7 @@ public:
 
 private:
 
-	type() : general_string_token(*_string_ptr) {}
+	string_token() : general_string_token(*_string_ptr) {}
 	template <class ... _Tokens>
 	friend class regular_extensions::alternative;
 public:
@@ -376,7 +376,7 @@ private:
 	std::string _regex;
 
 protected:
-	type(const std::string& content, const std::string& regex) : _content(content), _regex(regex) {}
+	general_regex_token(const std::string& content, const std::string& regex) : _content(content), _regex(regex) {}
 
 public:
 
@@ -470,7 +470,7 @@ private:
 
 
 public:
-	type(const std::string& content) : general_regex_token(content, *_regex_string_ptr) {}
+	regex_token(const std::string& content) : general_regex_token(content, *_regex_string_ptr) {}
 
 	static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
@@ -577,7 +577,7 @@ namespace regular_extensions {
 
 		std::vector<_Token> _sub_tokens;
 
-		type(std::vector<_Token>&& sub_tokens) : _sub_tokens(std::forward<std::vector<_Token>>(sub_tokens)) {}
+		kleene_star(std::vector<_Token>&& sub_tokens) : _sub_tokens(std::forward<std::vector<_Token>>(sub_tokens)) {}
 
 	public:
 
