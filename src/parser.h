@@ -842,7 +842,7 @@ namespace regular_extensions {
 					}
 
 					try {
-						_Token test = _Token::parse_string(iter, end_of_match_candidate, std::shared_ptr<<std::string>());
+						_Token test = _Token::parse_string(iter, end_of_match_candidate, std::shared_ptr<std::string>());
 					}
 					catch (const parse_error& e) {
 						if (begin_match != iter || check_match<_Token>(begin_match, iter)) { // if the matched string is not "" OR the sub token can be ""
@@ -1396,7 +1396,7 @@ namespace regular_extensions {
 
 			for (const auto& c : collect) {
 				try {
-					auto test = to_tuple_helper<tuple>::get_tuple_from_vector(c, std::make_index_sequence<sizeof ... (_Tokens)>{}, file_content);
+					auto test = to_tuple_helper<tuple>::get_tuple_from_vector(c, std::make_index_sequence<sizeof ... (_Tokens)>{}, std::shared_ptr<std::string>());
 					correctly_parsed_collected.emplace_back(c.back().second());
 				}
 				catch (const parse_error&) {
