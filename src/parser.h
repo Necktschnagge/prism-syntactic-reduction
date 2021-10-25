@@ -120,7 +120,7 @@ private:
 public:
 
 	template< class ... Args>
-	type(const std::string& exception_message, Args&& ... parent_class_arguments) : _Token(std::forward<Args>(parent_class_arguments) ...), _exception_message(exception_message) {}
+	error_token(const std::string& exception_message, Args&& ... parent_class_arguments) : _Token(std::forward<Args>(parent_class_arguments) ...), _exception_message(exception_message) {}
 
 	virtual bool operator==(const token& another) const override {
 		return false;
