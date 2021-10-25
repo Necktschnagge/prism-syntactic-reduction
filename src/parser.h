@@ -1323,7 +1323,7 @@ namespace regular_extensions {
 
 			for (const auto& c : collect) {
 				try {
-					auto test = to_tuple_helper<tuple>::get_tuple_from_vector(c, std::make_index_sequence<sizeof ... (_Tokens)>{}, file_content);
+					auto test = to_tuple_helper<tuple>::get_tuple_from_vector(c, std::make_index_sequence<sizeof ... (_Tokens)>{}, std::shared_ptr<std::string>());
 					correctly_parsed_collected.emplace_back(c.front().first, c.back().second());
 				}
 				catch (const parse_error&) {
