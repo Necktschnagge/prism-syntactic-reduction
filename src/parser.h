@@ -355,7 +355,7 @@ public:
 	*/
 	static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end) {
 		const std::string& pattern{ *_string_ptr };
-		return general_string_token::has_front_candidate(bergin, end, pattern);
+		return general_string_token::has_front_candidate(begin, end, pattern);
 	}
 
 	virtual std::string type_info() const override {
@@ -651,7 +651,7 @@ namespace regular_extensions {
 					}
 
 					try {
-						_Token test = _Token::parse_string(iter, end_of_match_candidate, file_content);
+						_Token test = _Token::parse_string(iter, end_of_match_candidate, std::shared_ptr<std::string>());
 					}
 					catch (const parse_error& e) {
 						results.emplace_back(begin_match, iter);
@@ -1600,6 +1600,14 @@ struct simple_derived {
 };
 
 struct higher_clauses {
+
+	using relaxed_comment_section = regular_extensions::kleene_star<
+		regular_extensions::alternative<
+		simple_derived::comment_line_ending,
+		regular_tokens::single_space_token
+		>
+	>;
+
 	using const_definition = regular_extensions::compound<
 		keyword_tokens::const_token,
 		regular_extensions::kleene_plus<regular_tokens::single_space_token>,
@@ -1614,6 +1622,15 @@ struct higher_clauses {
 		delimiter_tokens::semicolon_token
 	>;
 
+	using global_var_definition = delimiter_tokens::semicolon_token; //####expand
+	using module_section = delimiter_tokens::semicolon_token; //####expand
+	using formula_definition = delimiter_tokens::semicolon_token; //####expand
+	using init_section = delimiter_tokens::semicolon_token; //####expand
+	using rewards_section = delimiter_tokens::semicolon_token; //####expand
+
+	using dtmc_file_body = regular_extensions::kleene_star<regular_extensions::alternative<relaxed_comment_section, const_definition, global_var_definition, module_section, formula_definition, init_section, rewards_section>>;
+
+	using dtmc_file = regular_extensions::compound<relaxed_comment_section, keyword_tokens::dtmc_token, dtmc_file_body>;
 
 };
 
