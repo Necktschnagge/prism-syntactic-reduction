@@ -1673,7 +1673,16 @@ int cli(int argc, char** argv) {
 	}
 	try {
 		auto text = std::make_shared<std::string>(R"(init)");
-		using token_type = regular_extensions::alternative<regular_tokens::single_space_token, regular_tokens::line_feed_token/*keyword_tokens::init_token*/>;
+		using token_type = regular_extensions::alternative<regular_tokens::single_space_token, regular_tokens::line_feed_token, keyword_tokens::init_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
+	}
+	try {
+		auto text = std::make_shared<std::string>(R"( init
+)");
+		using token_type = regular_extensions::compound<regular_tokens::single_space_token, keyword_tokens::init_token, regular_tokens::line_feed_token>;
 		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
 	}
 	catch (const parse_error& e) {
@@ -1681,7 +1690,6 @@ int cli(int argc, char** argv) {
 	}
 
 	//std::make_pair(false, std::make_unique<error_token<regular_tokens::single_space_token>>(""));
-	auto x = std::make_unique<error_token<regular_tokens::single_space_token>>("some error message", "some content");
 
 	return 0;
 }

@@ -189,7 +189,7 @@ public:
 		string_const_iterator iter = pattern.cbegin();
 		string_const_iterator jter = begin;
 
-		while (jter != end && iter != pattern.cend()) {
+		while (jter != end || iter != pattern.cend()) {
 
 			const auto n_more = [](string_const_iterator begin, string_const_iterator iter, string_const_iterator end, const std::iterator_traits<string_const_iterator>::difference_type& n = 10) {
 				if (std::distance(iter, end) <= n)
@@ -966,7 +966,14 @@ namespace regular_extensions {
 			std::unique_ptr<_Token> _Token_if_successfully;
 			std::string error_message_if_not_successfully;
 
-			sub_parse_struct(sub_parse_struct&& another) = default;
+			sub_parse_struct() = default;
+			sub_parse_struct(sub_parse_struct&&) = default;
+
+			inline bool operator == (const sub_parse_struct<_Token>& another) const {
+				return parsed_successfully == another.parsed_successfully &&
+					(!_Token_if_successfully && !another._Token_if_successfully || _Token_if_successfully && another._Token_if_successfully && *_Token_if_successfully == *another._Token_if_successfully) &&
+					error_message_if_not_successfully == another.error_message_if_not_successfully;
+			}
 		};
 
 		std::tuple<sub_parse_struct<_Tokens>...> _sub_tokens;
@@ -978,16 +985,18 @@ namespace regular_extensions {
 			template <class _Function >
 			//static parse_wrapper(_Token(*parse_function)(string_const_iterator, string_const_iterator, std::shared_ptr<std::string>), string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 			static sub_parse_struct<_Token> parse_wrapper(_Function parse_function, string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
-				return  std::make_pair(false, std::make_unique<error_token<_Token>>("", std::string(begin, end)));
-#if false
+				sub_parse_struct<_Token> result;
 				try {
-					//return std::pair<bool, std::unique_ptr<_Token>>(true, std::move(std::unique_ptr(new _Token(parse_function(begin, end, file_content)))));
+					result._Token_if_successfully.reset(new _Token(parse_function(begin, end, file_content)));
+					//return std::pair<bool, std::unique_ptr<_Token>>(true, std::move(std::unique_ptr()));
 					//return std::make_pair(true, std::make_unique<_Token>()); //###
+					result.parsed_successfully = true;
 				}
 				catch (const parse_error& e) {
-					return  std::make_pair(false, std::make_unique<error_token<_Token>>(e.what()));
+					result.parsed_successfully = false;
+					result.error_message_if_not_successfully = e.what();
 				}
-#endif
+				return result;
 			}
 		};
 
@@ -998,9 +1007,7 @@ namespace regular_extensions {
 			// parse it completely, recursive
 			// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
 
-			//std::tuple<std::pair<bool, std::unique_ptr<_Tokens>>...> parsed{ helper<_Tokens>::parse_wrapper(_Tokens::parse_string, begin, end, file_content)... };
-
-			std::tuple<sub_parse_struct<_Tokens>...> parsed; // { helper<_Tokens>::parse_wrapper(_Tokens::parse_string, begin, end, file_content)... };
+			std::tuple<sub_parse_struct<_Tokens>...> parsed{ helper<_Tokens>::parse_wrapper(_Tokens::parse_string, begin, end, file_content)... };
 
 			std::size_t count_matches{ 0 };
 			std::apply([&count_matches](auto&& ... sub_parse) {(((sub_parse.parsed_successfully) ? ++count_matches : count_matches), ...); }, parsed);
@@ -1040,7 +1047,7 @@ namespace regular_extensions {
 			}
 			return type(std::move(parsed));
 		}
-		/*
+
 		static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
 			// list all subsection where an x_token might be parsed., might be empty. (maximal kleene expansions from every starting position)
 
@@ -1064,58 +1071,36 @@ namespace regular_extensions {
 			return results;
 
 		}
-		*/
+
 
 		/**
 		@brief Returns [true, iter] where [begin, iter] matches pattern and is the longest possible match, might be [true, begin] if found no front match but the empty match, but returns [false, X] if no such match is found.
 		*/
-		/*
+
 		static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end) {
 
-			if (begin == end) {
-				if (check_match<_Token>(begin, end)) { // if the sub token can be ""
-					return std::make_pair(true, begin);
-				}
-				else {
-					return std::make_pair(false, begin);
+			std::vector<std::pair<bool, std::string::const_iterator>> collect;
+
+			//std::list<std::vector<std::pair<bool, std::string::const_iterator>>> splitted_results;
+
+			((collect.push_back(_Tokens::has_front_candidate(begin, end))), ...);
+
+			std::pair<bool, std::string::const_iterator> result{ false, begin };
+
+			for (const auto& item : collect) {
+				if (item.first) {
+					result.first = iterm.first;
+					if (item.second > result.second)
+						result.second = item.second;
 				}
 			}
 
-			string_const_iterator iter = begin;
-			while (iter != end) {
-				std::pair<bool, std::string::const_iterator> pair = _Token::has_front_candidate(iter, end);
-				const bool& has_front_match{ pair.first };
-				const std::string::const_iterator& end_of_match_candidate{ pair.second };
-
-				if (!has_front_match) { // no match on front (starting from iter position)
-					if (begin != iter || check_match<_Token>(begin, iter)) { // if the matched string is not "" OR the sub token can be ""
-						return std::make_pair(true, iter);
-					}
-					else {
-						return std::make_pair(false, iter); // here: iter == begin
-					}
-				}
-
-				try {
-					_Token test = _Token::parse_string(iter, end_of_match_candidate, file_content);
-				}
-				catch (const parse_error& e) {
-					if (begin != iter || check_match<_Token>(begin, iter)) { // if the matched string is not "" OR the sub token can be ""
-						return std::make_pair(true, iter);
-					}
-					else {
-						return std::make_pair(false, iter); // here: iter == begin
-					}
-				}
-				iter = end_of_match_candidate;
-			}
-			// here: iter != begin; ( -> skipping the if clause )
-			return std::make_pair(true, iter);
+			return result;
 		}
-		*/
+
 
 	public:
-		virtual bool operator==(const token& another) const override { //## change it !!!
+		virtual bool operator==(const token& another) const override {
 			try {
 				const type& down_casted = dynamic_cast<const type&>(another);
 				return _sub_tokens == down_casted._sub_tokens;
@@ -1136,11 +1121,17 @@ namespace regular_extensions {
 		}
 
 		static std::string static_type_info() {
-			return std::string("ALTERNATIVE<") + ">";  //### ergänzen!!!
+			std::string result;
+			result += std::string("ALTERNATIVE<");
+			((result += _Tokens::static_type_info() + ", "), ...);
+			result.erase(result.size() - 2);
+			result += ">";
+			return result;
 		}
 
 		virtual const_token_ptr_vector children() const override {
 			auto result = const_token_ptr_vector();
+			std::apply([&result](auto&& ... element) { ((element.parsed_successfully ? result.push_back(element._Token_if_successfully.get()) : false), ...); }, _sub_tokens);
 			/*for (std::size_t i{ 0 }; i < _sub_tokens; ++i) { //### ergänzen
 				result.push_back(&_sub_tokens[i]);
 			}*/
@@ -1149,6 +1140,354 @@ namespace regular_extensions {
 
 
 	};
+
+	template<class ... _Tokens>
+	class compound : public token {
+		static_assert(sizeof...(_Tokens) != 0, "Forbidden to use empty compound.");
+	public:
+		using type = compound<_Tokens...>;
+		using tuple = std::tuple<_Tokens...>;
+	private:
+
+		template<class _Token>
+		struct sub_parse_struct {
+			using value_type = _Token;
+
+			bool parsed_successfully;
+			std::unique_ptr<_Token> _Token_if_successfully;
+			std::string error_message_if_not_successfully;
+
+			sub_parse_struct() = default;
+			sub_parse_struct(sub_parse_struct&&) = default;
+
+			inline bool operator == (const sub_parse_struct<_Token>& another) const {
+				return parsed_successfully == another.parsed_successfully &&
+					(!_Token_if_successfully && !another._Token_if_successfully || _Token_if_successfully && another._Token_if_successfully && *_Token_if_successfully == *another._Token_if_successfully) &&
+					error_message_if_not_successfully == another.error_message_if_not_successfully;
+			}
+		};
+
+		std::tuple<_Tokens...> _sub_tokens;
+
+		type(std::tuple<_Tokens...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
+
+		template <class _Token>
+		struct helper {
+			template <class _Function >
+			//static parse_wrapper(_Token(*parse_function)(string_const_iterator, string_const_iterator, std::shared_ptr<std::string>), string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+			static sub_parse_struct<_Token> parse_wrapper(_Function parse_function, string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+				sub_parse_struct<_Token> result;
+				try {
+					result._Token_if_successfully.reset(new _Token(parse_function(begin, end, file_content)));
+					//return std::pair<bool, std::unique_ptr<_Token>>(true, std::move(std::unique_ptr()));
+					//return std::make_pair(true, std::make_unique<_Token>()); //###
+					result.parsed_successfully = true;
+				}
+				catch (const parse_error& e) {
+					result.parsed_successfully = false;
+					result.error_message_if_not_successfully = e.what();
+				}
+				return result;
+			}
+		};
+
+		using candidate_vector = std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>>;
+	public:
+
+		// Convert vector into a tuple
+		template<class tuple_type>
+		struct to_tuple_helper {
+			template<std::size_t... I>
+			static auto get_tuple_from_vector(const candidate_vector& all_component_splittings, std::index_sequence<I...>, std::shared_ptr<std::string> file_content)
+			{
+				//regular_tokens::single_space_token::parse_string
+				return std::make_tuple(std::tuple_element<I, tuple_type>::type::parse_string(all_component_splittings[I].first, all_component_splittings[I].second, file_content) ...);
+			}
+		};
+
+		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+
+			// parse it completely, recursive
+			// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+
+
+			std::vector<candidate_vector> sub_candidates{ _Tokens::find_all_candidates(begin, end)... }; // { {comp1_occ1, comp1_occ2, ... }, {comp2_occ1, comp2_occ2, ... }, ...}
+
+			std::vector<candidate_vector> collect; //{  "variant1" { (comp1_begin, comp1_end), (comp2_begin, comp2_end), ... }, "variant2" { (comp1_begin, comp1_end), (comp2_begin, comp2_end), ... }, ... }
+
+
+			for (auto& vec : sub_candidates)
+				std::sort(
+					vec.begin(),
+					vec.end(),
+					[](const std::pair<token::string_const_iterator, std::string::const_iterator>& left, const std::pair<token::string_const_iterator, std::string::const_iterator>& right) {
+						return left.first == right.first ? left.second > right.second : left.first < right.first;
+					});
+
+			string_const_iterator string_rest_begin{ begin };
+			std::vector<candidate_vector::const_iterator> current_in_ith_component(sub_candidates.size());
+			std::size_t i{ 0 }; // current component
+			current_in_ith_component[0] = sub_candidates[0].cbegin();
+
+			while (!(current_in_ith_component[0] == sub_candidates[0].cend())) { // reached end of first component's occurrences
+				if (i == sub_candidates.size()) { // if at end
+					if (string_rest_begin == end) { // accept result if matched whole input
+						candidate_vector new_candidate; // { (comp1_begin, comp1_end), (comp2_begin, comp2_end), ... }
+						for (auto iter = 0; iter < sub_candidates.size(); ++iter) {
+							new_candidate.push_back(*current_in_ith_component[iter]);
+						}
+						collect.push_back(std::move(new_candidate));
+					}
+				}
+				else {
+					// try expand, and if it is possible, continue loop from begin to not forget some match:
+					if (current_in_ith_component[i] != sub_candidates[i].cend()) { // otherwise current component fully expanded.
+						// expand further...
+						if (current_in_ith_component[i]->first == string_rest_begin) { // go into next component
+							string_rest_begin = current_in_ith_component[i]->second;
+							++i;
+							if (i != current_in_ith_component.size()) current_in_ith_component[i] = sub_candidates[i].cbegin();
+						}
+						else { // go to next item in current component
+							++current_in_ith_component[i];
+						}
+						continue; // to do not go back before collect.push_back(...); i.e. do not skip a result
+					}
+				}
+
+				// go back in current component to the left if fully expanded sub component
+				while (i == sub_candidates.size() || current_in_ith_component[i] == sub_candidates[i].cend()) {
+					--i;
+					string_rest_begin = current_in_ith_component[i]->first;
+					++current_in_ith_component[i];
+				}
+			}
+			// all collected.
+
+			std::vector<std::tuple<_Tokens...>> correctly_parsed_collected;
+
+			for (const auto& c : collect) {
+				try {
+					correctly_parsed_collected.emplace_back(to_tuple_helper<tuple>::get_tuple_from_vector(c, std::make_index_sequence<sizeof ... (_Tokens)>{}, file_content));
+				}
+				catch (const parse_error&) {
+					//ignore, do not kep th collected candidate.
+				}
+			}
+
+			if (correctly_parsed_collected.size() == 0) {
+				std::string message;
+				message += "Input cannot be parsed as compound token:\n";
+				message += "The compound type is: " + type::static_type_info() + "\n";
+				message += "Input end to match is here:\n";
+				message += not_matching::get_position_description(file_content, end);
+				message += not_matching::show_position(file_content, end);
+				throw not_matching(message, file_content, begin);
+			}
+
+			if (correctly_parsed_collected.size() > 1) {
+				std::string message;
+				message += "Input cannot be parsed as compound token unambiguously:\n";
+				message += "The compound type is: " + type::static_type_info() + "\n";
+				message += "There are " + std::to_string(collect.size()) + " compound matches:\n";
+				message += "[omitting displaying all of them]\n";
+				throw ambiguous_matches(message, file_content, begin);
+			}
+
+			return type(std::move(correctly_parsed_collected[0]));
+		}
+
+		static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+			// list all subsection where an x_token might be parsed., might be empty. (maximal kleene expansions from every starting position)
+
+			std::vector<candidate_vector> sub_candidates{ _Tokens::find_all_candidates(begin, end)... }; // { {comp1_occ1, comp1_occ2, ... }, {comp2_occ1, comp2_occ2, ... }, ...}
+
+			std::vector<candidate_vector> collect; //{  "variant1" { (comp1_begin, comp1_end), (comp2_begin, comp2_end), ... }, "variant2" { (comp1_begin, comp1_end), (comp2_begin, comp2_end), ... }, ... }
+
+
+			for (auto& vec : sub_candidates)
+				std::sort(
+					vec.begin(),
+					vec.end(),
+					[](const std::pair<token::string_const_iterator, std::string::const_iterator>& left, const std::pair<token::string_const_iterator, std::string::const_iterator>& right) {
+						return left.first == right.first ? left.second > right.second : left.first < right.first;
+					});
+
+			string_const_iterator string_rest_begin{ begin };
+			std::vector<candidate_vector::const_iterator> current_in_ith_component(sub_candidates.size());
+			std::size_t i{ 0 }; // current component
+			current_in_ith_component[0] = sub_candidates[0].cbegin();
+
+			while (!(current_in_ith_component[0] == sub_candidates[0].cend())) { // reached end of first component's occurrences
+				if (i == sub_candidates.size()) { // if at end
+					candidate_vector new_candidate; // { (comp1_begin, comp1_end), (comp2_begin, comp2_end), ... }
+					for (auto iter = 0; iter < sub_candidates.size(); ++iter) {
+						new_candidate.push_back(*current_in_ith_component[iter]);
+					}
+					collect.push_back(std::move(new_candidate));
+				}
+				else {
+					// try expand, and if it is possible, continue loop from begin to not forget some match:
+					if (current_in_ith_component[i] != sub_candidates[i].cend()) { // otherwise current component fully expanded.
+						// expand further...
+						if (current_in_ith_component[i]->first == string_rest_begin || i == 0) { // go into next component if (this component extends the previous one) || (this component is the very first component)
+							string_rest_begin = current_in_ith_component[i]->second;
+							++i;
+							if (i != current_in_ith_component.size()) current_in_ith_component[i] = sub_candidates[i].cbegin();
+						}
+						else { // go to next item in current component
+							++current_in_ith_component[i];
+						}
+						continue; // to do not go back before collect.push_back(...); i.e. do not skip a result
+					}
+				}
+
+				// go back in current component to the left if fully expanded sub component
+				while (i == sub_candidates.size() || current_in_ith_component[i] == sub_candidates[i].cend()) {
+					--i;
+					string_rest_begin = current_in_ith_component[i]->first;
+					++current_in_ith_component[i];
+				}
+			}
+			// all collected.
+
+			std::vector<std::pair<string_const_iterator, string_const_iterator>> correctly_parsed_collected;
+
+			for (const auto& c : collect) {
+				try {
+					auto test = to_tuple_helper<tuple>::get_tuple_from_vector(c, std::make_index_sequence<sizeof ... (_Tokens)>{}, file_content);
+					correctly_parsed_collected.emplace_back(c.front().first, c.back().second());
+				}
+				catch (const parse_error&) {
+					//ignore, do not kep th collected candidate.
+				}
+			}
+			return correctly_parsed_collected;
+		}
+
+
+		/**
+		@brief Returns [true, iter] where [begin, iter] matches pattern and is the longest possible match, might be [true, begin] if found no front match but the empty match, but returns [false, X] if no such match is found.
+		*/
+
+		static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end) {
+
+
+			std::vector<candidate_vector> sub_candidates{ _Tokens::find_all_candidates(begin, end)... }; // { {comp1_occ1, comp1_occ2, ... }, {comp2_occ1, comp2_occ2, ... }, ...}
+
+			std::vector<candidate_vector> collect; //{  "variant1" { (comp1_begin, comp1_end), (comp2_begin, comp2_end), ... }, "variant2" { (comp1_begin, comp1_end), (comp2_begin, comp2_end), ... }, ... }
+
+
+			for (auto& vec : sub_candidates)
+				std::sort(
+					vec.begin(),
+					vec.end(),
+					[](const std::pair<token::string_const_iterator, std::string::const_iterator>& left, const std::pair<token::string_const_iterator, std::string::const_iterator>& right) {
+						return left.first == right.first ? left.second > right.second : left.first < right.first;
+					});
+
+			string_const_iterator string_rest_begin{ begin };
+			std::vector<candidate_vector::const_iterator> current_in_ith_component(sub_candidates.size());
+			std::size_t i{ 0 }; // current component
+			current_in_ith_component[0] = sub_candidates[0].cbegin();
+
+			while (!(current_in_ith_component[0] == sub_candidates[0].cend())) { // reached end of first component's occurrences
+				if (i == sub_candidates.size()) { // if at end
+					candidate_vector new_candidate; // { (comp1_begin, comp1_end), (comp2_begin, comp2_end), ... }
+					for (auto iter = 0; iter < sub_candidates.size(); ++iter) {
+						new_candidate.push_back(*current_in_ith_component[iter]);
+					}
+					collect.push_back(std::move(new_candidate));
+				}
+				else {
+					// try expand, and if it is possible, continue loop from begin to not forget some match:
+					if (current_in_ith_component[i] != sub_candidates[i].cend()) { // otherwise current component fully expanded.
+						// expand further...
+						if (current_in_ith_component[i]->first == string_rest_begin) { // go into next component if (this component extends the previous one) || (this component is the very first component)
+							string_rest_begin = current_in_ith_component[i]->second;
+							++i;
+							if (i != current_in_ith_component.size()) current_in_ith_component[i] = sub_candidates[i].cbegin();
+						}
+						else { // go to next item in current component
+							++current_in_ith_component[i];
+						}
+						continue; // to do not go back before collect.push_back(...); i.e. do not skip a result
+					}
+				}
+
+				// go back in current component to the left if fully expanded sub component
+				while (i == sub_candidates.size() || current_in_ith_component[i] == sub_candidates[i].cend()) {
+					--i;
+					string_rest_begin = current_in_ith_component[i]->first;
+					++current_in_ith_component[i];
+				}
+			}
+			// all collected.
+
+			std::vector<string_const_iterator> correctly_parsed_collected;
+
+			for (const auto& c : collect) {
+				try {
+					auto test = to_tuple_helper<tuple>::get_tuple_from_vector(c, std::make_index_sequence<sizeof ... (_Tokens)>{}, file_content);
+					correctly_parsed_collected.emplace_back(c.back().second());
+				}
+				catch (const parse_error&) {
+					//ignore, do not kep th collected candidate.
+				}
+			}
+
+			return correctly_parsed_collected;
+
+			if (correctly_parsed_collected.empty())
+				return std::make_pair(false, begin);
+			else
+				return std::make_pair(true, *std::max_element(correctly_parsed_collected.cbegin(), correctly_parsed_collected.cend()))
+		}
+
+
+	public:
+		virtual bool operator==(const token& another) const override {
+			try {
+				const type& down_casted = dynamic_cast<const type&>(another);
+				return _sub_tokens == down_casted._sub_tokens;
+			}
+			catch (const std::bad_cast&) {
+				return false;
+			}
+		}
+
+		virtual std::string to_string() const override {
+			std::string result;
+			//std::apply([&result](auto&& ... args) { (((args.parsed_successfully) ? result += args._Token_if_successfully->to_string() : result), ...); }, _sub_tokens);
+			return result;
+		}
+
+		virtual std::string type_info() const override {
+			return type::static_type_info();
+		}
+
+		static std::string static_type_info() {
+			std::string result;
+			result += std::string("ALTERNATIVE<");
+			/*((result += _Tokens::static_type_info() + ", "), ...);
+			result.erase(result.size() - 2);
+			result += ">";
+			*/
+			return result;
+		}
+
+		virtual const_token_ptr_vector children() const override {
+			auto result = const_token_ptr_vector();
+			//std::apply([&result](auto&& ... element) { ((element.parsed_successfully ? result.push_back(element._Token_if_successfully.get()) : false), ...); }, _sub_tokens);
+			/*for (std::size_t i{ 0 }; i < _sub_tokens; ++i) { //### ergänzen
+				result.push_back(&_sub_tokens[i]);
+			}*/
+			return result;
+		}
+
+
+	};
+
 	/*
 	template<class ... _Tokens>
 	class compound_token : public token {

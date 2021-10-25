@@ -86,6 +86,7 @@ public:
 				this_line.clear();
 			}
 			++column;
+			++iter;
 		}
 		++n; // also print error position itself
 		while (iter != file_content->cend() && n > 0 && *iter != '\n') {
@@ -111,6 +112,7 @@ public:
 				column = 0;
 			}
 			++column;
+			++iter;
 		}
 		std::string position_message;
 		position_message += "On line " + std::to_string(line);
@@ -137,7 +139,7 @@ public:
 		parse_error(""),
 		_file_content(file_content),
 		_error_position(error_position)
-	{	
+	{
 		parse_error::message = get_position_description(file_content, _error_position).append(message);
 	}
 	/*
@@ -225,7 +227,7 @@ public:
 		parse_error(""),
 		_file_content(file_content),
 		_error_position(error_position)
-	{	
+	{
 		parse_error::message = get_position_description(file_content, _error_position).append(message);
 	}
 	/*
