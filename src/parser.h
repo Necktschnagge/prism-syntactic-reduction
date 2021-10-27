@@ -1682,7 +1682,7 @@ struct higher_clauses {
 	using module_transition_post_conditions_token = regular_extensions::alternative<
 		higher_clauses::condition_token,
 		module_transition_post_condition_probability_distribution_token
-	>; //#### expand
+	>;
 
 	using module_transition_token = regular_extensions::compound<
 		delimiter_tokens::left_square_bracket_token, // [
@@ -1724,7 +1724,11 @@ struct higher_clauses {
 		delimiter_tokens::semicolon_token
 	>;
 
-	using init_section = delimiter_tokens::semicolon_token; //####expand
+	using init_section = regular_extensions::compound <
+		keyword_tokens::init_token,
+		higher_clauses::condition_token, // initial condition on variables
+		keyword_tokens::endinit_token
+	>;
 
 	using reward_trigger_token = regular_extensions::compound <
 		higher_clauses::condition_token,
@@ -1765,12 +1769,6 @@ struct higher_clauses {
 };
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
-////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
-////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
-////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
-////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
-////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
 ////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
 ////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
 ////////////////////////////////////////////////////////////////////////////////////////////////////////   OLD STUFF
@@ -2255,73 +2253,4 @@ public:
 	}
 
 };
-#endif
-
-
-
-#if false
-
-class init_definition_token : public token {
-public:
-
-	std::shared_ptr<init_token> _init_keyword;
-	std::shared_ptr<condition_token> _start_condition;
-	std::shared_ptr<endinit_token> _endinit_keyword;
-
-
-	using token::token;
-
-	init_definition_token(const init_definition_token& another) :
-		token(another),
-		_init_keyword(copy_shared_ptr(another._init_keyword)),
-		_start_condition(copy_shared_ptr(another._start_condition)),
-		_endinit_keyword(copy_shared_ptr(another._endinit_keyword))
-	{}
-
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<init_definition_token>(*this);
-	}
-
-	virtual void parse_non_primitive() override {
-		string_const_iterator rest_begin{ cbegin() };
-		string_const_iterator rest_end{ cend() };
-
-		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::init_keyword);
-		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "init" in init definition.)");
-		parse_error::assert_true(search_keyword->prefix().end() == rest_begin, R"(Init definition does not start with "init".)");
-		_init_keyword = std::make_shared<init_token>(this, rest_begin, search_keyword->suffix().begin());
-		rest_begin = search_keyword->suffix().begin();
-
-		auto search_end_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::endinit_keyword);
-		parse_error::assert_true(search_end_keyword != regex_iterator(), R"(Could not find "endinit" in init definition.)");
-		parse_error::assert_true(search_end_keyword->suffix().begin() == rest_end, R"(Could not find "endinit" at the end of init definition.)");
-		_endinit_keyword = std::make_shared<endinit_token>(this, search_end_keyword->prefix().end(), search_end_keyword->suffix().begin());
-		rest_end = search_end_keyword->prefix().end();
-
-		_start_condition = std::make_shared<condition_token>(this, rest_begin, rest_end);
-	}
-
-	virtual token_list children() const override {
-		std::vector<std::shared_ptr<token>> possible_tokens{
-			_init_keyword, _start_condition, _endinit_keyword
-		};
-		token_list result;
-		std::copy_if(
-			possible_tokens.cbegin(),
-			possible_tokens.cend(),
-			std::back_inserter(result),
-			[](const std::shared_ptr<token>& ptr) {
-				return ptr.operator bool();
-			}
-		);
-		return result;
-	}
-
-	virtual bool is_primitive() const override { return false; }
-
-	virtual bool is_sound() const final override {
-		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::init_definition);
-	}
-};
-
 #endif
