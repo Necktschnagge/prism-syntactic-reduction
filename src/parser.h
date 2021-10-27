@@ -1659,7 +1659,42 @@ struct higher_clauses {
 
 	using condition_token = delimiter_tokens::semicolon_token; //#### expand
 
-	using module_transition_token = delimiter_tokens::semicolon_token; //#### expand
+	using module_transition_post_condition_probability_distribution_case_token = regular_extensions::compound<
+		simple_derived::maybe_spaces_token,
+		regular_tokens::float_number_token, // probability
+		simple_derived::maybe_spaces_token,
+		delimiter_tokens::colon_token,
+		higher_clauses::condition_token // post-condition
+
+	>;
+
+	using module_transition_post_condition_probability_distribution_token = regular_extensions::compound<
+		module_transition_post_condition_probability_distribution_case_token,
+		regular_extensions::kleene_star<
+		regular_extensions::compound<
+		delimiter_tokens::plus_token,
+		module_transition_post_condition_probability_distribution_case_token
+		>
+		>
+	>;
+
+	using module_transition_post_conditions_token = regular_extensions::alternative<
+		condition_token,
+		module_transition_post_condition_probability_distribution_token
+	>; //#### expand
+
+	using module_transition_token = regular_extensions::compound<
+		delimiter_tokens::left_square_bracket_token, // [
+		simple_derived::maybe_spaces_token,
+		regular_tokens::identifier_token, // transition label
+		simple_derived::maybe_spaces_token,
+		delimiter_tokens::right_square_bracket_token, // ]
+		//simple_derived::maybe_spaces_token,
+		condition_token, // precondition
+		delimiter_tokens::ascii_arrow_token, // ->
+		module_transition_post_conditions_token,
+		delimiter_tokens::semicolon_token
+	>; //#### expand
 
 	using module_section = regular_extensions::compound <
 		keyword_tokens::module_token,
@@ -1667,10 +1702,10 @@ struct higher_clauses {
 		regular_tokens::identifier_token, // module name
 		simple_derived::spaces_token,
 		regular_extensions::kleene_star<
-			regular_extensions::alternative<
-				module_transition_token,
-				var_definition
-			>
+		regular_extensions::alternative<
+		module_transition_token,
+		var_definition
+		>
 		>,
 		keyword_tokens::endmodule_token,
 		simple_derived::spaces_token
@@ -1682,9 +1717,9 @@ struct higher_clauses {
 		regular_tokens::identifier_token,
 		simple_derived::maybe_spaces_token,
 		delimiter_tokens::equals_token,
-		simple_derived::maybe_spaces_token,
+		//simple_derived::maybe_spaces_token,
 		condition_token,
-		simple_derived::maybe_spaces_token,
+		//simple_derived::maybe_spaces_token,
 		delimiter_tokens::semicolon_token
 	>; //####expand
 	using init_section = delimiter_tokens::semicolon_token; //####expand
@@ -1815,49 +1850,6 @@ public:
 #endif
 
 #if false
-class number_token : public token {
-
-public:
-
-	using token::token;
-
-	number_token(const number_token& another) : token(another) {}
-
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<number_token>(*this);
-	}
-
-
-	virtual void parse_non_primitive() final override {
-	}
-
-	virtual token_list children() const override {
-		return token_list();
-	}
-
-	virtual bool is_primitive() const final override { return true; }
-
-	virtual bool is_sound() const final override {
-		try {
-			long double x = std::stold(std::string(cbegin(), cend()));
-		}
-		catch (...) {
-			return false;
-		}
-		return true;
-	}
-
-
-	int int_value() {
-		return std::stoi(str());
-	}
-};
-
-#endif
-
-
-
-#if false
 
 class equation_token : public token {
 
@@ -1978,6 +1970,9 @@ public:
 	}
 };
 
+#endif
+
+#if false
 class condition_token : public token {
 
 public:
@@ -2241,362 +2236,6 @@ public:
 #if false
 
 
-class transition_token : public token {
-
-public:
-	std::shared_ptr<left_square_brace_token> _start_label;
-	std::shared_ptr<space_token> _start_label_separator;
-	std::shared_ptr<identifier_token> _label;
-	std::shared_ptr<space_token> _label_separator;
-	std::shared_ptr<right_square_brace_token> _end_label;
-	std::shared_ptr<space_token> _right_brace_separator;
-	std::shared_ptr<condition_token> _pre_condition;
-	std::shared_ptr<ascii_arrow_token> _arrow;
-	std::shared_ptr<space_token> _arrow_separator;
-	using probability_clause = std::optional<
-		std::tuple<
-		std::shared_ptr<float_token>,
-		std::shared_ptr<space_token>,
-		std::shared_ptr<colon_token>
-		>
-	>;
-	using plus_clause = std::optional<
-		std::tuple<
-		std::shared_ptr<plus_token>,
-		std::shared_ptr<space_token>
-		>
-	>;
-	std::vector<
-		std::tuple<
-		probability_clause,
-		std::shared_ptr<condition_token>,
-		plus_clause
-		>
-	> _regular_post_conditions;
-	std::shared_ptr<semicolon_token> _semicolon;
-
-	using token::token;
-
-	transition_token(const transition_token& another) :
-		token(another),
-		_start_label(copy_shared_ptr(another._start_label)),
-		_start_label_separator(copy_shared_ptr(another._start_label_separator)),
-		_label(copy_shared_ptr(another._label)),
-		_label_separator(copy_shared_ptr(another._label_separator)),
-		_end_label(copy_shared_ptr(another._end_label)),
-		_right_brace_separator(copy_shared_ptr(another._right_brace_separator)),
-		_pre_condition(copy_shared_ptr(another._pre_condition)),
-		_arrow(copy_shared_ptr(another._arrow)),
-		_arrow_separator(copy_shared_ptr(another._arrow_separator)),
-		_semicolon(copy_shared_ptr(another._semicolon))
-	{
-		for (const auto& tuple : another._regular_post_conditions) {
-			probability_clause first;
-			if (std::get<0>(tuple)) {
-				first = std::make_optional(
-					std::make_tuple(
-						copy_shared_ptr(std::get<0>(std::get<0>(tuple).value())),
-						copy_shared_ptr(std::get<1>(std::get<0>(tuple).value())),
-						copy_shared_ptr(std::get<2>(std::get<0>(tuple).value()))
-					)
-				);
-			}
-			plus_clause third;
-			if (std::get<2>(tuple)) {
-				third = std::make_optional(
-					std::make_tuple(
-						copy_shared_ptr(std::get<0>(std::get<2>(tuple).value())),
-						copy_shared_ptr(std::get<1>(std::get<2>(tuple).value()))
-					)
-				);
-			}
-			_regular_post_conditions.push_back(
-				std::make_tuple(
-					first,
-					copy_shared_ptr(std::get<1>(tuple)),
-					third
-				)
-			);
-		}
-	}
-
-	virtual std::shared_ptr<token> clone() const override {
-		return std::make_shared<transition_token>(*this);
-	}
-
-	virtual void parse_non_primitive() override {
-
-		string_const_iterator rest_begin{ cbegin() };
-		string_const_iterator rest_end{ cend() };
-
-		auto search_left_square_brace = regex_iterator(rest_begin, rest_end, const_regexes::primitives::left_square_brace);
-		parse_error::assert_true(search_left_square_brace != regex_iterator(), R"(Could not find left square brace in transition.)");
-		parse_error::assert_true(search_left_square_brace->prefix().end() == rest_begin, R"(left square brace at unexpected position.)");
-		_start_label = std::make_shared<left_square_brace_token>(this, rest_begin, search_left_square_brace->suffix().begin());
-		rest_begin = search_left_square_brace->suffix().begin();
-
-		auto search_start_label_separator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
-		parse_error::assert_true(search_start_label_separator != regex_iterator(), R"(Could not find space separators after "[" in transition.)");
-		parse_error::assert_true(search_start_label_separator->prefix().end() == rest_begin, R"(Could not find space separators immediately after "[" in transition.)");
-		_start_label_separator = std::make_shared<space_token>(this, rest_begin, search_start_label_separator->suffix().begin());
-		rest_begin = search_start_label_separator->suffix().begin();
-
-		auto search_identifier = regex_iterator(rest_begin, rest_end, const_regexes::primitives::identifier);
-		parse_error::assert_true(search_identifier != regex_iterator(), R"(Could not find an identifier after "[" in transition.)");
-		parse_error::assert_true(search_identifier->prefix().end() == rest_begin, R"(Could not find an identifier immediately after "[" in transition.)");
-		_label = std::make_shared<identifier_token>(this, rest_begin, search_identifier->suffix().begin());
-		rest_begin = search_identifier->suffix().begin();
-
-		auto search_space_separator_after_identifier = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
-		parse_error::assert_true(search_space_separator_after_identifier != regex_iterator(), R"(Could not find space separators after identifier in transition.)");
-		parse_error::assert_true(search_space_separator_after_identifier->prefix().end() == rest_begin, R"(Could not find space separator immediately after identifier transition.)");
-		_label_separator = std::make_shared<space_token>(this, rest_begin, search_space_separator_after_identifier->suffix().begin());
-		rest_begin = search_space_separator_after_identifier->suffix().begin();
-
-		auto search_right_square_brace = regex_iterator(rest_begin, rest_end, const_regexes::primitives::right_square_brace);
-		parse_error::assert_true(search_right_square_brace != regex_iterator(), R"(Could not find right square brace after identifier in transition.)");
-		parse_error::assert_true(search_right_square_brace->prefix().end() == rest_begin, R"(Right square brace at unexpected position.)");
-		_end_label = std::make_shared<right_square_brace_token>(this, rest_begin, search_right_square_brace->suffix().begin());
-		rest_begin = search_right_square_brace->suffix().begin();
-
-		auto search_right_square_brace_separator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
-		parse_error::assert_true(search_right_square_brace_separator != regex_iterator(), R"(Could not find space separators after "]" in transition.)");
-		parse_error::assert_true(search_right_square_brace_separator->prefix().end() == rest_begin, R"(Could not find space separator immediately after "]" transition.)");
-		_right_brace_separator = std::make_shared<space_token>(this, rest_begin, search_right_square_brace_separator->suffix().begin());
-		rest_begin = search_right_square_brace_separator->suffix().begin();
-
-		auto search_arrow = regex_iterator(rest_begin, rest_end, const_regexes::primitives::ascii_arrow);
-		parse_error::assert_true(search_arrow != regex_iterator(), R"(Could not find "->" in transition.)");
-		_arrow = std::make_shared<ascii_arrow_token>(this, search_arrow->prefix().end(), search_arrow->suffix().begin());
-		_pre_condition = std::make_shared<condition_token>(this, rest_begin, search_arrow->prefix().end());
-		rest_begin = search_arrow->suffix().begin();
-
-		auto search_arrow_separator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
-		parse_error::assert_true(search_arrow_separator != regex_iterator(), R"(Could not find space separators after "->" in transition.)");
-		parse_error::assert_true(search_arrow_separator->prefix().end() == rest_begin, R"(Could not find space separators immediately after "->" in transition.)");
-		_arrow_separator = std::make_shared<space_token>(this, rest_begin, search_arrow_separator->suffix().begin());
-		rest_begin = search_arrow_separator->suffix().begin();
-
-		auto search_semicolon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::semicolon);
-		parse_error::assert_true(search_semicolon != regex_iterator(), R"(Could not find semicolon in transition.)");
-		parse_error::assert_true(search_semicolon->suffix().begin() == rest_end, R"(Unexpected semicolon in formula definition.)");
-		_semicolon = std::make_shared<semicolon_token>(this, search_semicolon->prefix().end(), search_semicolon->suffix().begin());
-		rest_end = search_semicolon->prefix().end();
-
-		while (rest_begin != rest_end) {
-			auto search_colon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::colon);
-			if (search_colon == regex_iterator()) {
-				_regular_post_conditions.push_back({
-					std::optional<std::tuple<std::shared_ptr<float_token>,std::shared_ptr<space_token>,std::shared_ptr<colon_token>>>(),
-					std::make_shared< condition_token>(this, rest_begin, rest_end),
-					std::optional<std::tuple<std::shared_ptr<plus_token>,std::shared_ptr<space_token>>>()
-					});
-				break;
-			}
-			parse_error::assert_true(search_colon != regex_iterator(), R"(Could not find a ":" somewhere after "->" in transition.)");
-			auto _colon_token{ std::make_shared<colon_token>(this, search_colon->prefix().end(), search_colon->suffix().begin()) };
-
-			auto search_probability = regex_iterator(rest_begin, search_colon->prefix().end(), const_regexes::primitives::not_spaces);
-			parse_error::assert_true(search_probability != regex_iterator(), R"(Could not find a space-free part somewhere after "->" in transition.)");
-			parse_error::assert_true(search_probability->prefix().end() == rest_begin, R"(Could not find a space-free part immediately after "->" in transition.)");
-
-			auto _probability{ std::make_shared<float_token>(this, search_probability->prefix().end(), search_probability->suffix().begin()) };
-			auto _probability_separator{ std::make_shared<space_token>(this, search_probability->suffix().begin(), search_probability->suffix().end()) };
-			rest_begin = search_colon->suffix().begin();
-
-			auto search_plus = regex_iterator(rest_begin, rest_end, const_regexes::primitives::plus);
-			const bool found_last_condition{ search_plus == regex_iterator() };
-			auto _condition_end{ !found_last_condition ? search_plus->prefix().end() : rest_end };
-			auto _condition{ std::make_shared<condition_token>(this, rest_begin, _condition_end) };
-			rest_begin = found_last_condition ? _condition_end : search_plus->suffix().begin();
-
-			if (!found_last_condition) {
-				auto _plus{ std::make_shared<plus_token>(this, search_plus->prefix().end(), search_plus->suffix().begin()) };
-
-				auto search_plus_separator = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
-				parse_error::assert_true(search_plus_separator != regex_iterator(), R"(Could not find space separators after "+" in transition.)");
-				parse_error::assert_true(search_plus_separator->prefix().end() == rest_begin, R"(Could not find space separators immediately after "+" in transition.)");
-				auto _plus_separator = std::make_shared<space_token>(this, rest_begin, search_plus_separator->suffix().begin());
-				rest_begin = search_plus_separator->suffix().begin();
-
-				_regular_post_conditions.push_back({
-					std::make_tuple(_probability, _probability_separator, _colon_token),
-					_condition,
-					std::make_tuple(_plus, _plus_separator)
-					});
-			}
-			else {
-				_regular_post_conditions.push_back({
-					std::make_tuple(_probability, _probability_separator, _colon_token),
-					_condition,
-					std::tuple_element<2, typename decltype(_regular_post_conditions)::value_type>::type()
-					});
-			}
-		}
-	}
-
-	virtual token_list children() const override {
-		std::vector<std::shared_ptr<token>> possible_tokens;
-
-		possible_tokens.push_back(_start_label);
-		possible_tokens.push_back(_start_label_separator);
-		possible_tokens.push_back(_label);
-		possible_tokens.push_back(_label_separator);
-		possible_tokens.push_back(_end_label);
-		possible_tokens.push_back(_right_brace_separator);
-		possible_tokens.push_back(_pre_condition);
-		possible_tokens.push_back(_arrow);
-		possible_tokens.push_back(_arrow_separator);
-
-		for (const auto& post_condition_tuple : _regular_post_conditions) {
-			if (std::get<0>(post_condition_tuple).has_value()) {
-				possible_tokens.push_back(std::get<0>(*std::get<0>(post_condition_tuple)));
-				possible_tokens.push_back(std::get<1>(*std::get<0>(post_condition_tuple)));
-				possible_tokens.push_back(std::get<2>(*std::get<0>(post_condition_tuple)));
-			}
-			possible_tokens.push_back(std::get<1>(post_condition_tuple));
-			if (std::get<2>(post_condition_tuple).has_value()) {
-				possible_tokens.push_back(std::get<0>(*std::get<2>(post_condition_tuple)));
-				possible_tokens.push_back(std::get<1>(*std::get<2>(post_condition_tuple)));
-			}
-		}
-		possible_tokens.push_back(_semicolon);
-		token_list result;
-		std::copy_if(
-			possible_tokens.cbegin(),
-			possible_tokens.cend(),
-			std::back_inserter(result),
-			[](const std::shared_ptr<token>& ptr) {
-				return ptr.operator bool();
-			}
-		);
-		return result;
-	}
-
-	virtual bool is_primitive() const override { return false; }
-
-	virtual bool is_sound() const final override {
-		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::transition);
-	}
-};
-
-class module_definition_token : public token {
-public:
-
-	using token::token;
-
-	std::shared_ptr<module_token> _module_token;
-	std::shared_ptr<spaces_plus_token> _module_separator;
-	std::shared_ptr<identifier_token> _module_identifier;
-	std::shared_ptr<spaces_plus_token> _identifier_separator;
-	std::vector<
-		std::pair<
-		std::shared_ptr<transition_token>,
-		std::shared_ptr<space_token>
-		>
-	> _transitions;
-	std::shared_ptr<endmodule_token> _endmodule_token;
-
-	module_definition_token(const module_definition_token& another) :
-		token(another),
-		_module_token(copy_shared_ptr(another._module_token)),
-		_module_separator(copy_shared_ptr(another._module_separator)),
-		_module_identifier(copy_shared_ptr(another._module_identifier)),
-		_identifier_separator(copy_shared_ptr(another._identifier_separator)),
-		_endmodule_token(copy_shared_ptr(another._endmodule_token))
-	{
-		for (const auto& pair : another._transitions) {
-			_transitions.push_back(std::make_pair(
-				copy_shared_ptr(pair.first),
-				copy_shared_ptr(pair.second)
-			));
-		}
-	}
-
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<module_definition_token>(*this);
-	}
-
-	virtual void parse_non_primitive() override {
-
-		string_const_iterator rest_begin{ cbegin() };
-		string_const_iterator rest_end{ cend() };
-
-		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::module_keyword);
-		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "module" in module definition.)");
-		parse_error::assert_true(search_keyword->prefix().end() == rest_begin, R"(Module definition does not start with "module".)");
-		_module_token = std::make_shared<module_token>(this, rest_begin, search_keyword->suffix().begin());
-		rest_begin = search_keyword->suffix().begin();
-
-		auto search_space_separator_after_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
-		parse_error::assert_true(search_space_separator_after_keyword != regex_iterator(), R"(Could not find space separator after keyword "module" in module definition.)");
-		parse_error::assert_true(search_space_separator_after_keyword->prefix().end() == rest_begin, R"(Could not find space separator immediately after keyword "module" in module definition.)");
-		_module_separator = std::make_shared<spaces_plus_token>(this, rest_begin, search_space_separator_after_keyword->suffix().begin());
-		rest_begin = search_space_separator_after_keyword->suffix().begin();
-
-		auto search_identifier = regex_iterator(rest_begin, rest_end, const_regexes::primitives::identifier);
-		parse_error::assert_true(search_identifier != regex_iterator(), R"(Could not find an identifier after keyword "module" in module definition.)");
-		parse_error::assert_true(search_identifier->prefix().end() == rest_begin, R"(Could not find an identifier immediately after keyword "module" in module definition.)");
-		_module_identifier = std::make_shared<identifier_token>(this, rest_begin, search_identifier->suffix().begin());
-		rest_begin = search_identifier->suffix().begin();
-
-		auto search_space_separator_after_identifier = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
-		parse_error::assert_true(search_space_separator_after_identifier != regex_iterator(), R"(Could not find space separators after identifier in module definition.)");
-		parse_error::assert_true(search_space_separator_after_identifier->prefix().end() == rest_begin, R"(Could not find space separator immediately after identifier in module definition.)");
-		_identifier_separator = std::make_shared<spaces_plus_token>(this, rest_begin, search_space_separator_after_identifier->suffix().begin());
-		rest_begin = search_space_separator_after_identifier->suffix().begin();
-
-		auto search_endmodule = regex_iterator(rest_begin, rest_end, const_regexes::primitives::endmodule_keyword);
-		parse_error::assert_true(search_endmodule != regex_iterator(), R"(Could not find endmodule in module definition.)");
-		parse_error::assert_true(search_endmodule->suffix().begin() == rest_end, R"(Keyword "endmodule" not at the end of global definition.)");
-		_endmodule_token = std::make_shared<endmodule_token>(this, search_endmodule->prefix().end(), search_endmodule->suffix().begin());
-		rest_end = search_endmodule->prefix().end();
-
-		while (rest_begin != rest_end) {
-
-			auto search_transition = regex_iterator(rest_begin, rest_end, const_regexes::clauses::transition);
-			parse_error::assert_true(search_transition != regex_iterator(), R"(Could not find a transition in module definition.)");
-			parse_error::assert_true(search_transition->prefix().end() == rest_begin, R"(Could not find a transition immediately at the beginning of the remaining body of module definition.)");
-			auto my_transition{ std::make_shared<transition_token>(this, rest_begin, search_transition->suffix().begin()) };
-			rest_begin = search_transition->suffix().begin();
-
-			auto search_space_separator_after_transition = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
-			parse_error::assert_true(search_space_separator_after_transition != regex_iterator(), R"(Could not find space separators after identifier in module definition.)");
-			parse_error::assert_true(search_space_separator_after_transition->prefix().end() == rest_begin, R"(Could not find space separator immediately after identifier in module definition.)");
-			auto my_separator{ std::make_shared<space_token>(this, rest_begin, search_space_separator_after_transition->suffix().begin()) };
-			rest_begin = search_space_separator_after_transition->suffix().begin();
-
-			_transitions.push_back({ my_transition, my_separator });
-		}
-	}
-
-	virtual token_list children() const override {
-		std::vector<std::shared_ptr<token>> possible_tokens{
-			_module_token, _module_separator, _module_identifier, _identifier_separator
-		};
-		for (const auto& transition_pair : _transitions) {
-			possible_tokens.push_back(transition_pair.first);
-			possible_tokens.push_back(transition_pair.second);
-		}
-		possible_tokens.push_back(_endmodule_token);
-		token_list result;
-		std::copy_if(
-			possible_tokens.cbegin(),
-			possible_tokens.cend(),
-			std::back_inserter(result),
-			[](const std::shared_ptr<token>& ptr) {
-				return ptr.operator bool();
-			}
-		);
-		return result;
-	}
-
-	virtual bool is_primitive() const override { return false; }
-
-	virtual bool is_sound() const final override {
-		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::module_definition);
-	}
-};
 
 class reward_definition_token : public token {
 public:
