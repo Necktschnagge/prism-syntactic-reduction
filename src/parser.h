@@ -1680,7 +1680,7 @@ struct higher_clauses {
 	>;
 
 	using module_transition_post_conditions_token = regular_extensions::alternative<
-		condition_token,
+		higher_clauses::condition_token,
 		module_transition_post_condition_probability_distribution_token
 	>; //#### expand
 
@@ -1726,7 +1726,25 @@ struct higher_clauses {
 
 	using init_section = delimiter_tokens::semicolon_token; //####expand
 
-	using rewards_section = delimiter_tokens::semicolon_token; //####expand
+	using reward_trigger_token = regular_extensions::compound <
+		higher_clauses::condition_token,
+		delimiter_tokens::colon_token,
+		simple_derived::maybe_spaces_token,
+		regular_tokens::float_number_token,
+		simple_derived::maybe_spaces_token,
+		delimiter_tokens::semicolon_token
+	>;
+
+	using rewards_section = regular_extensions::compound<
+		keyword_tokens::rewards_token,
+		simple_derived::spaces_token,
+		delimiter_tokens::double_quote_token,
+		regular_tokens::identifier_token,
+		delimiter_tokens::double_quote_token,
+		regular_extensions::kleene_star<reward_trigger_token>,
+		simple_derived::maybe_spaces_token,
+		keyword_tokens::endrewards_token
+	>;
 
 	using dtmc_file_body = regular_extensions::kleene_star<regular_extensions::alternative<
 		relaxed_comment_section,
@@ -1851,6 +1869,8 @@ public:
 };
 #endif
 
+
+
 #if false
 
 class equation_token : public token {
@@ -1973,6 +1993,8 @@ public:
 };
 
 #endif
+
+
 
 #if false
 class condition_token : public token {
@@ -2235,164 +2257,7 @@ public:
 };
 #endif
 
-#if false
 
-
-
-class reward_definition_token : public token {
-public:
-
-	std::shared_ptr<rewards_token> _rewards_token;
-	std::shared_ptr<spaces_plus_token> _rewards_separator;
-	std::shared_ptr<double_quote_token> _open_quote;
-	std::shared_ptr<identifier_token> _reward_identifier;
-	std::shared_ptr<double_quote_token> _close_quote;
-	std::shared_ptr<space_token> _identifier_separator;
-	std::vector<
-		std::tuple<
-		std::shared_ptr<condition_token>,
-		std::shared_ptr<colon_token>,
-		std::shared_ptr<space_token>,
-		std::shared_ptr<float_token>,
-		std::shared_ptr<semicolon_token>,
-		std::shared_ptr<space_token>
-		>
-	> _reward_triggers;
-	std::shared_ptr<endrewards_token> _endrewards_token;
-
-	using token::token;
-
-	reward_definition_token(const reward_definition_token& another) :
-		token(another),
-		_rewards_token(copy_shared_ptr(another._rewards_token)),
-		_open_quote(copy_shared_ptr(another._open_quote)),
-		_reward_identifier(copy_shared_ptr(another._reward_identifier)),
-		_close_quote(copy_shared_ptr(another._close_quote)),
-		_identifier_separator(copy_shared_ptr(another._identifier_separator)),
-		_endrewards_token(copy_shared_ptr(another._endrewards_token))
-	{
-		for (const auto& tuple : another._reward_triggers) {
-			_reward_triggers.push_back(std::make_tuple(
-				copy_shared_ptr(std::get<0>(tuple)),
-				copy_shared_ptr(std::get<1>(tuple)),
-				copy_shared_ptr(std::get<2>(tuple)),
-				copy_shared_ptr(std::get<3>(tuple)),
-				copy_shared_ptr(std::get<4>(tuple)),
-				copy_shared_ptr(std::get<5>(tuple))
-			));
-		}
-	}
-
-	std::shared_ptr<token> clone() const override {
-		return std::make_shared<reward_definition_token>(*this);
-	}
-
-	virtual void parse_non_primitive() override {
-		string_const_iterator rest_begin{ cbegin() };
-		string_const_iterator rest_end{ cend() };
-
-		auto search_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::rewards_keyword);
-		parse_error::assert_true(search_keyword != regex_iterator(), R"(Could not find keyword "rewards" in reward definition.)");
-		parse_error::assert_true(search_keyword->prefix().end() == rest_begin, R"(Reward definition does not start with "rewards".)");
-		_rewards_token = std::make_shared<rewards_token>(this, rest_begin, search_keyword->suffix().begin());
-		rest_begin = search_keyword->suffix().begin();
-
-		auto search_space_separator_after_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces_plus);
-		parse_error::assert_true(search_space_separator_after_keyword != regex_iterator(), R"(Could not find space separator after keyword "rewards" in reward definition.)");
-		parse_error::assert_true(search_space_separator_after_keyword->prefix().end() == rest_begin, R"(Could not find space separator immediately after keyword "rewards" in reward definition.)");
-		_rewards_separator = std::make_shared<spaces_plus_token>(this, rest_begin, search_space_separator_after_keyword->suffix().begin());
-		rest_begin = search_space_separator_after_keyword->suffix().begin();
-
-		auto search_quote = regex_iterator(rest_begin, rest_end, const_regexes::primitives::double_quote);
-		parse_error::assert_true(search_quote != regex_iterator(), R"(Could not find an " in reward definition.)");
-		parse_error::assert_true(search_quote->prefix().end() == rest_begin, R"(Could not find an " immediately after keyword "rewards" in reward definition.)");
-		_open_quote = std::make_shared<double_quote_token>(this, rest_begin, search_quote->suffix().begin());
-		rest_begin = search_quote->suffix().begin();
-
-		auto search_quote_2 = regex_iterator(rest_begin, rest_end, const_regexes::primitives::double_quote);
-		parse_error::assert_true(search_quote_2 != regex_iterator(), R"(Could not find a second " in reward definition.)");
-		_reward_identifier = std::make_shared<identifier_token>(this, search_quote->suffix().begin(), search_quote_2->prefix().end());
-		_close_quote = std::make_shared<double_quote_token>(this, search_quote_2->prefix().end(), search_quote_2->suffix().begin());
-		rest_begin = search_quote_2->suffix().begin();
-
-		auto search_space_separator_after_identifier = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
-		parse_error::assert_true(search_space_separator_after_identifier != regex_iterator(), R"(Could not find space separators after identifier in reward definition.)");
-		parse_error::assert_true(search_space_separator_after_identifier->prefix().end() == rest_begin, R"(Could not find space separator immediately after identifier in reward definition.)");
-		_identifier_separator = std::make_shared<space_token>(this, rest_begin, search_space_separator_after_identifier->suffix().begin());
-		rest_begin = search_space_separator_after_identifier->suffix().begin();
-
-		auto search_end_keyword = regex_iterator(rest_begin, rest_end, const_regexes::primitives::endrewards_keyword);
-		parse_error::assert_true(search_end_keyword != regex_iterator(), R"(Could not find "endrewards" in reward definition.)");
-		parse_error::assert_true(search_end_keyword->suffix().begin() == rest_end, R"(Could not find "endrewards" at the end of reward definition.)");
-		_endrewards_token = std::make_shared<endrewards_token>(this, search_end_keyword->prefix().end(), search_end_keyword->suffix().begin());
-		rest_end = search_end_keyword->prefix().end();
-
-		while (rest_begin != rest_end) {
-			auto search_semicolon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::semicolon);
-			parse_error::assert_true(search_semicolon != regex_iterator(), R"(Could not find ";" in reward definition.)");
-			auto _semicolon = std::make_shared<semicolon_token>(this, search_semicolon->prefix().end(), search_semicolon->suffix().begin());
-			auto inner_begin = rest_begin;
-			auto inner_end = search_semicolon->prefix().end();
-			rest_begin = search_semicolon->suffix().begin();
-
-			auto search_space_separator_after_semicolon = regex_iterator(rest_begin, rest_end, const_regexes::primitives::spaces);
-			parse_error::assert_true(search_space_separator_after_semicolon != regex_iterator(), R"(Could not find space separator after ";" in reward definition.)");
-			parse_error::assert_true(search_space_separator_after_semicolon->prefix().end() == rest_begin, R"(Could not find space separator immediately after ";" in reward definition.)");
-			auto _semicolon_separator = std::make_shared<space_token>(this, rest_begin, search_space_separator_after_semicolon->suffix().begin());
-			rest_begin = search_space_separator_after_semicolon->suffix().begin();
-
-			auto search_colon = regex_iterator(inner_begin, inner_end, const_regexes::primitives::colon);
-			parse_error::assert_true(search_colon != regex_iterator(), R"(Could not find ":" in reward definition.)");
-			auto _colon = std::make_shared<colon_token>(this, search_colon->prefix().end(), search_colon->suffix().begin());
-			auto _condition = std::make_shared<condition_token>(this, inner_begin, search_colon->prefix().end());
-			inner_begin = search_colon->suffix().begin();
-
-			auto search_colon_separator = regex_iterator(inner_begin, inner_end, const_regexes::primitives::spaces);
-			parse_error::assert_true(search_colon_separator != regex_iterator(), R"(Could not find space separator after ":" in reward definition.)");
-			parse_error::assert_true(search_colon_separator->prefix().end() == inner_begin, R"(Could not find space separator immediately after ":" in reward definition.)");
-			auto _colon_separator = std::make_shared<space_token>(this, inner_begin, search_colon_separator->suffix().begin());
-			inner_begin = search_colon_separator->suffix().begin();
-
-			auto _accumulator = std::make_shared<float_token>(this, inner_begin, inner_end); //### need some expression token in case of 1.0 ; (additional space)
-
-			_reward_triggers.push_back({ _condition, _colon, _colon_separator, _accumulator, _semicolon, _semicolon_separator });
-		}
-
-
-	}
-
-	virtual token_list children() const override {
-		std::vector<std::shared_ptr<token>> possible_tokens{
-			_rewards_token, _rewards_separator, _open_quote, _reward_identifier, _close_quote, _identifier_separator
-		};
-		for (const auto& entry : _reward_triggers) {
-			possible_tokens.push_back(std::get<0>(entry));
-			possible_tokens.push_back(std::get<1>(entry));
-			possible_tokens.push_back(std::get<2>(entry));
-			possible_tokens.push_back(std::get<3>(entry));
-			possible_tokens.push_back(std::get<4>(entry));
-			possible_tokens.push_back(std::get<5>(entry));
-		}
-		possible_tokens.push_back(_endrewards_token);
-		token_list result;
-		std::copy_if(
-			possible_tokens.cbegin(),
-			possible_tokens.cend(),
-			std::back_inserter(result),
-			[](const std::shared_ptr<token>& ptr) {
-				return ptr.operator bool();
-			}
-		);
-		return result;
-	}
-
-	virtual bool is_primitive() const override { return false; }
-
-	virtual bool is_sound() const final override {
-		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::reward_definition);
-	}
-};
-#endif
 
 #if false
 
