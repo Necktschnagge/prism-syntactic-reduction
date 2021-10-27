@@ -35,6 +35,7 @@ public:
 		public:
 			inline static const auto CONST_{ std::string(R"(const)") };
 			inline static const auto DTMC{ std::string(R"(dtmc)") };
+			inline static const auto ENDINIT{ std::string(R"(endinit)") };
 			inline static const auto ENDMODULE{ std::string(R"(endmodule)") };
 			inline static const auto ENDREWARDS{ std::string(R"(endrewards)") };
 			inline static const auto FORMULA{ std::string(R"(formula)") };
@@ -58,7 +59,6 @@ public:
 			inline static const auto type_specifier{ std::string(R"(int)") };
 
 
-			inline static const auto endinit_keyword{ std::string(R"(endinit)") };
 			inline static const auto digit{ std::string(R"(\d)") };
 			inline static const auto right_square_brace{ std::string(R"(\])") };
 			inline static const auto right_brace{ std::string(R"(\))") };

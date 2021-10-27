@@ -514,6 +514,7 @@ namespace keyword_tokens {
 
 	using const_token = string_token<&const_regexes::strings::keywords::CONST_>;
 	using dtmc_token = string_token<&const_regexes::strings::keywords::DTMC>;
+	using endinit_token = string_token<&const_regexes::strings::keywords::ENDINIT>;
 	using endmodule_token = string_token<&const_regexes::strings::keywords::ENDMODULE>;
 	using endrewards_token = string_token<&const_regexes::strings::keywords::ENDREWARDS>;
 	using formula_token = string_token<&const_regexes::strings::keywords::FORMULA>;
@@ -1694,7 +1695,7 @@ struct higher_clauses {
 		delimiter_tokens::ascii_arrow_token, // ->
 		module_transition_post_conditions_token,
 		delimiter_tokens::semicolon_token
-	>; //#### expand
+	>;
 
 	using module_section = regular_extensions::compound <
 		keyword_tokens::module_token,
@@ -1721,7 +1722,8 @@ struct higher_clauses {
 		condition_token,
 		//simple_derived::maybe_spaces_token,
 		delimiter_tokens::semicolon_token
-	>; //####expand
+	>;
+
 	using init_section = delimiter_tokens::semicolon_token; //####expand
 
 	using rewards_section = delimiter_tokens::semicolon_token; //####expand
@@ -2390,9 +2392,9 @@ public:
 		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::reward_definition);
 	}
 };
+#endif
 
-using init_token = primitive_regex_token_template<&const_regexes::primitives::init_keyword>;
-using endinit_token = primitive_regex_token_template<&const_regexes::primitives::endinit_keyword>;
+#if false
 
 class init_definition_token : public token {
 public:
@@ -2455,204 +2457,6 @@ public:
 	virtual bool is_sound() const final override {
 		return boost::regex_match(cbegin(), cend(), const_regexes::clauses::init_definition);
 	}
-};
-
-class dtmc_body : public token {
-
-public:
-	using token::token;
-
-	virtual bool is_primitive() const override { return false; }
-
-	token_list local_children;
-
-	dtmc_body(const dtmc_body& another) : token(another) {
-		std::transform(another.local_children.cbegin(), another.local_children.cend(), std::back_inserter(local_children),
-			[&](const std::shared_ptr<token>& original) { return
-			clone_shared_ptr(original);
-			});
-	}
-
-	def_standard_clone()
-
-private:
-	virtual void parse_non_primitive() override {
-		token_list& result{ local_children };
-
-		string_const_iterator rest_begin{ cbegin() };
-		string_const_iterator rest_end{ cend() };
-
-		using clause_searcher = std::pair<boost::regex, regex_iterator>;
-
-		while (rest_begin != rest_end) {
-			// check the casse of no match in the whole string, after loop step: recreate iterators in vector.
-			std::vector<clause_searcher> searchers;
-			auto append_searcher{ [&](const boost::regex& r) {
-				searchers.emplace_back(r,regex_iterator(rest_begin,rest_end,r));
-			} };
-			append_searcher(const_regexes::primitives::spaces_plus);
-			append_searcher(const_regexes::clauses::formula_definition);
-			append_searcher(const_regexes::clauses::const_definition);
-			append_searcher(const_regexes::clauses::global_definition);
-			append_searcher(const_regexes::clauses::module_definition);
-			append_searcher(const_regexes::clauses::reward_definition);
-			append_searcher(const_regexes::clauses::init_definition);
-
-			const auto COMP_SEARCHERS{ [&](const clause_searcher& l, const clause_searcher& r) {
-				if (l.second == regex_iterator()) return false; // left did not find anything
-				if (r.second == regex_iterator()) return true; // right did not find anything
-				return l.second->prefix().end() < r.second->prefix().end();
-			} };
-			std::sort(searchers.begin(), searchers.end(), COMP_SEARCHERS);
-			auto& current_match_result{ *searchers.front().second };
-			//check for match at begin of remaining body:
-			parse_error::assert_true(searchers.front().second->prefix().end() == rest_begin && (rest_begin == current_match_result.prefix().end()), "The first matching clause does not start with the beginning of the remaining body.");
-			//### enhancement of error message: info where in the input did an error rise?
-			//check for ambiguities:
-			parse_error::assert_true(searchers.cbegin()->first != std::next(searchers.cbegin())->first, "Ambiguitiy found when parsing body.");
-			// there is an unique clause found.
-			if (searchers.front().first == const_regexes::primitives::spaces_plus) {
-				result.push_back(std::make_unique<space_token>(this, match_begin(current_match_result), match_end(current_match_result)));
-			}
-			if (searchers.front().first == const_regexes::clauses::formula_definition) {
-				result.push_back(std::make_shared<formula_definition_token>(this, match_begin(current_match_result), match_end(current_match_result)));
-			}
-			if (searchers.front().first == const_regexes::clauses::const_definition) {
-				result.push_back(std::make_unique<const_definition_token>(this, match_begin(current_match_result), match_end(current_match_result)));
-			}
-			if (searchers.front().first == const_regexes::clauses::global_definition) {
-				result.push_back(std::make_unique<global_definition_token>(this, match_begin(current_match_result), match_end(current_match_result)));
-			}
-			if (searchers.front().first == const_regexes::clauses::module_definition) {
-				result.push_back(std::make_unique<module_definition_token>(this, match_begin(current_match_result), match_end(current_match_result)));
-			}
-			if (searchers.front().first == const_regexes::clauses::reward_definition) {
-				result.push_back(std::make_unique<reward_definition_token>(this, match_begin(current_match_result), match_end(current_match_result)));
-			}
-			if (searchers.front().first == const_regexes::clauses::init_definition) {
-				result.push_back(std::make_unique<init_definition_token>(this, match_begin(current_match_result), match_end(current_match_result)));
-			}
-			rest_begin = match_end(current_match_result);
-		}
-	}
-
-	virtual token_list children() const override {
-		token_list result;
-		std::copy_if(
-			local_children.cbegin(),
-			local_children.cend(),
-			std::back_inserter(result),
-			[](const std::shared_ptr<token>& ptr) {
-				return ptr.operator bool();
-			}
-		);
-		return result;
-	}
-
-	virtual bool is_sound() const final override {
-		return true;
-		//return std::accumulate(children.cbegin(), children.cend(), true, [](bool acc, const auto& element) { return acc && element->is_sound(); }); //check lowercase?
-	}
-
-public:
-	template <class _TokenType>
-	std::list<std::shared_ptr<_TokenType>> children_of_kind() {
-		std::list<std::shared_ptr<token>> down_castable;
-		const auto got_children = children();
-		std::copy_if(got_children.cbegin(),
-			got_children.cend(),
-			std::back_inserter(down_castable),
-			[](const std::shared_ptr<token>& ptr) { return std::dynamic_pointer_cast<_TokenType>(ptr); }
-		);
-		std::list<std::shared_ptr<_TokenType>> down_casted;
-		std::transform(down_castable.begin(), down_castable.end(), std::back_inserter(down_casted), [](auto ptr) { return std::dynamic_pointer_cast<_TokenType>(ptr); });
-		return down_casted;
-	}
-
-	std::list<std::shared_ptr<const_definition_token>> const_definitions() { return children_of_kind<const_definition_token>(); }
-
-	std::list<std::shared_ptr<formula_definition_token>> formula_definitions() { return children_of_kind<formula_definition_token>(); }
-
-	std::list<std::shared_ptr<global_definition_token>> global_definitions() { return children_of_kind<global_definition_token>(); }
-
-	std::list<std::shared_ptr<init_definition_token>> init_definitions() { return children_of_kind<init_definition_token>(); }
-
-	std::list<std::shared_ptr<module_definition_token>> module_definitions() { return children_of_kind<module_definition_token>(); }
-
-	std::list<std::shared_ptr<reward_definition_token>> reward_definitions() { return children_of_kind<reward_definition_token>(); }
-
-	std::list<std::shared_ptr<space_token>> space_tokens() { return children_of_kind<space_token>(); }
-
-};
-
-using dtmc_token = primitive_regex_token_template<&const_regexes::primitives::dtmc>;
-
-
-class file_token : public token {
-
-public:
-
-	std::shared_ptr<space_token> _leading_spaces;
-	std::shared_ptr<dtmc_token> _dtmc_declaration;
-	std::shared_ptr<dtmc_body> _dtmc_body_component;
-
-
-	using token::token;
-	file_token(std::shared_ptr<const std::string> file_content) : token(file_content, file_content->cbegin(), file_content->cend()) {}
-
-	std::shared_ptr<token> clone() const override {
-		auto the_clone = std::make_shared<file_token>(*this);
-		return the_clone;
-	}
-
-
-	file_token(const file_token& another) :
-		token(another),
-		_leading_spaces(copy_shared_ptr(another._leading_spaces)),
-		_dtmc_declaration(copy_shared_ptr(another._dtmc_declaration)),
-		_dtmc_body_component(copy_shared_ptr(another._dtmc_body_component))
-	{}
-
-	virtual void parse_non_primitive() override {
-		auto it_dtmc = regex_iterator(_begin, _end, const_regexes::clauses::dtmc);
-
-		parse_error::assert_true(it_dtmc != regex_iterator(), R"(No "dtmc" found.)");
-		//parse_error::assert_true(boost::regex_match(it_dtmc->prefix().begin(), it_dtmc->prefix().end(), const_regexes::primitives::spaces), R"(Found "dtmc", but input sequence does not start with "dtmc".)");
-
-
-		_leading_spaces = std::make_shared<space_token>(this, it_dtmc->prefix().end(), it_dtmc->prefix().end()); // I just ignore here what comes in front of dtmc ######
-		_dtmc_declaration = std::make_shared<dtmc_token>(*this, it_dtmc->prefix().end(), it_dtmc->suffix().begin());
-		_dtmc_body_component = std::make_shared<dtmc_body>(*this, it_dtmc->suffix().begin(), it_dtmc->suffix().end());
-	}
-
-	virtual token_list children() const override {
-		std::vector<std::shared_ptr<token>> possible_tokens{
-			_leading_spaces, _dtmc_declaration, _dtmc_body_component
-		};
-		token_list result;
-		std::copy_if(
-			possible_tokens.cbegin(),
-			possible_tokens.cend(),
-			std::back_inserter(result),
-			[](const std::shared_ptr<token>& ptr) {
-				return ptr.operator bool();
-			}
-		);
-		return result;
-	}
-
-	virtual bool is_primitive() const override { return false; }
-
-	virtual bool is_sound() const final override {
-		return true;
-	}
-private:
-	std::shared_ptr<space_token> leading_spaces() { return _leading_spaces; }
-
-	std::shared_ptr<dtmc_token> dtmc_declaration() { return _dtmc_declaration; }
-
-	std::shared_ptr<dtmc_body> dtmc_body_component() { return _dtmc_body_component; }
-
 };
 
 #endif
