@@ -2183,7 +2183,9 @@ look for primitive:
 	>;
 
 	template<class T, class _Select>
-	static auto select_items_of_kleene_component(T& whole_token, const _Select& select_items) -> decltype(whole_token.sub_tokens()) {
+	static auto select_items_of_kleene_component(T& whole_token, const _Select& select_items) -> 
+		std::remove_const_t<std::remove_reference_t<decltype(whole_token.sub_tokens())>> 
+	{
 		std::remove_const_t<std::remove_reference_t<decltype(whole_token.sub_tokens())>> sub_token_vector{ whole_token.sub_tokens() };
 		auto iter = std::remove_if(sub_token_vector.begin(), sub_token_vector.end(), select_items);
 		sub_token_vector.erase(iter, sub_token_vector.end());

@@ -1503,11 +1503,11 @@ int cli(int argc, char** argv) {
 	standard_logger().info("Finished parsing.");
 
 	const higher_clauses::dtmc_file_body& dtmc_body{ std::get<2>(dtmc_file._sub_tokens) };
-	higher_clauses::dtmc_file_body::value_type;
+	using body_element = higher_clauses::dtmc_file_body::value_type;
 
 
 	auto all_wrapped_const_definitions = higher_clauses::select_items_of_kleene_component(dtmc_body,
-		[](const higher_clauses::dtmc_file_body::value_type& alt) -> bool { return !std::get<1>(alt.sub_tokens())._Token_if_successfully.has_value(); }
+		[](const body_element& alt_token) -> bool { return !std::get<1>(alt_token.sub_tokens())._Token_if_successfully.has_value(); }
 	); // makes copy of all tokens
 	
 	standard_logger().info("Reading const defintions...");
