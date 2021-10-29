@@ -3,6 +3,7 @@
 
 #include "parser.h"
 #include "debug_001.h"
+#include "char_helper.h"
 
 #include <nlohmann/json.hpp>
 
@@ -1427,22 +1428,15 @@ file_token construct_reduced_model(
 	return reduced_file;
 }
 
+#endif
 
-const auto path_to_string = [](auto path) {
-	if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
-		return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(path.c_str());
-	}
-	else {
-		return std::string(path.c_str());
-	}
-};
 
+#if true
 int cli(int argc, char** argv) {
+
 	standard_logger().info("This is Syntactic Reducer 1.0\n\n");
-	//standard_logger().info(std::string("Running config json: ") + argv[0]);
 	const std::string CURRENT_PATH_CHAR_STRING{ path_to_string(std::filesystem::current_path()) };
-	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING);
-	//std::filesystem::path CURRENT_PATH{ CURRENT_PATH_CHAR_STRING };
+	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING + "\n");
 
 	standard_logger().info("Loading config json...");
 	/* Obtain config json path */
@@ -1451,6 +1445,7 @@ int cli(int argc, char** argv) {
 	config_json_path = std::filesystem::canonical(config_json_path);
 	const std::filesystem::path config_json_directory{ config_json_path.parent_path() };
 	standard_logger().info(std::string("Canonical config json path:  ") + path_to_string(config_json_path));
+
 	/* Load config json */
 	nlohmann::json config;
 	if (argc >= 2) {
@@ -1470,6 +1465,8 @@ int cli(int argc, char** argv) {
 		return 1;
 	}
 	standard_logger().info(std::string("Successfully loaded config json:\n\n") + config.dump(3) + "\n");
+
+
 	std::string prism_command = config["prism_command"];
 	std::string transformed_prism_command{};
 	for (const auto& c : prism_command) {
@@ -1482,7 +1479,6 @@ int cli(int argc, char** argv) {
 
 	/* Load model */
 	standard_logger().info("Loading model...");
-	//standard_logger().debug(path_to_string(config_json_directory / std::string(config["model_path"])));
 	std::filesystem::path model_path{
 		std::filesystem::canonical(
 			config_json_directory / std::string(config["model_path"])
@@ -1492,7 +1488,7 @@ int cli(int argc, char** argv) {
 	std::ifstream model_ifstream;
 	model_ifstream.open(model_path);
 	auto model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
-	standard_logger().info("Loading model   ...DONE!");
+	standard_logger().info("Loading model   ...DONE!\n");
 
 	std::filesystem::path results_directory{ std::filesystem::weakly_canonical(config_json_directory / std::string(config["result_dir"])) };
 	standard_logger().info(std::string("Results will be written to directory:  ") + path_to_string(results_directory));
@@ -1500,27 +1496,34 @@ int cli(int argc, char** argv) {
 	standard_logger().info("Loading list of excluded variables...");
 	// when here then all live set were computed.
 	auto excluded_vars = std::vector<std::string>(config["exclude_vars"].cbegin(), config["exclude_vars"].cend());
-	//std::vector<std::string> excluded_vars{ "y_Integrator_44480461", "x_cfblk5_1_1174489129" };
+
 
 	standard_logger().info("Start parsing...");
-	auto ftoken = file_token(model_string_ptr);
-	ftoken.parse();
-	bool check = ftoken.is_sound_recursive();
+	auto dtmc_file{ higher_clauses::dtmc_file::parse_string(model_string_ptr->cbegin(), model_string_ptr->cend(), model_string_ptr) };
 	standard_logger().info("Finished parsing.");
 
+	const higher_clauses::dtmc_file_body& dtmc_body{ std::get<2>(dtmc_file._sub_tokens) };
+	higher_clauses::dtmc_file_body::value_type;
 
+
+	auto all_wrapped_const_definitions = higher_clauses::select_items_of_kleene_component(dtmc_body,
+		[](const higher_clauses::dtmc_file_body::value_type& alt) -> bool { return !std::get<1>(alt.sub_tokens())._Token_if_successfully.has_value(); }
+	); // makes copy of all tokens
+	
+	standard_logger().info("Reading const defintions...");
 	// values of const symbols:
 	const std::map<std::string, int> const_table{ [&] {
 		std::map<std::string, int> const_table;
-		auto const_def_container = ftoken._dtmc_body_component->const_definitions();
+		/*
 		for (const auto& const_def : const_def_container) {
 			const_table[const_def->_constant_identifier->str()] = *const_def->_expression->get_value(const_table); // check nullptr?
 		}
+		*/
 		return const_table;
 	}() };
 
 	std::string var_name{ "cf" };
-
+#if false
 	// node "var_name" |-> (!removed during coloring phase, count neighbours during coloring phrase, active and inactive neighbours, color)
 	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>> graph;
 	live_var_map live_vars;
@@ -1640,10 +1643,12 @@ int cli(int argc, char** argv) {
 	std::ofstream config_json_ofstream;
 	config_json_ofstream.open(config_json_path);
 	config_json_ofstream << config.dump(3);
-
+#endif
 	return 0;
 }
 #else 
+
+// ###### ove this code to testing project
 int cli(int argc, char** argv) {
 	standard_logger().info("This is Syntactic Reducer 1.0\n\n");
 	//standard_logger().info(std::string("Running config json: ") + argv[0]);
@@ -1712,15 +1717,15 @@ int cli(int argc, char** argv) {
 		standard_logger().error(e.what());
 	}
 #if true
-		try {
-			using erroring_token = //regular_tokens::single_space_token; ///#####
-				regular_extensions::compound<
-				//term_token,
-				//simple_derived::comparison_operator_token//,
-				//term_token
-				regular_tokens::single_space_token, regular_tokens::single_space_token, regular_tokens::single_space_token
-				//,higher_clauses::term_token
-				>;
+	try {
+		using erroring_token = //regular_tokens::single_space_token; ///#####
+			regular_extensions::compound<
+			//term_token,
+			//simple_derived::comparison_operator_token//,
+			//term_token
+			regular_tokens::single_space_token, regular_tokens::single_space_token, regular_tokens::single_space_token
+			//,higher_clauses::term_token
+			>;
 
 		auto text = std::make_shared<std::string>(R"(   2)");
 		using token_type = higher_clauses::term_token;
@@ -1729,7 +1734,7 @@ int cli(int argc, char** argv) {
 		auto y = regular_tokens::natural_number_token::find_all_candidates(text->cbegin(), text->cend());
 		auto z = simple_derived::natural_number_or_identifier_token::find_all_candidates(text->cbegin(), text->cend());
 
-		
+
 		token_type copy{ token_type(parsed_token) };
 		token_type moved = std::move(copy);
 
@@ -1737,7 +1742,7 @@ int cli(int argc, char** argv) {
 		sub_token_type sub_parsed_token = sub_token_type::parse_string(text->cbegin(), text->cend(), text);
 		sub_token_type sub_copy{ sub_token_type(sub_parsed_token) };
 		sub_token_type sub_moved = std::move(sub_copy);
-		
+
 	}
 	catch (const parse_error& e) {
 		standard_logger().error(e.what());

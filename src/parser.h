@@ -182,6 +182,10 @@ protected:
 	general_string_token(const std::string& string) : _string(string) {}
 
 public:
+	general_string_token(const general_string_token&) = default;
+	general_string_token(general_string_token&&) = default;
+	general_string_token& operator=(const general_string_token&) = default;
+
 	static type parse_string(string_const_iterator begin, string_const_iterator end, const std::string& pattern, std::shared_ptr<std::string> file_content) {
 
 		// parse it completely, recursive
@@ -328,6 +332,10 @@ private:
 	friend class regular_extensions::alternative;
 public:
 
+	string_token(const string_token&) = default;
+	string_token(string_token&&) = default;
+	string_token& operator=(const string_token&) = default;
+
 	static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
 		const std::string& pattern{ *_string_ptr };
@@ -379,6 +387,10 @@ protected:
 	general_regex_token(const std::string& content, const std::string& regex) : _content(content), _regex(regex) {}
 
 public:
+
+	general_regex_token(const general_regex_token&) = default;
+	general_regex_token(general_regex_token&&) = default;
+	general_regex_token& operator=(const general_regex_token&) = default;
 
 	static type parse_string(string_const_iterator begin, string_const_iterator end, const std::string& regex, std::shared_ptr<std::string> file_content) {
 
@@ -471,6 +483,10 @@ private:
 
 public:
 	regex_token(const std::string& content) : general_regex_token(content, *_regex_string_ptr) {}
+
+	regex_token(const regex_token&) = default;
+	regex_token(regex_token&&) = default;
+	regex_token& operator=(const regex_token&) = default;
 
 	static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
@@ -576,13 +592,24 @@ namespace regular_extensions {
 	class kleene_star : public token {
 	public:
 		using type = kleene_star<_Token>;
-	private:
+		using value_type = _Token;
 
+	private:
 		std::vector<_Token> _sub_tokens;
+
 
 		kleene_star(std::vector<_Token>&& sub_tokens) : _sub_tokens(std::forward<std::vector<_Token>>(sub_tokens)) {}
 
 	public:
+
+		kleene_star(const kleene_star&) = default;
+		kleene_star(kleene_star&&) = default;
+
+		kleene_star& operator=(const kleene_star&) = default;
+
+		const std::vector<_Token>& sub_tokens() const {
+			return _sub_tokens;
+		}
 
 		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
@@ -689,7 +716,7 @@ namespace regular_extensions {
 				try {
 					_Token test = _Token::parse_string(iter, end_of_match_candidate, std::shared_ptr<std::string>());
 				}
-				catch (const parse_error& e) {
+				catch (const parse_error&) {
 					return std::make_pair(true, iter);
 				}
 				iter = end_of_match_candidate;
@@ -754,6 +781,11 @@ namespace regular_extensions {
 		kleene_plus(std::vector<_Token>&& sub_tokens) : _sub_tokens(std::forward<std::vector<_Token>>(sub_tokens)) {}
 
 	public:
+
+		kleene_plus(const kleene_plus&) = default;
+		kleene_plus(kleene_plus&&) = default;
+		kleene_plus& operator=(const kleene_plus&) = default;
+
 
 		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
@@ -961,27 +993,28 @@ namespace regular_extensions {
 		static_assert(sizeof...(_Tokens) != 0, "Forbidden to use empty alternative.");
 	public:
 		using type = alternative<_Tokens...>;
-	private:
 
 		template<class _Token>
 		struct sub_parse_struct {
 			using value_type = _Token;
 
-			bool parsed_successfully; // remove it. this flag should be contained in the optional!!! #####
 			std::optional<_Token> _Token_if_successfully;
 			std::string error_message_if_not_successfully;
 
-			sub_parse_struct() : parsed_successfully(false) {};
+			sub_parse_struct() {};
 			sub_parse_struct(sub_parse_struct&&) = default;
 			sub_parse_struct(const sub_parse_struct&) = default;
 
+			sub_parse_struct& operator=(const sub_parse_struct&) = default;
+
+
 			inline bool operator == (const sub_parse_struct<_Token>& another) const {
-				return parsed_successfully == another.parsed_successfully &&
-					(!_Token_if_successfully && !another._Token_if_successfully || _Token_if_successfully.has_value() && another._Token_if_successfully.has_value() && _Token_if_successfully.value() == another._Token_if_successfully.value()) &&
+				return _Token_if_successfully == another._Token_if_successfully &&
 					error_message_if_not_successfully == another.error_message_if_not_successfully;
 			}
 		};
 
+	private:
 		std::tuple<sub_parse_struct<_Tokens>...> _sub_tokens;
 
 		alternative(std::tuple<sub_parse_struct<_Tokens>...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {}
@@ -994,10 +1027,8 @@ namespace regular_extensions {
 				sub_parse_struct<_Token> result;
 				try {
 					result._Token_if_successfully.emplace(std::move(parse_function(begin, end, file_content)));
-					result.parsed_successfully = true;
 				}
 				catch (const parse_error& e) {
-					result.parsed_successfully = false;
 					result.error_message_if_not_successfully = e.what();
 				}
 				return result;
@@ -1009,6 +1040,12 @@ namespace regular_extensions {
 		alternative(const alternative&) = default;
 		alternative(alternative&&) = default;
 
+		alternative& operator=(const alternative& another) = default;
+
+		const std::tuple<sub_parse_struct<_Tokens>...>& sub_tokens() const {
+			return _sub_tokens;
+		};
+
 		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
 			// parse it completely, recursive
@@ -1017,7 +1054,7 @@ namespace regular_extensions {
 			std::tuple<sub_parse_struct<_Tokens>...> parsed{ helper<_Tokens>::parse_wrapper(_Tokens::parse_string, begin, end, file_content)... };
 
 			std::size_t count_matches{ 0 };
-			std::apply([&count_matches](auto&& ... sub_parse) {(((sub_parse.parsed_successfully) ? ++count_matches : count_matches), ...); }, parsed);
+			std::apply([&count_matches](auto&& ... sub_parse) {(((sub_parse._Token_if_successfully.has_value()) ? ++count_matches : count_matches), ...); }, parsed);
 
 			if (count_matches == 0) {
 				std::string message;
@@ -1043,7 +1080,7 @@ namespace regular_extensions {
 
 				std::apply([&](auto&& ... pairs) {
 					((
-						(pairs.parsed_successfully) ?
+						(pairs._Token_if_successfully.has_value()) ?
 						message +=
 						"candidate type: " +
 						std::remove_reference_t<decltype(pairs)>::value_type::static_type_info()
@@ -1117,7 +1154,7 @@ namespace regular_extensions {
 
 		virtual std::string to_string() const override {
 			std::string result;
-			std::apply([&result](auto&& ... args) { (((args.parsed_successfully) ? result += args._Token_if_successfully.value().to_string() : result), ...); }, _sub_tokens);
+			std::apply([&result](auto&& ... args) { (((args._Token_if_successfully.has_value()) ? result += args._Token_if_successfully.value().to_string() : result), ...); }, _sub_tokens);
 			return result;
 		}
 
@@ -1136,7 +1173,7 @@ namespace regular_extensions {
 
 		virtual const_token_ptr_vector children() const override {
 			auto result = const_token_ptr_vector();
-			std::apply([&result](auto&& ... element) { ((element.parsed_successfully ? result.push_back(&element._Token_if_successfully.value()) : void()), ...); }, _sub_tokens);
+			std::apply([&result](auto&& ... element) { ((element._Token_if_successfully.has_value() ? result.push_back(&element._Token_if_successfully.value()) : void()), ...); }, _sub_tokens);
 			/*for (std::size_t i{ 0 }; i < _sub_tokens; ++i) { //### ergänzen
 				result.push_back(&_sub_tokens[i]);
 			}*/
@@ -1152,9 +1189,10 @@ namespace regular_extensions {
 	public:
 		using type = compound<_Tokens...>;
 		using tuple = std::tuple<_Tokens...>;
-	private:
 
 		std::tuple<_Tokens...> _sub_tokens;
+	private:
+
 
 		compound(std::tuple<_Tokens...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
 
@@ -1174,6 +1212,7 @@ namespace regular_extensions {
 	public:
 		compound(const compound& another) = default;
 		compound(compound&& another) = default;
+		compound& operator=(const compound& another) = default;
 
 		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
@@ -1460,9 +1499,13 @@ namespace regular_extensions {
 
 		std::optional<_Token> _sub_token;
 
-		optional(std::optional<_Token>&& sub_token) : _sub_token(std::forward<std::optional<_Token>>(sub_token)) {}
+		optional(std::optional<_Token>&& sub_token) : _sub_token(std::move(sub_token)) {}
 
 	public:
+
+		optional(const optional&) = default;
+		optional(optional&&) = default;
+		optional& operator= (const optional&) = default;
 
 		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
@@ -1475,7 +1518,7 @@ namespace regular_extensions {
 			std::optional<_Token> sub_token;
 
 			try {
-				sub_token = std::make_optional<_Token>(_Token::parse(begin, end, file_content));
+				sub_token.emplace(_Token::parse_string(begin, end, file_content));
 			}
 			catch (const parse_error& e) {
 				std::string message;
@@ -1483,7 +1526,7 @@ namespace regular_extensions {
 				message += e.what();
 				throw not_matching(message, file_content, begin);
 			}
-			return type(sub_token);
+			return type(std::move(sub_token));
 		}
 
 		static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
@@ -1706,7 +1749,7 @@ struct higher_clauses {
 		term_token,
 		simple_derived::comparison_operator_token,
 		term_token
-		>;
+	>;
 
 	using boolean_operator = regular_extensions::alternative<
 		delimiter_tokens::vertical_bar_token,
@@ -1781,6 +1824,8 @@ struct higher_clauses {
 
 	public:
 		condition_token(condition_token&&) = default;
+		condition_token(const condition_token&) = default;
+		condition_token& operator=(const condition_token&) = default;
 		/*
 remove outer spaces
 remove outer (...) // if they are matching, just try if the middle string is legally bracketed
@@ -2062,9 +2107,9 @@ look for primitive:
 		simple_derived::maybe_spaces_token,
 		delimiter_tokens::right_square_bracket_token, // ]
 		//simple_derived::maybe_spaces_token,
-		condition_token, // precondition
+		higher_clauses::condition_token, // precondition
 		delimiter_tokens::ascii_arrow_token, // ->
-		module_transition_post_conditions_token,
+		higher_clauses::module_transition_post_conditions_token,
 		delimiter_tokens::semicolon_token
 	>;
 
@@ -2075,8 +2120,8 @@ look for primitive:
 		simple_derived::spaces_token,
 		regular_extensions::kleene_star<
 		regular_extensions::alternative<
-		module_transition_token,
-		var_definition
+		higher_clauses::module_transition_token,
+		higher_clauses::var_definition
 		>
 		>,
 		keyword_tokens::endmodule_token,
@@ -2122,13 +2167,13 @@ look for primitive:
 	>;
 
 	using dtmc_file_body = regular_extensions::kleene_star<regular_extensions::alternative<
-		relaxed_comment_section,
-		const_definition,
-		global_var_definition,
-		module_section,
-		formula_definition,
-		init_section,
-		rewards_section
+		higher_clauses::relaxed_comment_section,
+		higher_clauses::const_definition,
+		higher_clauses::global_var_definition,
+		higher_clauses::module_section,
+		higher_clauses::formula_definition,
+		higher_clauses::init_section,
+		higher_clauses::rewards_section
 		>>;
 
 	using dtmc_file = regular_extensions::compound<
@@ -2136,6 +2181,14 @@ look for primitive:
 		keyword_tokens::dtmc_token,
 		dtmc_file_body
 	>;
+
+	template<class T, class _Select>
+	static auto select_items_of_kleene_component(T& whole_token, const _Select& select_items) -> decltype(whole_token.sub_tokens()) {
+		std::remove_const_t<std::remove_reference_t<decltype(whole_token.sub_tokens())>> sub_token_vector{ whole_token.sub_tokens() };
+		auto iter = std::remove_if(sub_token_vector.begin(), sub_token_vector.end(), select_items);
+		sub_token_vector.erase(iter, sub_token_vector.end());
+		return sub_token_vector;
+	}
 
 };
 
