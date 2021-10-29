@@ -1059,7 +1059,6 @@ namespace regular_extensions {
 			// list all subsection where an x_token might be parsed., might be empty. (maximal kleene expansions from every starting position)
 
 			std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> results;
-
 			std::list<std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>>> splitted_results;
 
 			((splitted_results.push_back(_Tokens::find_all_candidates(begin, end))), ...);
@@ -1069,14 +1068,13 @@ namespace regular_extensions {
 			}
 
 			std::sort(
-				results.cbegin(),
-				results.cend(),
+				results.begin(),
+				results.end(),
 				[](const std::pair<token::string_const_iterator, std::string::const_iterator>& left, const std::pair<token::string_const_iterator, std::string::const_iterator>& right) {
 					return left.first == right.first ? left.second > right.second : left.first < right.first;
 				});
 
 			return results;
-
 		}
 
 
@@ -1704,13 +1702,10 @@ struct higher_clauses {
 		simple_derived::maybe_spaces_token
 	>;
 
-	using comparison_token = //regular_tokens::single_space_token; ///#####
-		regular_extensions::compound<
-		//term_token,
-		//simple_derived::comparison_operator_token//,
-		//term_token
-		regular_tokens::single_space_token, regular_tokens::single_space_token, regular_tokens::single_space_token
-		//,term_token
+	using comparison_token = regular_extensions::compound<
+		term_token,
+		simple_derived::comparison_operator_token,
+		term_token
 		>;
 
 	using boolean_operator = regular_extensions::alternative<

@@ -1019,9 +1019,9 @@ void find_all_minimal_partitionings( //#?ready
 	std::vector<collapse_node>&max_groupings,
 	std::vector<std::vector<collapse_node::big_int>>&all_colorings_with_minimal_variables
 ) {
-	standard_logger().info("#############################################################################################");
-	standard_logger().info("##### Start calculating all possible partitionings with minimal number of partitions... #####");
-	standard_logger().info("#############################################################################################");
+	standard_logger().info("=============================================================================================");
+	standard_logger().info("===== Start calculating all possible partitionings with minimal number of partitions... =====");
+	standard_logger().info("=============================================================================================");
 	standard_logger().info("");
 
 	standard_logger().info("The following enemies are forbidden to be merged into one partition:");
@@ -1042,9 +1042,9 @@ void find_all_minimal_partitionings( //#?ready
 	find_all_coverings_with_non_overlapping_groups(all_vars, max_groupings, combinations_of_max_groupings, all_colorings_with_minimal_variables);
 	standard_logger().info("Calculating all partitionings of the whole variable set by eliminating overlapping maximal local groupings   ...DONE!");
 
-	standard_logger().info("##############################################################################################");
-	standard_logger().info("##### Finished calculating all possible partitionings with minimal number of partitions. #####");
-	standard_logger().info("##############################################################################################");
+	standard_logger().info("==============================================================================================");
+	standard_logger().info("===== Finished calculating all possible partitionings with minimal number of partitions. =====");
+	standard_logger().info("==============================================================================================");
 
 }
 
@@ -1725,7 +1725,11 @@ int cli(int argc, char** argv) {
 		auto text = std::make_shared<std::string>(R"(   2)");
 		using token_type = higher_clauses::term_token;
 		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
-		/*
+		auto x = regular_tokens::identifier_token::find_all_candidates(text->cbegin(), text->cend());
+		auto y = regular_tokens::natural_number_token::find_all_candidates(text->cbegin(), text->cend());
+		auto z = simple_derived::natural_number_or_identifier_token::find_all_candidates(text->cbegin(), text->cend());
+
+		
 		token_type copy{ token_type(parsed_token) };
 		token_type moved = std::move(copy);
 
@@ -1733,7 +1737,7 @@ int cli(int argc, char** argv) {
 		sub_token_type sub_parsed_token = sub_token_type::parse_string(text->cbegin(), text->cend(), text);
 		sub_token_type sub_copy{ sub_token_type(sub_parsed_token) };
 		sub_token_type sub_moved = std::move(sub_copy);
-		*/
+		
 	}
 	catch (const parse_error& e) {
 		standard_logger().error(e.what());
