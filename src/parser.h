@@ -61,7 +61,7 @@ public:
 
 protected:
 	struct utils {
-		template <class _MatchResults> //###remove???
+		template <class _MatchResults>
 		static string_const_iterator match_begin(const _MatchResults& m) {
 			return m.prefix().end();
 		}
@@ -165,7 +165,7 @@ bool check_match(const std::string::const_iterator& test_string_begin, const std
 		_Token test = _Token::parse_string(test_string_begin, test_string_end, std::shared_ptr<std::string>());
 		return true;
 	}
-	catch (const parse_error& e) {
+	catch (const parse_error&) {
 		return false;
 	}
 
@@ -517,12 +517,14 @@ namespace keyword_tokens {
 	using endinit_token = string_token<&const_regexes::strings::keywords::ENDINIT>;
 	using endmodule_token = string_token<&const_regexes::strings::keywords::ENDMODULE>;
 	using endrewards_token = string_token<&const_regexes::strings::keywords::ENDREWARDS>;
+	using false_token = string_token<&const_regexes::strings::keywords::FALSE_>;
 	using formula_token = string_token<&const_regexes::strings::keywords::FORMULA>;
 	using global_token = string_token<&const_regexes::strings::keywords::GLOBAL>;
 	using init_token = string_token<&const_regexes::strings::keywords::INIT>;
 	using int_token = string_token<&const_regexes::strings::keywords::INT>;
 	using module_token = string_token<&const_regexes::strings::keywords::MODULE>;
 	using rewards_token = string_token<&const_regexes::strings::keywords::REWARDS>;
+	using true_token = string_token<&const_regexes::strings::keywords::TRUE_>;
 
 };
 
@@ -553,7 +555,7 @@ namespace delimiter_tokens {
 namespace regular_tokens {
 
 	using anything_but_newline_token = regex_token<&const_regexes::strings::regulars::anything_but_newline>; //## do it as regular_extensions::alternative<...>
-	using comparison_operator_token = regex_token<&const_regexes::strings::regulars::comparison_operator>; //## do it as regular_extensions::alternative<...>
+	//using comparison_operator_token = regex_token<&const_regexes::strings::regulars::comparison_operator>; //## do it as regular_extensions::alternative<...>
 	using float_number_token = regex_token<&const_regexes::strings::regulars::float_number>;
 	using identifier_token = regex_token<&const_regexes::strings::regulars::identifier>;
 	using line_feed_token = regex_token<&const_regexes::strings::regulars::line_feed>;
@@ -651,10 +653,7 @@ namespace regular_extensions {
 						goto outer_again;
 					}
 
-					try {
-						_Token test = _Token::parse_string(iter, end_of_match_candidate, std::shared_ptr<std::string>());
-					}
-					catch (const parse_error& e) {
+					if (!check_match<_Token>(iter, end_of_match_candidate)) {
 						results.emplace_back(begin_match, iter);
 						++begin_match;
 						goto outer_again;
@@ -968,23 +967,24 @@ namespace regular_extensions {
 		struct sub_parse_struct {
 			using value_type = _Token;
 
-			bool parsed_successfully;
-			std::unique_ptr<_Token> _Token_if_successfully;
+			bool parsed_successfully; // remove it. this flag should be contained in the optional!!! #####
+			std::optional<_Token> _Token_if_successfully;
 			std::string error_message_if_not_successfully;
 
-			sub_parse_struct() = default;
+			sub_parse_struct() : parsed_successfully(false) {};
 			sub_parse_struct(sub_parse_struct&&) = default;
+			sub_parse_struct(const sub_parse_struct&) = default;
 
 			inline bool operator == (const sub_parse_struct<_Token>& another) const {
 				return parsed_successfully == another.parsed_successfully &&
-					(!_Token_if_successfully && !another._Token_if_successfully || _Token_if_successfully && another._Token_if_successfully && *_Token_if_successfully == *another._Token_if_successfully) &&
+					(!_Token_if_successfully && !another._Token_if_successfully || _Token_if_successfully.has_value() && another._Token_if_successfully.has_value() && _Token_if_successfully.value() == another._Token_if_successfully.value()) &&
 					error_message_if_not_successfully == another.error_message_if_not_successfully;
 			}
 		};
 
 		std::tuple<sub_parse_struct<_Tokens>...> _sub_tokens;
 
-		alternative(std::tuple<sub_parse_struct<_Tokens>...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {} //##error copying
+		alternative(std::tuple<sub_parse_struct<_Tokens>...>&& sub_tokens) : _sub_tokens(std::move(sub_tokens)) {}
 
 		template <class _Token>
 		struct helper {
@@ -993,9 +993,7 @@ namespace regular_extensions {
 			static sub_parse_struct<_Token> parse_wrapper(_Function parse_function, string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 				sub_parse_struct<_Token> result;
 				try {
-					result._Token_if_successfully.reset(new _Token(parse_function(begin, end, file_content)));
-					//return std::pair<bool, std::unique_ptr<_Token>>(true, std::move(std::unique_ptr()));
-					//return std::make_pair(true, std::make_unique<_Token>()); //###
+					result._Token_if_successfully.emplace(std::move(parse_function(begin, end, file_content)));
 					result.parsed_successfully = true;
 				}
 				catch (const parse_error& e) {
@@ -1007,6 +1005,9 @@ namespace regular_extensions {
 		};
 
 	public:
+
+		alternative(const alternative&) = default;
+		alternative(alternative&&) = default;
 
 		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
@@ -1118,7 +1119,7 @@ namespace regular_extensions {
 
 		virtual std::string to_string() const override {
 			std::string result;
-			std::apply([&result](auto&& ... args) { (((args.parsed_successfully) ? result += args._Token_if_successfully->to_string() : result), ...); }, _sub_tokens);
+			std::apply([&result](auto&& ... args) { (((args.parsed_successfully) ? result += args._Token_if_successfully.value().to_string() : result), ...); }, _sub_tokens);
 			return result;
 		}
 
@@ -1137,7 +1138,7 @@ namespace regular_extensions {
 
 		virtual const_token_ptr_vector children() const override {
 			auto result = const_token_ptr_vector();
-			std::apply([&result](auto&& ... element) { ((element.parsed_successfully ? result.push_back(element._Token_if_successfully.get()) : void()), ...); }, _sub_tokens);
+			std::apply([&result](auto&& ... element) { ((element.parsed_successfully ? result.push_back(&element._Token_if_successfully.value()) : void()), ...); }, _sub_tokens);
 			/*for (std::size_t i{ 0 }; i < _sub_tokens; ++i) { //### ergänzen
 				result.push_back(&_sub_tokens[i]);
 			}*/
@@ -1173,6 +1174,8 @@ namespace regular_extensions {
 		};
 
 	public:
+		compound(const compound& another) = default;
+		compound(compound&& another) = default;
 
 		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
@@ -1591,6 +1594,43 @@ struct simple_derived {
 
 	using maybe_spaces_token = regular_extensions::kleene_star<regular_tokens::single_space_token>;
 	using spaces_token = regular_extensions::kleene_plus<regular_tokens::single_space_token>;
+
+	using comparison_operator_token = regular_extensions::alternative<
+		delimiter_tokens::equals_token,
+		delimiter_tokens::not_equals_token,
+		delimiter_tokens::less_token,
+		delimiter_tokens::less_or_equal_token,
+		delimiter_tokens::greater_token,
+		delimiter_tokens::greater_or_equal_token
+	>;
+
+
+	static token::string_const_iterator find_largest_single_space_range_at(token::string_const_iterator begin, token::string_const_iterator end, token::string_const_iterator search_from_here) {
+		if (search_from_here == begin)
+		{ // search forwards
+			while (search_from_here != end) {
+				const auto last_position{ search_from_here++ };
+				if (!check_match<regular_tokens::single_space_token>(last_position, search_from_here))
+					return last_position;
+			}
+			return end;
+		}
+		else
+			if (search_from_here == end)
+			{ // search backwards
+				do {
+					const auto last_position{ search_from_here-- };
+					if (!check_match<regular_tokens::single_space_token>(search_from_here, last_position))
+						return last_position;
+				} while (search_from_here != begin);
+				return begin;
+			}
+			else
+			{
+				throw std::invalid_argument("searching position must equal begin or end");
+			}
+	}
+
 	using comment_line_ending_token = regular_extensions::compound<
 		delimiter_tokens::double_slash_token,
 		regular_extensions::kleene_star<regular_tokens::anything_but_newline_token>
@@ -1658,7 +1698,343 @@ struct higher_clauses {
 		higher_clauses::var_definition
 	>;
 
-	using condition_token = delimiter_tokens::semicolon_token; //#### expand
+	using term_token = regular_extensions::compound<
+		simple_derived::maybe_spaces_token,
+		simple_derived::natural_number_or_identifier_token,
+		simple_derived::maybe_spaces_token
+	>;
+
+	using comparison_token = //regular_tokens::single_space_token; ///#####
+		regular_extensions::compound<
+		//term_token,
+		//simple_derived::comparison_operator_token//,
+		//term_token
+		regular_tokens::single_space_token, regular_tokens::single_space_token, regular_tokens::single_space_token
+		//,term_token
+		>;
+
+	using boolean_operator = regular_extensions::alternative<
+		delimiter_tokens::vertical_bar_token,
+		delimiter_tokens::ampersand_token
+		//,delimiter_tokens::not_...
+	>;
+
+
+
+	class condition_token : public token {
+	public:
+		using type = condition_token;
+	private:
+
+		std::optional<simple_derived::spaces_token> _leading_spaces;
+		std::optional<delimiter_tokens::left_parenthesis_token> _leading_left_parenthesis;
+		std::vector</*std::unique_ptr<*/higher_clauses::condition_token/*>*/> _sub_conditions;
+		std::vector</*std::unique_ptr<*/higher_clauses::boolean_operator/*>*/> _outer_boolean_operators;
+		std::optional<keyword_tokens::false_token> _false_keyword;
+		std::optional<keyword_tokens::true_token> _true_keyword;
+		std::optional<higher_clauses::comparison_token> _comparison;
+		std::optional<delimiter_tokens::right_parenthesis_token> _trailing_right_parenthesis;
+		std::optional<simple_derived::spaces_token> _trailing_spaces;
+
+		condition_token() {}
+
+		static std::pair<std::vector<string_const_iterator>, std::vector<string_const_iterator>> find_all_parenthesis(string_const_iterator begin, string_const_iterator end) {
+			std::pair<std::vector<string_const_iterator>, std::vector<string_const_iterator>> result;
+			for (auto iter = begin; iter != end; ++iter) {
+				if (*iter == '(')
+					result.first.push_back(iter);
+				if (*iter == ')')
+					result.second.push_back(iter);
+			}
+			return result;
+		}
+
+		static bool well_bracketed(
+			string_const_iterator begin,
+			string_const_iterator end,
+			const std::optional< std::pair<std::vector<string_const_iterator>, std::vector<string_const_iterator>>>& pre_analyzed_all_paranthesis = std::optional< std::pair<std::vector<string_const_iterator>, std::vector<string_const_iterator>>>()
+		) {
+			std::pair<std::vector<string_const_iterator>, std::vector<string_const_iterator>> all_parenthesis;
+			if (pre_analyzed_all_paranthesis.has_value()) {
+				std::copy_if(
+					pre_analyzed_all_paranthesis.value().first.begin(),
+					pre_analyzed_all_paranthesis.value().first.end(),
+					std::back_inserter(all_parenthesis.first),
+					[&](const string_const_iterator& it) {
+						return !(it < begin) && (it < end);
+					}
+				);
+				std::copy_if(
+					pre_analyzed_all_paranthesis.value().second.begin(),
+					pre_analyzed_all_paranthesis.value().second.end(),
+					std::back_inserter(all_parenthesis.second),
+					[&](const string_const_iterator& it) {
+						return !(it < begin) && (it < end);
+					}
+				);
+			}
+			else
+				all_parenthesis = find_all_parenthesis(begin, end);
+			if (all_parenthesis.first.size() != all_parenthesis.second.size())
+				return false;
+			for (std::size_t i = 0; i < all_parenthesis.first.size(); ++i) {
+				if (all_parenthesis.first[i] > all_parenthesis.second[i])
+					return false; // with n = i + 1, the n-th '(' appears after already seen n times ')'
+			}
+			return true;
+		}
+
+	public:
+		condition_token(condition_token&&) = default;
+		/*
+remove outer spaces
+remove outer (...) // if they are matching, just try if the middle string is legally bracketed
+split at highest |
+split at highes &
+look for primitive:
+   true
+   false
+   comparison
+*/
+		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
+
+
+			// parse it completely, recursive
+			// if any exception, rethrow it here. cannot_parse_error, ambiguous_parse_error
+
+			// find all cadidates for spaces.
+			// determine öargest space chunk at front and back.
+			// remove eliminated space chunks
+
+			type result;
+
+			string_const_iterator front_spaces = simple_derived::find_largest_single_space_range_at(begin, end, begin);
+			string_const_iterator back_spaces = simple_derived::find_largest_single_space_range_at(begin, end, end);
+
+			if (front_spaces > back_spaces) {
+				std::string message;
+				message += "Tried to parse a string as condition_token, but the whole string consists of spaces.\n";
+				throw not_matching(message, file_content, begin);
+			}
+
+			if (front_spaces != begin) {
+				result._leading_spaces = std::move(simple_derived::spaces_token::parse_string(begin, front_spaces, file_content));
+				begin = front_spaces;
+			}
+			if (back_spaces != end) {
+				result._trailing_spaces = std::move(simple_derived::spaces_token::parse_string(back_spaces, end, file_content));
+				end = back_spaces;
+			}
+			if (begin == end) {
+				std::string message;
+				message += "Tried to parse an empty string as condition_token.\n";
+				throw not_matching(message, file_content, begin);
+			}
+			// try match front / back ()    (if they are matching, just try if the middle string is legally bracketed)
+			if (
+				check_match<delimiter_tokens::left_parenthesis_token>(begin, std::next(begin)) &&
+				check_match<delimiter_tokens::right_parenthesis_token>(std::prev(end), end) &&
+				well_bracketed(std::next(begin), std::prev(end))
+				) {
+				result._leading_left_parenthesis = std::move(delimiter_tokens::left_parenthesis_token::parse_string(begin, std::next(begin), file_content));
+				result._trailing_right_parenthesis = std::move(delimiter_tokens::right_parenthesis_token::parse_string(std::prev(end), end, file_content));
+				++begin;
+				--end;
+				// forward further parsing to sub condition if detected outer parenthesis
+				result._sub_conditions.push_back(std::move(condition_token::parse_string(begin, end, file_content)));
+				return result;
+			}
+
+			const auto all_parenthesis{ find_all_parenthesis(begin, end) };
+			const auto count_parenthesis_depth = [&](const string_const_iterator& pos) {
+				std::size_t count_left{ 0 };
+				for (const auto& lp : all_parenthesis.first) {
+					if (lp < pos) ++count_left;
+				}
+				std::size_t count_right{ 0 };
+				for (const auto& rp : all_parenthesis.second) {
+					if (rp < pos) ++count_right;
+				}
+				return count_left - count_right;
+			};
+
+			// search some outer "|"
+			{
+				std::vector<string_const_iterator> pos_of_or_delimiters;
+				for (auto iter = begin; iter != end; ++iter) {
+					if (check_match<delimiter_tokens::vertical_bar_token>(iter, std::next(iter))) {
+						if (count_parenthesis_depth(iter) == 0)
+							pos_of_or_delimiters.push_back(iter);
+					}
+				}
+
+				if (!pos_of_or_delimiters.empty()) { // it is an or - condition
+					for (const auto& pos : pos_of_or_delimiters) {
+						result._sub_conditions.emplace_back(std::move(condition_token::parse_string(begin, pos, file_content)));
+						result._outer_boolean_operators.emplace_back(std::move(higher_clauses::boolean_operator::parse_string(pos, std::next(pos), file_content)));
+						begin = std::next(pos);
+					}
+					result._sub_conditions.emplace_back(std::move(condition_token::parse_string(begin, end, file_content)));
+					return result;
+				}
+			}
+			// search some outer "&"
+			{
+				std::vector<string_const_iterator> pos_of_or_delimiters;
+				for (auto iter = begin; iter != end; ++iter) {
+					if (check_match<delimiter_tokens::ampersand_token>(iter, std::next(iter))) {
+						if (count_parenthesis_depth(iter) == 0)
+							pos_of_or_delimiters.push_back(iter);
+					}
+				}
+
+				if (!pos_of_or_delimiters.empty()) { // it is an and - condition
+					for (const auto& pos : pos_of_or_delimiters) {
+						result._sub_conditions.emplace_back(std::move(condition_token::parse_string(begin, pos, file_content)));
+						result._outer_boolean_operators.emplace_back(std::move(higher_clauses::boolean_operator::parse_string(pos, std::next(pos), file_content)));
+						begin = std::next(pos);
+					}
+					result._sub_conditions.emplace_back(std::move(condition_token::parse_string(begin, end, file_content)));
+					return result;
+				}
+			}
+			if (check_match<keyword_tokens::true_token>(begin, end)) { // true
+				result._true_keyword = std::move(keyword_tokens::true_token::parse_string(begin, end, file_content));
+				return result;
+			}
+			if (check_match<keyword_tokens::false_token>(begin, end)) { // false
+				result._false_keyword = std::move(keyword_tokens::false_token::parse_string(begin, end, file_content));
+				return result;
+			}
+
+			// when here the condition must consist of an equation. Leading and trailing spaces have already been removed.
+
+			higher_clauses::comparison_token&& xxx = std::move(higher_clauses::comparison_token::parse_string(begin, end, file_content));
+			result._comparison.emplace(std::move(xxx));
+
+			return result;
+		}
+
+		static std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> find_all_candidates(std::string::const_iterator begin, std::string::const_iterator end) {
+			// list all subsection where an x_token might be parsed., might be empty.
+			const auto all_parenthesis{ std::make_optional(find_all_parenthesis(begin, end)) };
+
+			std::vector<std::pair<token::string_const_iterator, std::string::const_iterator>> results;
+			// brute force soltion: just return everything:
+			for (auto iter = begin; iter != end; ++iter)
+				for (auto jter = std::next(iter); jter != end; ++jter)
+					if (well_bracketed(iter, jter, all_parenthesis))
+						results.emplace_back(iter, jter);
+			return results;
+		}
+
+		/**
+		@brief Returns [true, iter] if [begin,iter] matches pattern, otherwise [false, iter] if found a match at later position, [false, end] if no match at all.
+		*/
+		static std::pair<bool, std::string::const_iterator> has_front_candidate(std::string::const_iterator begin, std::string::const_iterator end) {
+
+			const auto all_parenthesis{ std::make_optional(find_all_parenthesis(begin, end)) };
+
+			std::vector<std::string::const_iterator> results;
+			// brute force soltion: just return everything:
+			for (auto jter = begin; jter != end; ++jter) {
+				if (begin == jter) continue;
+				if (well_bracketed(begin, jter, all_parenthesis))
+					results.emplace_back(jter);
+			}
+			if (results.empty())
+				return std::make_pair(false, begin);
+			else
+				return std::make_pair(true, results.back());
+		}
+
+	public:
+		virtual bool operator==(const token& another) const override {
+			try {
+				const type& down_casted = dynamic_cast<const type&>(another);
+				return
+					_leading_spaces == down_casted._leading_spaces &&
+					_leading_left_parenthesis == down_casted._leading_left_parenthesis &&
+					_sub_conditions == down_casted._sub_conditions &&
+					_outer_boolean_operators == down_casted._outer_boolean_operators &&
+					_false_keyword == down_casted._false_keyword &&
+					_true_keyword == down_casted._true_keyword &&
+					_comparison == down_casted._comparison &&
+					_trailing_right_parenthesis == down_casted._trailing_right_parenthesis &&
+					_trailing_spaces == down_casted._trailing_spaces
+					;
+			}
+			catch (const std::bad_cast&) {
+				return false;
+			}
+		}
+
+		virtual std::string to_string() const override {
+			std::string result;
+			if (_leading_spaces.has_value()) result += _leading_spaces.value().to_string();
+			if (_leading_left_parenthesis.has_value()) result += _leading_left_parenthesis.value().to_string();
+
+			auto iter = _sub_conditions.cbegin();
+			auto jter = _outer_boolean_operators.cbegin();
+			while (true) {
+				if (iter != _sub_conditions.cend()) {
+					result += iter->to_string();
+					++iter;
+				}
+				if (jter != _outer_boolean_operators.cend()) {
+					result += jter->to_string();
+					++jter;
+				}
+				if (iter == _sub_conditions.cend() && jter == _outer_boolean_operators.cend())
+					break;
+			}
+			if (_false_keyword.has_value()) result += _false_keyword.value().to_string();
+			if (_true_keyword.has_value()) result += _true_keyword.value().to_string();
+			if (_comparison.has_value()) result += _comparison.value().to_string();
+
+			if (_trailing_right_parenthesis.has_value()) result += _trailing_right_parenthesis.value().to_string();
+			if (_trailing_spaces.has_value()) result += _trailing_spaces.value().to_string();
+			return result;
+		}
+
+		virtual std::string type_info() const override {
+			return static_type_info();
+		}
+
+		static std::string static_type_info() {
+			return "CONDITION_TOKEN";
+		}
+
+		virtual const_token_ptr_vector children() const override {
+			const_token_ptr_vector result;
+			if (_leading_spaces.has_value()) result.push_back(&_leading_spaces.value());
+			if (_leading_left_parenthesis.has_value()) result.push_back(&_leading_left_parenthesis.value());
+
+			auto iter = _sub_conditions.cbegin();
+			auto jter = _outer_boolean_operators.cbegin();
+			while (true) {
+				if (iter != _sub_conditions.cend()) {
+					result.push_back(&(*iter));
+					++iter;
+				}
+				if (jter != _outer_boolean_operators.cend()) {
+					result.push_back(&(*jter));
+					++jter;
+				}
+				if (iter == _sub_conditions.cend() && jter == _outer_boolean_operators.cend())
+					break;
+			}
+			if (_false_keyword.has_value()) result.push_back(&_false_keyword.value());
+			if (_true_keyword.has_value()) result.push_back(&_true_keyword.value());
+			if (_comparison.has_value()) result.push_back(&_comparison.value());
+
+			if (_trailing_right_parenthesis.has_value()) result.push_back(&_trailing_right_parenthesis.value());
+			if (_trailing_spaces.has_value()) result.push_back(&_trailing_spaces.value());
+			return result;
+		}
+
+	};
+
 
 	using module_transition_post_condition_probability_distribution_case_token = regular_extensions::compound<
 		simple_derived::maybe_spaces_token,

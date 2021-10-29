@@ -1662,11 +1662,15 @@ int cli(int argc, char** argv) {
 	 )");
 		using token_type = regular_extensions::kleene_star<regular_tokens::single_space_token>;
 		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
 	}
 	try {
 		auto text = std::make_shared<std::string>(R"(	)");
 		using token_type = regular_extensions::kleene_plus<regular_tokens::single_space_token>;
 		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
 	}
 	catch (const parse_error& e) {
 		standard_logger().error(e.what());
@@ -1675,6 +1679,8 @@ int cli(int argc, char** argv) {
 		auto text = std::make_shared<std::string>(R"(init)");
 		using token_type = regular_extensions::alternative<regular_tokens::single_space_token, regular_tokens::line_feed_token, keyword_tokens::init_token>;
 		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
 	}
 	catch (const parse_error& e) {
 		standard_logger().error(e.what());
@@ -1684,11 +1690,55 @@ int cli(int argc, char** argv) {
 )");
 		using token_type = regular_extensions::compound<regular_tokens::single_space_token, keyword_tokens::init_token, regular_tokens::line_feed_token>;
 		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
 	}
 	catch (const parse_error& e) {
 		standard_logger().error(e.what());
 	}
+	try {
+		auto text = std::make_shared<std::string>(R"( )");
+		using token_type = regular_extensions::compound<regular_tokens::single_space_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
 
+		using sub_token_type = regular_extensions::compound<token_type>;
+		sub_token_type sub_parsed_token = sub_token_type::parse_string(text->cbegin(), text->cend(), text);
+		sub_token_type sub_copy{ sub_token_type(sub_parsed_token) };
+		sub_token_type sub_moved = std::move(sub_copy);
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
+	}
+#if true
+		try {
+			using erroring_token = //regular_tokens::single_space_token; ///#####
+				regular_extensions::compound<
+				//term_token,
+				//simple_derived::comparison_operator_token//,
+				//term_token
+				regular_tokens::single_space_token, regular_tokens::single_space_token, regular_tokens::single_space_token
+				//,higher_clauses::term_token
+				>;
+
+		auto text = std::make_shared<std::string>(R"(   2)");
+		using token_type = higher_clauses::term_token;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		/*
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
+
+		using sub_token_type = regular_extensions::compound<token_type>;
+		sub_token_type sub_parsed_token = sub_token_type::parse_string(text->cbegin(), text->cend(), text);
+		sub_token_type sub_copy{ sub_token_type(sub_parsed_token) };
+		sub_token_type sub_moved = std::move(sub_copy);
+		*/
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
+	}
+#endif
 	//std::make_pair(false, std::make_unique<error_token<regular_tokens::single_space_token>>(""));
 
 	return 0;

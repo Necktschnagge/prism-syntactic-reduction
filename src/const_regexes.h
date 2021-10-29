@@ -38,19 +38,21 @@ public:
 			inline static const auto ENDINIT{ std::string(R"(endinit)") };
 			inline static const auto ENDMODULE{ std::string(R"(endmodule)") };
 			inline static const auto ENDREWARDS{ std::string(R"(endrewards)") };
+			inline static const auto FALSE_{ std::string(R"(false)") };
 			inline static const auto FORMULA{ std::string(R"(formula)") };
 			inline static const auto GLOBAL{ std::string(R"(global)") };
 			inline static const auto INIT{ std::string(R"(init)") };
 			inline static const auto INT{ std::string(R"(int)") };
 			inline static const auto MODULE{ std::string(R"(module)") };
 			inline static const auto REWARDS{ std::string(R"(rewards)") };
+			inline static const auto TRUE_{ std::string(R"(true)") };
 		};
 
 
 		class regulars {
 		public:
 			inline static const auto anything_but_newline{ std::string(R"([^\n])") };
-			inline static const auto comparison_operator{ std::string(R"(!=|=||<=|>=|<|>)") };
+			inline static const auto comparison_operator{ std::string(R"(!=|=|<=|>=|<|>)") };
 			inline static const auto float_number{ std::string(R"([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)") };
 			inline static const auto identifier{ std::string(R"([_a-zA-Z][_a-zA-Z0-9']*)") };
 			inline static const auto line_feed{ std::string(R"(\n)") };
