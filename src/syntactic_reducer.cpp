@@ -1499,7 +1499,6 @@ int cli(int argc, char** argv) {
 
 	standard_logger().info("Start parsing...");
 	std::optional<higher_clauses::dtmc_file> dtmc_file;
-	/*
 	try {
 		dtmc_file.emplace(higher_clauses::dtmc_file::parse_string(model_string_ptr->cbegin(), model_string_ptr->cend(), model_string_ptr));
 	}
@@ -1510,13 +1509,15 @@ int cli(int argc, char** argv) {
 
 	}
 	standard_logger().info("Finished parsing.");
+	
 	const higher_clauses::dtmc_file_body& dtmc_body{ std::get<2>(dtmc_file.value()._sub_tokens) };
 	using body_element = higher_clauses::dtmc_file_body::value_type;
-
 
 	auto all_wrapped_const_definitions = higher_clauses::select_items_of_kleene_component(dtmc_body,
 		[](const body_element& alt_token) -> bool { return !std::get<1>(alt_token.sub_tokens())._Token_if_successfully.has_value(); }
 	); // makes copy of all tokens
+
+	/*
 	
 	standard_logger().info("Reading const defintions...");
 	// values of const symbols:
