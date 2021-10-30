@@ -755,8 +755,8 @@ namespace regular_extensions {
 
 		virtual const_token_ptr_vector children() const override {
 			auto result = const_token_ptr_vector();
-			for (std::size_t i{ 0 }; i < _sub_tokens.size(); ++i) {
-				result.push_back(&_sub_tokens[i]);
+			for (auto iter = _sub_tokens.cbegin(); iter != _sub_tokens.cend(); ++iter) {
+				result.push_back(&(*iter));
 			}
 			return result;
 		}
