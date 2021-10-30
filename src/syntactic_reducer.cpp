@@ -1509,28 +1509,31 @@ int cli(int argc, char** argv) {
 
 	}
 	standard_logger().info("Finished parsing.");
-	
+
 	const higher_clauses::dtmc_file_body& dtmc_body{ std::get<2>(dtmc_file.value()._sub_tokens) };
 	using body_element = higher_clauses::dtmc_file_body::value_type;
 
-	auto all_wrapped_const_definitions = higher_clauses::select_items_of_kleene_component(dtmc_body,
+	std::vector<body_element> all_wrapped_const_definitions = higher_clauses::select_items_of_kleene_component(dtmc_body,
 		[](const body_element& alt_token) -> bool { return !std::get<1>(alt_token.sub_tokens())._Token_if_successfully.has_value(); }
 	); // makes copy of all tokens
 
-	/*
-	
+
 	standard_logger().info("Reading const defintions...");
 	// values of const symbols:
 	const std::map<std::string, int> const_table{ [&] {
 		std::map<std::string, int> const_table;
-		
-		//for (const auto& const_def : const_def_container) {
-		//	const_table[const_def->_constant_identifier->str()] = *const_def->_expression->get_value(const_table); // check nullptr?
-		//}
-		
-		return const_table;
-	}() };
 
+		for (const auto& const_def_alt : all_wrapped_const_definitions) {
+			auto& plain_condition = std::get<1>(const_def_alt.sub_tokens())._Token_if_successfully.value();
+			const_table[std::get<higher_clauses::IDENTIFIER_IN_CONST_DEFINITION>(plain_condition.sub_tokens()).to_string()] =
+				std::stoi(std::get<higher_clauses::NATURAL_NUMBER_IN_CONST_DEFINITION>(plain_condition.sub_tokens()).to_string());
+		}
+
+		return const_table;
+		}()
+	};
+
+	/*
 	*/
 	std::string var_name{ "cf" };
 #if false
@@ -1761,7 +1764,7 @@ int cli(int argc, char** argv) {
 	//std::make_pair(false, std::make_unique<error_token<regular_tokens::single_space_token>>(""));
 
 	return 0;
-	}
+}
 #endif
 
 int main(int argc, char** argv)

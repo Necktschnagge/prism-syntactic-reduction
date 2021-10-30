@@ -1214,6 +1214,10 @@ namespace regular_extensions {
 		compound(compound&& another) = default;
 		compound& operator=(const compound& another) = default;
 
+		const tuple& sub_tokens() const {
+			return _sub_tokens;
+		}
+
 		static type parse_string(string_const_iterator begin, string_const_iterator end, std::shared_ptr<std::string> file_content) {
 
 			// parse it completely, recursive
@@ -1713,6 +1717,9 @@ struct higher_clauses {
 		simple_derived::maybe_spaces_token,
 		delimiter_tokens::semicolon_token
 	>;
+
+	static constexpr std::size_t IDENTIFIER_IN_CONST_DEFINITION{ 4 };
+	static constexpr std::size_t NATURAL_NUMBER_IN_CONST_DEFINITION{ 8 };
 
 	using var_definition = regular_extensions::compound<
 		regular_tokens::identifier_token,
