@@ -1497,12 +1497,20 @@ int cli(int argc, char** argv) {
 	// when here then all live set were computed.
 	auto excluded_vars = std::vector<std::string>(config["exclude_vars"].cbegin(), config["exclude_vars"].cend());
 
-
 	standard_logger().info("Start parsing...");
-	auto dtmc_file{ higher_clauses::dtmc_file::parse_string(model_string_ptr->cbegin(), model_string_ptr->cend(), model_string_ptr) };
-	standard_logger().info("Finished parsing.");
+	std::optional<higher_clauses::dtmc_file> dtmc_file;
+	/*
+	try {
+		dtmc_file.emplace(higher_clauses::dtmc_file::parse_string(model_string_ptr->cbegin(), model_string_ptr->cend(), model_string_ptr));
+	}
+	catch (const parse_error& e) {
+		standard_logger().error("Error when parsing model:\n\n");
+		standard_logger().error(e.what());
+		return 1;
 
-	const higher_clauses::dtmc_file_body& dtmc_body{ std::get<2>(dtmc_file._sub_tokens) };
+	}
+	standard_logger().info("Finished parsing.");
+	const higher_clauses::dtmc_file_body& dtmc_body{ std::get<2>(dtmc_file.value()._sub_tokens) };
 	using body_element = higher_clauses::dtmc_file_body::value_type;
 
 
@@ -1514,14 +1522,15 @@ int cli(int argc, char** argv) {
 	// values of const symbols:
 	const std::map<std::string, int> const_table{ [&] {
 		std::map<std::string, int> const_table;
-		/*
-		for (const auto& const_def : const_def_container) {
-			const_table[const_def->_constant_identifier->str()] = *const_def->_expression->get_value(const_table); // check nullptr?
-		}
-		*/
+		
+		//for (const auto& const_def : const_def_container) {
+		//	const_table[const_def->_constant_identifier->str()] = *const_def->_expression->get_value(const_table); // check nullptr?
+		//}
+		
 		return const_table;
 	}() };
 
+	*/
 	std::string var_name{ "cf" };
 #if false
 	// node "var_name" |-> (!removed during coloring phase, count neighbours during coloring phrase, active and inactive neighbours, color)
@@ -1751,7 +1760,7 @@ int cli(int argc, char** argv) {
 	//std::make_pair(false, std::make_unique<error_token<regular_tokens::single_space_token>>(""));
 
 	return 0;
-}
+	}
 #endif
 
 int main(int argc, char** argv)
