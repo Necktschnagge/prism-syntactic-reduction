@@ -2089,23 +2089,85 @@ look for primitive:
 		simple_derived::maybe_spaces_token,
 		delimiter_tokens::colon_token,
 		higher_clauses::condition_token // post-condition
-
 	>;
+
+	static constexpr std::size_t CONDITION_IN_POST_CONDITION_CASE{ 4 };
+	static const higher_clauses::condition_token& GET_CONDITION_IN_POST_CONDITION_CASE(const module_transition_post_condition_probability_distribution_case_token& token)
+	{
+		return std::get<CONDITION_IN_POST_CONDITION_CASE>(token.sub_tokens());
+	};
+
+	using additional_case_token = regular_extensions::compound<
+		delimiter_tokens::plus_token,
+		module_transition_post_condition_probability_distribution_case_token
+	>;
+
+	static const module_transition_post_condition_probability_distribution_case_token& CASE_IN_ADDITIONAL_CASE(const additional_case_token& token) {
+		return std::get<1>(token.sub_tokens());
+	};
 
 	using module_transition_post_condition_probability_distribution_token = regular_extensions::compound<
 		module_transition_post_condition_probability_distribution_case_token,
 		regular_extensions::kleene_star<
-		regular_extensions::compound<
-		delimiter_tokens::plus_token,
-		module_transition_post_condition_probability_distribution_case_token
-		>
+		higher_clauses::additional_case_token
 		>
 	>;
+
+	static constexpr std::size_t FIRST_CASE_IN_PROBABILITY_DISTRIBUTION{ 0 };
+	static const module_transition_post_condition_probability_distribution_case_token& GET_FIRST_CASE_IN_PROBABILITY_DISTRIBUTION(const module_transition_post_condition_probability_distribution_token& token) {
+		return std::get<FIRST_CASE_IN_PROBABILITY_DISTRIBUTION>(token.sub_tokens());
+	}
+	static constexpr std::size_t ADDITIONAL_CASES_IN_PROBABILITY_DISTRIBUTION{ 1 };
+	static const regular_extensions::kleene_star<higher_clauses::additional_case_token>& GET_ADDITIONAL_CASES_IN_PROBABILITY_DISTRIBUTION(const module_transition_post_condition_probability_distribution_token& token) {
+		return std::get<ADDITIONAL_CASES_IN_PROBABILITY_DISTRIBUTION>(token.sub_tokens());
+	}
 
 	using module_transition_post_conditions_token = regular_extensions::alternative<
 		higher_clauses::condition_token,
 		module_transition_post_condition_probability_distribution_token
 	>;
+
+	static constexpr std::size_t SINGLE_CONDITION_IN_MODULE_TRANSITION_POST_CONDITIONS{ 0 };
+	static const std::optional<higher_clauses::condition_token>& GET_OPTIONAL_SINGLE_CONDITION_IN_MODULE_TRANSITION_POST_CONDITIONS(const module_transition_post_conditions_token& token) {
+		return std::get<SINGLE_CONDITION_IN_MODULE_TRANSITION_POST_CONDITIONS>(token.sub_tokens())._Token_if_successfully;
+
+	};
+	static constexpr std::size_t PROBABILITY_DISTRIBUTION_IN_MODULE_TRANSITION_POST_CONDITIONS{ 1 };
+
+	static std::vector<std::reference_wrapper<const higher_clauses::condition_token>> get_list_of_post_conditions(
+		const module_transition_post_conditions_token& token
+	) {
+		std::vector<std::reference_wrapper<const higher_clauses::condition_token>> result;
+		if (GET_OPTIONAL_SINGLE_CONDITION_IN_MODULE_TRANSITION_POST_CONDITIONS(token).has_value()) {
+			result.emplace_back(
+				GET_OPTIONAL_SINGLE_CONDITION_IN_MODULE_TRANSITION_POST_CONDITIONS(token).value()
+			);
+			return result;
+		}
+		const module_transition_post_condition_probability_distribution_token& distribution{
+			std::get<PROBABILITY_DISTRIBUTION_IN_MODULE_TRANSITION_POST_CONDITIONS>(token.sub_tokens())._Token_if_successfully.value()
+		};
+		result.emplace_back(
+			GET_CONDITION_IN_POST_CONDITION_CASE(
+				GET_FIRST_CASE_IN_PROBABILITY_DISTRIBUTION(distribution)
+			)
+		);
+
+		for (
+			const higher_clauses::additional_case_token& further_case :
+			GET_ADDITIONAL_CASES_IN_PROBABILITY_DISTRIBUTION(distribution).sub_tokens()
+			//std::get<ADDITIONAL_CASES_IN_PROBABILITY_DISTRIBUTION>(distribution.sub_tokens()).sub_tokens()
+			) {
+			result.emplace_back(
+				higher_clauses::GET_CONDITION_IN_POST_CONDITION_CASE(
+					higher_clauses::CASE_IN_ADDITIONAL_CASE(further_case)
+				)
+			);
+		}
+		/*
+		*/
+		return result;
+	}
 
 	using module_transition_token = regular_extensions::compound<
 		delimiter_tokens::left_square_bracket_token, // [
@@ -2120,20 +2182,28 @@ look for primitive:
 		delimiter_tokens::semicolon_token
 	>;
 
+	using module_section_item = regular_extensions::alternative<
+		higher_clauses::module_transition_token,
+		higher_clauses::var_definition
+	>;
+
+	static constexpr std::size_t MODULE_TRANSITION_IN_MODULE_SECTION_ITEM{ 0 };
+
+	using module_body = regular_extensions::kleene_star<
+		module_section_item
+	>;
+
 	using module_section = regular_extensions::compound <
 		keyword_tokens::module_token,
 		simple_derived::spaces_token,
 		regular_tokens::identifier_token, // module name
 		simple_derived::spaces_token,
-		regular_extensions::kleene_star<
-		regular_extensions::alternative<
-		higher_clauses::module_transition_token,
-		higher_clauses::var_definition
-		>
-		>,
+		higher_clauses::module_body, // body
 		keyword_tokens::endmodule_token,
 		simple_derived::spaces_token
 	>;
+
+	static constexpr std::size_t BODY_IN_MODULE_SECTION{ 4 };
 
 	using formula_definition = regular_extensions::compound<
 		keyword_tokens::formula_token,
@@ -2173,7 +2243,7 @@ look for primitive:
 		keyword_tokens::endrewards_token
 	>;
 
-	using dtmc_file_body = regular_extensions::kleene_star<regular_extensions::alternative<
+	using dtmc_file_body_element = regular_extensions::alternative<
 		higher_clauses::relaxed_comment_section,
 		higher_clauses::const_definition,
 		higher_clauses::global_var_definition,
@@ -2181,7 +2251,13 @@ look for primitive:
 		higher_clauses::formula_definition,
 		higher_clauses::init_section,
 		higher_clauses::rewards_section
-		>>;
+	>;
+
+	static constexpr std::size_t MODULE_SECTION_IN_DTMC_FILE_BODY_ELEMENT{ 3 };
+
+	using dtmc_file_body = regular_extensions::kleene_star<
+		higher_clauses::dtmc_file_body_element
+	>;
 
 	using dtmc_file = regular_extensions::compound<
 		relaxed_comment_section,
@@ -2190,11 +2266,11 @@ look for primitive:
 	>;
 
 	template<class T, class _Select>
-	static auto select_items_of_kleene_component(T& whole_token, const _Select& select_items) -> 
-		std::remove_const_t<std::remove_reference_t<decltype(whole_token.sub_tokens())>> 
+	static auto select_items_of_kleene_component(const T& whole_token, const _Select& excluded_items) ->
+		std::remove_const_t<std::remove_reference_t<decltype(whole_token.sub_tokens())>>
 	{
 		std::remove_const_t<std::remove_reference_t<decltype(whole_token.sub_tokens())>> sub_token_vector{ whole_token.sub_tokens() };
-		auto iter = std::remove_if(sub_token_vector.begin(), sub_token_vector.end(), select_items);
+		auto iter = std::remove_if(sub_token_vector.begin(), sub_token_vector.end(), excluded_items);
 		sub_token_vector.erase(iter, sub_token_vector.end());
 		return sub_token_vector;
 	}

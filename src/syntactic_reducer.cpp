@@ -45,7 +45,6 @@ bool compare_colorings(std::map<std::string, int>& c1, std::map<std::string, int
 	return __compare_helper__(c1, c2) && __compare_helper__(c2, c1);
 }
 
-#if false //using old parser
 
 // state of cf variables |-> (must be recalculated, variables that are live there (current state), changes since last calculation)
 using liveness_tuple = std::tuple<bool, std::vector<std::string>, std::vector<std::string>>;
@@ -66,6 +65,7 @@ auto color(const std::tuple<bool, int, std::set<std::string>, int>& t) -> int {
 	return std::get<3>(t);
 }
 
+#if false //using old parser
 void apply_coloring_to_file_token(file_token& reduced_file, const std::string& var_name, const std::map<std::string, int>& const_table, live_var_map& live_vars, const std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph) {
 
 	// transform the init condition:
@@ -1048,14 +1048,16 @@ void find_all_minimal_partitionings( //#?ready
 	standard_logger().info("==============================================================================================");
 
 }
-
+#endif
 void live_range_analysis(
-	const file_token & ftoken,
+	const higher_clauses::dtmc_file_body & dtmc_body,
 	const std::map<std::string, int>&const_table,
-	const std::string & var_name, std::vector<std::string>&excluded_vars,
+	const std::string & var_name,
+	std::vector<std::string>&excluded_vars,
 	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>&graph,
 	live_var_map & live_vars
 ) {
+	standard_logger().info("Running live range analysis...");
 	// live range analysis:
 	// calculate program graph:
 	std::string var_name_next{ var_name + "'" };
@@ -1063,21 +1065,54 @@ void live_range_analysis(
 	using value_type = int;
 
 	// vector of state transitions with associated transition and postcond token
-	using program_graph_edge = std::tuple<value_type, value_type, std::shared_ptr<transition_token>, std::shared_ptr<condition_token>>;
+	using program_graph_edge = std::tuple<value_type, value_type, higher_clauses::module_transition_token*, higher_clauses::condition_token*>;
 	std::vector<program_graph_edge> program_graph;
 
 	const auto concrete_transition_identifier_of_program_graph_item =
-		[](const std::tuple<value_type, value_type, std::shared_ptr<transition_token>, std::shared_ptr<condition_token>>& edge) {
+		[](const std::tuple<value_type, value_type, higher_clauses::module_transition_token*, higher_clauses::condition_token*>& edge) {
 		return std::make_pair(std::get<2>(edge), std::get<3>(edge));
 	};
 
-	auto module_defs = ftoken._dtmc_body_component->module_definitions();
-	// assert correct size.
-	auto& the_module{ module_defs.front() };
+	standard_logger().info("Looking for modules...");
+	std::vector<higher_clauses::dtmc_file_body_element> module_defs = higher_clauses::select_items_of_kleene_component(
+		dtmc_body,
+		[](const higher_clauses::dtmc_file_body_element& alt_token) -> bool {
+			return !std::get<higher_clauses::MODULE_SECTION_IN_DTMC_FILE_BODY_ELEMENT>(
+				alt_token.sub_tokens())._Token_if_successfully.has_value();
+		}
+	);
 
+	if (module_defs.size() != 1) {
+		std::string message;
+		message += "Expected 1 module section in dtmc file, but found ";
+		message += std::to_string(module_defs.size());
+		throw std::logic_error(message);
+	}
 
+	standard_logger().info("Found exactly one module.");
+	const higher_clauses::module_section& the_module{
+		std::get<higher_clauses::MODULE_SECTION_IN_DTMC_FILE_BODY_ELEMENT>(module_defs.front().sub_tokens())._Token_if_successfully.value()
+	};
+
+	const higher_clauses::module_body& module_body{
+		std::get<higher_clauses::BODY_IN_MODULE_SECTION>(the_module.sub_tokens())
+	};
+
+	standard_logger().info("Extracting transitions...");
+	std::vector<higher_clauses::module_section_item> transitions =
+		higher_clauses::select_items_of_kleene_component(
+			module_body,
+			[](const higher_clauses::module_section_item& item) -> bool {
+				return !std::get<higher_clauses::MODULE_TRANSITION_IN_MODULE_SECTION_ITEM>(
+					item.sub_tokens())._Token_if_successfully.has_value();
+			}
+	); // makes a copy.
+
+	standard_logger().info("Building program graph...");
 	// fill program graph
-	for (const auto& s : the_module->_transitions) {
+#if false
+	for (const auto& s : transitions) {
+
 		const auto& transition = s.first; // ignore separating space
 
 		auto contains_var = transition->_pre_condition->contains_variable(var_name);
@@ -1280,8 +1315,9 @@ again_while:
 		count_active_neighbours(graph_pair.second) = neighbours(graph_pair.second).size();
 		color(graph_pair.second) = -1;
 	}
+#endif
 }
-
+#if false
 
 unsigned long long count_variables_of_coloring(const std::map<std::string, int>&coloring) {
 	std::set<int> values;
@@ -1533,16 +1569,19 @@ int cli(int argc, char** argv) {
 		}()
 	};
 
-	/*
-	*/
 	std::string var_name{ "cf" };
-#if false
 	// node "var_name" |-> (!removed during coloring phase, count neighbours during coloring phrase, active and inactive neighbours, color)
 	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>> graph;
 	live_var_map live_vars;
 
-
-	live_range_analysis(ftoken, const_table, var_name, excluded_vars, graph, live_vars);
+	try {
+		live_range_analysis(dtmc_body, const_table, var_name, excluded_vars, graph, live_vars);
+	}
+	catch (const std::logic_error& e) {
+		standard_logger().error(e.what());
+		return 1;
+	}
+#if false
 
 	/*+++++++++++++++++++++++++++++*/
 
