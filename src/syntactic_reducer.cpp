@@ -3,6 +3,7 @@
 
 #include "parser.h"
 #include "debug_001.h"
+#include "char_helper.h"
 
 #include <nlohmann/json.hpp>
 
@@ -44,21 +45,6 @@ bool compare_colorings(std::map<std::string, int>& c1, std::map<std::string, int
 	return __compare_helper__(c1, c2) && __compare_helper__(c2, c1);
 }
 
-void print_model_to_stream(const file_token& reduced_file, std::ostream& ofile) {
-	token::token_list to_be_printed = reduced_file.children();
-	while (!to_be_printed.empty()) {
-		const auto element = to_be_printed.front();
-		to_be_printed.pop_front();
-		if (element->is_primitive()) {
-			ofile << element->str();
-		}
-		else {
-			const auto got_children = element->children();
-			to_be_printed.insert(to_be_printed.begin(), got_children.begin(), got_children.end());
-		}
-	}
-}
-
 
 // state of cf variables |-> (must be recalculated, variables that are live there (current state), changes since last calculation)
 using liveness_tuple = std::tuple<bool, std::vector<std::string>, std::vector<std::string>>;
@@ -79,6 +65,7 @@ auto color(const std::tuple<bool, int, std::set<std::string>, int>& t) -> int {
 	return std::get<3>(t);
 }
 
+#if false //using old parser
 void apply_coloring_to_file_token(file_token& reduced_file, const std::string& var_name, const std::map<std::string, int>& const_table, live_var_map& live_vars, const std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph) {
 
 	// transform the init condition:
@@ -634,7 +621,7 @@ void find_local_groupings(
 		}
 
 		next_free_index = 11;
-	}
+		}
 
 
 	while (true) {
@@ -805,7 +792,7 @@ void find_local_groupings(
 		++next_free_index;
 
 	}
-}
+	}
 
 enum class selected : char {
 	YES, NO, UNDECIDED
@@ -1033,9 +1020,9 @@ void find_all_minimal_partitionings( //#?ready
 	std::vector<collapse_node>&max_groupings,
 	std::vector<std::vector<collapse_node::big_int>>&all_colorings_with_minimal_variables
 ) {
-	standard_logger().info("#############################################################################################");
-	standard_logger().info("##### Start calculating all possible partitionings with minimal number of partitions... #####");
-	standard_logger().info("#############################################################################################");
+	standard_logger().info("=============================================================================================");
+	standard_logger().info("===== Start calculating all possible partitionings with minimal number of partitions... =====");
+	standard_logger().info("=============================================================================================");
 	standard_logger().info("");
 
 	standard_logger().info("The following enemies are forbidden to be merged into one partition:");
@@ -1056,19 +1043,21 @@ void find_all_minimal_partitionings( //#?ready
 	find_all_coverings_with_non_overlapping_groups(all_vars, max_groupings, combinations_of_max_groupings, all_colorings_with_minimal_variables);
 	standard_logger().info("Calculating all partitionings of the whole variable set by eliminating overlapping maximal local groupings   ...DONE!");
 
-	standard_logger().info("##############################################################################################");
-	standard_logger().info("##### Finished calculating all possible partitionings with minimal number of partitions. #####");
-	standard_logger().info("##############################################################################################");
+	standard_logger().info("==============================================================================================");
+	standard_logger().info("===== Finished calculating all possible partitionings with minimal number of partitions. =====");
+	standard_logger().info("==============================================================================================");
 
 }
-
+#endif
 void live_range_analysis(
-	const file_token & ftoken,
+	const higher_clauses::dtmc_file_body & dtmc_body,
 	const std::map<std::string, int>&const_table,
-	const std::string & var_name, std::vector<std::string>&excluded_vars,
+	const std::string & var_name,
+	std::vector<std::string>&excluded_vars,
 	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>&graph,
 	live_var_map & live_vars
 ) {
+	standard_logger().info("Running live range analysis...");
 	// live range analysis:
 	// calculate program graph:
 	std::string var_name_next{ var_name + "'" };
@@ -1076,21 +1065,54 @@ void live_range_analysis(
 	using value_type = int;
 
 	// vector of state transitions with associated transition and postcond token
-	using program_graph_edge = std::tuple<value_type, value_type, std::shared_ptr<transition_token>, std::shared_ptr<condition_token>>;
+	using program_graph_edge = std::tuple<value_type, value_type, higher_clauses::module_transition_token*, higher_clauses::condition_token*>;
 	std::vector<program_graph_edge> program_graph;
 
 	const auto concrete_transition_identifier_of_program_graph_item =
-		[](const std::tuple<value_type, value_type, std::shared_ptr<transition_token>, std::shared_ptr<condition_token>>& edge) {
+		[](const std::tuple<value_type, value_type, higher_clauses::module_transition_token*, higher_clauses::condition_token*>& edge) {
 		return std::make_pair(std::get<2>(edge), std::get<3>(edge));
 	};
 
-	auto module_defs = ftoken._dtmc_body_component->module_definitions();
-	// assert correct size.
-	auto& the_module{ module_defs.front() };
+	standard_logger().info("Looking for modules...");
+	std::vector<higher_clauses::dtmc_file_body_element> module_defs = higher_clauses::select_items_of_kleene_component(
+		dtmc_body,
+		[](const higher_clauses::dtmc_file_body_element& alt_token) -> bool {
+			return !std::get<higher_clauses::MODULE_SECTION_IN_DTMC_FILE_BODY_ELEMENT>(
+				alt_token.sub_tokens())._Token_if_successfully.has_value();
+		}
+	);
 
+	if (module_defs.size() != 1) {
+		std::string message;
+		message += "Expected 1 module section in dtmc file, but found ";
+		message += std::to_string(module_defs.size());
+		throw std::logic_error(message);
+	}
 
+	standard_logger().info("Found exactly one module.");
+	const higher_clauses::module_section& the_module{
+		std::get<higher_clauses::MODULE_SECTION_IN_DTMC_FILE_BODY_ELEMENT>(module_defs.front().sub_tokens())._Token_if_successfully.value()
+	};
+
+	const higher_clauses::module_body& module_body{
+		std::get<higher_clauses::BODY_IN_MODULE_SECTION>(the_module.sub_tokens())
+	};
+
+	standard_logger().info("Extracting transitions...");
+	std::vector<higher_clauses::module_section_item> transitions =
+		higher_clauses::select_items_of_kleene_component(
+			module_body,
+			[](const higher_clauses::module_section_item& item) -> bool {
+				return !std::get<higher_clauses::MODULE_TRANSITION_IN_MODULE_SECTION_ITEM>(
+					item.sub_tokens())._Token_if_successfully.has_value();
+			}
+	); // makes a copy.
+
+	standard_logger().info("Building program graph...");
 	// fill program graph
-	for (const auto& s : the_module->_transitions) {
+#if false
+	for (const auto& s : transitions) {
+
 		const auto& transition = s.first; // ignore separating space
 
 		auto contains_var = transition->_pre_condition->contains_variable(var_name);
@@ -1293,8 +1315,9 @@ again_while:
 		count_active_neighbours(graph_pair.second) = neighbours(graph_pair.second).size();
 		color(graph_pair.second) = -1;
 	}
+#endif
 }
-
+#if false
 
 unsigned long long count_variables_of_coloring(const std::map<std::string, int>&coloring) {
 	std::set<int> values;
@@ -1441,22 +1464,15 @@ file_token construct_reduced_model(
 	return reduced_file;
 }
 
+#endif
 
-const auto path_to_string = [](auto path) {
-	if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
-		return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(path.c_str());
-	}
-	else {
-		return std::string(path.c_str());
-	}
-};
 
+#if true
 int cli(int argc, char** argv) {
+
 	standard_logger().info("This is Syntactic Reducer 1.0\n\n");
-	//standard_logger().info(std::string("Running config json: ") + argv[0]);
 	const std::string CURRENT_PATH_CHAR_STRING{ path_to_string(std::filesystem::current_path()) };
-	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING);
-	//std::filesystem::path CURRENT_PATH{ CURRENT_PATH_CHAR_STRING };
+	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING + "\n");
 
 	standard_logger().info("Loading config json...");
 	/* Obtain config json path */
@@ -1465,6 +1481,7 @@ int cli(int argc, char** argv) {
 	config_json_path = std::filesystem::canonical(config_json_path);
 	const std::filesystem::path config_json_directory{ config_json_path.parent_path() };
 	standard_logger().info(std::string("Canonical config json path:  ") + path_to_string(config_json_path));
+
 	/* Load config json */
 	nlohmann::json config;
 	if (argc >= 2) {
@@ -1484,6 +1501,8 @@ int cli(int argc, char** argv) {
 		return 1;
 	}
 	standard_logger().info(std::string("Successfully loaded config json:\n\n") + config.dump(3) + "\n");
+
+
 	std::string prism_command = config["prism_command"];
 	std::string transformed_prism_command{};
 	for (const auto& c : prism_command) {
@@ -1496,7 +1515,6 @@ int cli(int argc, char** argv) {
 
 	/* Load model */
 	standard_logger().info("Loading model...");
-	//standard_logger().debug(path_to_string(config_json_directory / std::string(config["model_path"])));
 	std::filesystem::path model_path{
 		std::filesystem::canonical(
 			config_json_directory / std::string(config["model_path"])
@@ -1506,7 +1524,7 @@ int cli(int argc, char** argv) {
 	std::ifstream model_ifstream;
 	model_ifstream.open(model_path);
 	auto model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
-	standard_logger().info("Loading model   ...DONE!");
+	standard_logger().info("Loading model   ...DONE!\n");
 
 	std::filesystem::path results_directory{ std::filesystem::weakly_canonical(config_json_directory / std::string(config["result_dir"])) };
 	standard_logger().info(std::string("Results will be written to directory:  ") + path_to_string(results_directory));
@@ -1514,33 +1532,56 @@ int cli(int argc, char** argv) {
 	standard_logger().info("Loading list of excluded variables...");
 	// when here then all live set were computed.
 	auto excluded_vars = std::vector<std::string>(config["exclude_vars"].cbegin(), config["exclude_vars"].cend());
-	//std::vector<std::string> excluded_vars{ "y_Integrator_44480461", "x_cfblk5_1_1174489129" };
 
 	standard_logger().info("Start parsing...");
-	auto ftoken = file_token(model_string_ptr);
-	ftoken.parse();
-	bool check = ftoken.is_sound_recursive();
+	std::optional<higher_clauses::dtmc_file> dtmc_file;
+	try {
+		dtmc_file.emplace(higher_clauses::dtmc_file::parse_string(model_string_ptr->cbegin(), model_string_ptr->cend(), model_string_ptr));
+	}
+	catch (const parse_error& e) {
+		standard_logger().error("Error when parsing model:\n\n");
+		standard_logger().error(e.what());
+		return 1;
+
+	}
 	standard_logger().info("Finished parsing.");
 
+	const higher_clauses::dtmc_file_body& dtmc_body{ std::get<2>(dtmc_file.value()._sub_tokens) };
+	using body_element = higher_clauses::dtmc_file_body::value_type;
 
+	std::vector<body_element> all_wrapped_const_definitions = higher_clauses::select_items_of_kleene_component(dtmc_body,
+		[](const body_element& alt_token) -> bool { return !std::get<1>(alt_token.sub_tokens())._Token_if_successfully.has_value(); }
+	); // makes copy of all tokens
+
+
+	standard_logger().info("Reading const defintions...");
 	// values of const symbols:
 	const std::map<std::string, int> const_table{ [&] {
 		std::map<std::string, int> const_table;
-		auto const_def_container = ftoken._dtmc_body_component->const_definitions();
-		for (const auto& const_def : const_def_container) {
-			const_table[const_def->_constant_identifier->str()] = *const_def->_expression->get_value(const_table); // check nullptr?
+
+		for (const auto& const_def_alt : all_wrapped_const_definitions) {
+			auto& plain_condition = std::get<1>(const_def_alt.sub_tokens())._Token_if_successfully.value();
+			const_table[std::get<higher_clauses::IDENTIFIER_IN_CONST_DEFINITION>(plain_condition.sub_tokens()).to_string()] =
+				std::stoi(std::get<higher_clauses::NATURAL_NUMBER_IN_CONST_DEFINITION>(plain_condition.sub_tokens()).to_string());
 		}
+
 		return const_table;
-	}() };
+		}()
+	};
 
 	std::string var_name{ "cf" };
-
 	// node "var_name" |-> (!removed during coloring phase, count neighbours during coloring phrase, active and inactive neighbours, color)
 	std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>> graph;
 	live_var_map live_vars;
 
-
-	live_range_analysis(ftoken, const_table, var_name, excluded_vars, graph, live_vars);
+	try {
+		live_range_analysis(dtmc_body, const_table, var_name, excluded_vars, graph, live_vars);
+	}
+	catch (const std::logic_error& e) {
+		standard_logger().error(e.what());
+		return 1;
+	}
+#if false
 
 	/*+++++++++++++++++++++++++++++*/
 
@@ -1610,7 +1651,7 @@ int cli(int argc, char** argv) {
 
 	// all_partitions.json
 	write_all_partitionings(results_directory, all_partitionings_with_minimal_size);
-	
+
 	// meta.json
 	write_meta_json(results_directory, all_partitionings_with_minimal_size.size());
 
@@ -1654,11 +1695,116 @@ int cli(int argc, char** argv) {
 	std::ofstream config_json_ofstream;
 	config_json_ofstream.open(config_json_path);
 	config_json_ofstream << config.dump(3);
-	
+#endif
 	return 0;
 }
+#else 
+
+// ###### ove this code to testing project
+int cli(int argc, char** argv) {
+	standard_logger().info("This is Syntactic Reducer 1.0\n\n");
+	//standard_logger().info(std::string("Running config json: ") + argv[0]);
+
+	standard_logger().info("Testing new parser bottom up...");
+	{
+		auto text = std::make_shared<std::string>("init");
+		keyword_tokens::init_token parsed_token = keyword_tokens::init_token::parse_string(text->cbegin(), text->cend(), text);
+	}
+	{
+		auto text = std::make_shared<std::string>("	");
+		regular_tokens::single_space_token parsed_token = regular_tokens::single_space_token::parse_string(text->cbegin(), text->cend(), text);
+	}
+	{
+		auto text = std::make_shared<std::string>(R"(	 	
+	 )");
+		using token_type = regular_extensions::kleene_star<regular_tokens::single_space_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
+	}
+	try {
+		auto text = std::make_shared<std::string>(R"(	)");
+		using token_type = regular_extensions::kleene_plus<regular_tokens::single_space_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
+	}
+	try {
+		auto text = std::make_shared<std::string>(R"(init)");
+		using token_type = regular_extensions::alternative<regular_tokens::single_space_token, regular_tokens::line_feed_token, keyword_tokens::init_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
+	}
+	try {
+		auto text = std::make_shared<std::string>(R"( init
+)");
+		using token_type = regular_extensions::compound<regular_tokens::single_space_token, keyword_tokens::init_token, regular_tokens::line_feed_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
+	}
+	try {
+		auto text = std::make_shared<std::string>(R"( )");
+		using token_type = regular_extensions::compound<regular_tokens::single_space_token>;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
+
+		using sub_token_type = regular_extensions::compound<token_type>;
+		sub_token_type sub_parsed_token = sub_token_type::parse_string(text->cbegin(), text->cend(), text);
+		sub_token_type sub_copy{ sub_token_type(sub_parsed_token) };
+		sub_token_type sub_moved = std::move(sub_copy);
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
+	}
+#if true
+	try {
+		using erroring_token = //regular_tokens::single_space_token; ///#####
+			regular_extensions::compound<
+			//term_token,
+			//simple_derived::comparison_operator_token//,
+			//term_token
+			regular_tokens::single_space_token, regular_tokens::single_space_token, regular_tokens::single_space_token
+			//,higher_clauses::term_token
+			>;
+
+		auto text = std::make_shared<std::string>(R"(   2)");
+		using token_type = higher_clauses::term_token;
+		token_type parsed_token = token_type::parse_string(text->cbegin(), text->cend(), text);
+		auto x = regular_tokens::identifier_token::find_all_candidates(text->cbegin(), text->cend());
+		auto y = regular_tokens::natural_number_token::find_all_candidates(text->cbegin(), text->cend());
+		auto z = simple_derived::natural_number_or_identifier_token::find_all_candidates(text->cbegin(), text->cend());
 
 
+		token_type copy{ token_type(parsed_token) };
+		token_type moved = std::move(copy);
+
+		using sub_token_type = regular_extensions::compound<token_type>;
+		sub_token_type sub_parsed_token = sub_token_type::parse_string(text->cbegin(), text->cend(), text);
+		sub_token_type sub_copy{ sub_token_type(sub_parsed_token) };
+		sub_token_type sub_moved = std::move(sub_copy);
+
+	}
+	catch (const parse_error& e) {
+		standard_logger().error(e.what());
+	}
+#endif
+	//std::make_pair(false, std::make_unique<error_token<regular_tokens::single_space_token>>(""));
+
+	return 0;
+}
+#endif
 
 int main(int argc, char** argv)
 {

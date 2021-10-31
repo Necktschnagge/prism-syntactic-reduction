@@ -18,12 +18,12 @@ stages:
     - job: Generate_and_upload_all_models
       strategy:
         matrix:
-#          ubuntu_20_04:
-#            image_name: 'ubuntu-20.04'
-#            agent_pool_name: 'Azure Pipelines'
+          ubuntu_20_04:
+            image_name: 'ubuntu-20.04'
+            agent_pool_name: 'Azure Pipelines'
 
-          Ubuntu_20_04:
-            agent_pool_name: 'Performance'
+#          Ubuntu_20_04:
+#            agent_pool_name: 'Performance'
             
       pool:
         vmImage: $(image_name)
@@ -32,9 +32,9 @@ stages:
       timeoutInMinutes: 300
       steps:
        #Boost
-#       - script: sudo apt-get install libboost-all-dev libtbb-dev
-#         displayName: "Linux: Install Boost"
-#         condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
+       - script: sudo apt-get install libboost-all-dev libtbb-dev
+         displayName: "Linux: Install Boost and other dependencies"
+         condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
        #real Tasks:
        - script: git submodule update --init --recursive
          displayName: "Init Git Submodules"
