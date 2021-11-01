@@ -1,0 +1,107 @@
+PRISM
+=====
+
+Version: 4.3.1.dev
+Date: Mon Nov 01 17:30:17 UTC 2021
+Hostname: fv-az99-243
+Memory limits: cudd=10g, java(heap)=1g
+Command line: prism ../../../../RESULTS/prism_model/reduced_model.prism -pf 'filter(printall, Pmax=? [ F failure ], "init")' -reorder -reorderoptions converge -mtbdd -cuddmaxmem 10g
+
+Parsing model file "../../../../RESULTS/prism_model/reduced_model.prism"...
+
+1 property:
+(1) filter(printall, Pmax=? [ F failure ], "init")
+
+Type:        DTMC
+Modules:     control_flowerror_propagation 
+Variables:   colored_0 colored_4 colored_5 colored_7 colored_3 colored_2 colored_6 colored_1 
+
+---------------------------------------------------------------------
+
+Model checking: filter(printall, Pmax=? [ F failure ], "init")
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 23 iterations in 0.00 seconds (average 0.000174, setup 0.00)
+
+Time for model construction: 0.027 seconds.
+
+Type:        DTMC
+States:      206 (25 initial)
+Transitions: 239
+
+Transition matrix: 543 nodes (4 terminal), 239 minterms, vars: 26r/26c
+
+Reordering... 
+Reordering until convergence, iteration 1...done (took 0.007 seconds)
+  Iteration 1: transition matrix 12.2%, overall 13.1%
+Reordering until convergence, iteration 2...done (took 0.008 seconds)
+
+Reordering... done (took 0.016 seconds)
+MTBDD nodes of transition matrix: 477 (543 before reordering, 12.2% reduction)
+Number of overall MTBDD nodes: 812 (934 before reordering, 13.1% reduction)
+
+---------------------------------------------------------------------
+Rebuilding reordered model...
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 23 iterations in 0.00 seconds (average 0.000087, setup 0.00)
+
+Time for model construction: 0.01 seconds.
+
+Type:        DTMC
+States:      206 (25 initial)
+Transitions: 239
+
+Transition matrix: 477 nodes (4 terminal), 239 minterms, vars: 26r/26c
+
+Warning: "Pmin=?" and "Pmax=?" operators are identical to "P=?" for DTMCs/CTMCs
+
+Prob0: 13 iterations in 0.00 seconds (average 0.000077, setup 0.00)
+
+Prob1: 1 iterations in 0.00 seconds (average 0.000000, setup 0.00)
+
+yes = 206, no = 0, maybe = 0
+
+Results (including zeros) for filter "init":
+0:(0,1,1,1,0,0,2,4)=1.0
+1:(0,1,1,1,0,1,2,4)=1.0
+2:(0,1,1,1,0,2,2,4)=1.0
+3:(0,1,1,1,0,3,2,4)=1.0
+4:(0,1,1,1,0,4,2,4)=1.0
+5:(0,1,1,1,1,0,2,4)=1.0
+6:(0,1,1,1,1,1,2,4)=1.0
+7:(0,1,1,1,1,2,2,4)=1.0
+8:(0,1,1,1,1,3,2,4)=1.0
+9:(0,1,1,1,1,4,2,4)=1.0
+10:(0,1,1,1,2,0,2,4)=1.0
+11:(0,1,1,1,2,1,2,4)=1.0
+12:(0,1,1,1,2,2,2,4)=1.0
+13:(0,1,1,1,2,3,2,4)=1.0
+14:(0,1,1,1,2,4,2,4)=1.0
+15:(0,1,1,1,3,0,2,4)=1.0
+16:(0,1,1,1,3,1,2,4)=1.0
+17:(0,1,1,1,3,2,2,4)=1.0
+18:(0,1,1,1,3,3,2,4)=1.0
+19:(0,1,1,1,3,4,2,4)=1.0
+20:(0,1,1,1,4,0,2,4)=1.0
+21:(0,1,1,1,4,1,2,4)=1.0
+22:(0,1,1,1,4,2,2,4)=1.0
+23:(0,1,1,1,4,3,2,4)=1.0
+24:(0,1,1,1,4,4,2,4)=1.0
+
+Range of values over initial states: [1.0,1.0]
+
+Time for model checking: 0.005 seconds.
+
+Result: [1.0,1.0] (range of values over initial states)
+
+---------------------------------------------------------------------
+
+Note: There was 1 warning during computation.
+
