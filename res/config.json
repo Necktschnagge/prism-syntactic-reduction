@@ -1,9 +1,9 @@
 {
-	"model_path": "../Examples/rewrite_model1_probs_re.pmc",
-	"result_dir": "../RESULTS",
-	"exclude_vars": [
-		"y_Integrator_44480461",
-		"x_cfblk5_1_1174489129"
-	],
-	"prism_command": ".\/prism '..\/..\/..\/..\/RESULTS\/prism_model\/reduced_model.prism' -pf 'filter(printall, Pmax=? [ F<100 \"deadlock\" ], \"init\")' -reorderoptions converge -reorder -mtbdd -cuddmaxmem 10g"
+   "exclude_vars": [
+      "y_Integrator_44480461",
+      "x_cfblk5_1_1174489129"
+   ],
+   "model_path": "../Examples/rewrite_model1_probs_re.pmc",
+   "prism_command": ".\\/prism '..\\/..\\/..\\/..\\/RESULTS\\/prism_model\\/reduced_model.prism' -pf 'filter(printall, Pmax=? [ F<100 \"deadlock\" ], \"init\")' -reorderoptions converge -reorder -mtbdd -cuddmaxmem 10g",
+   "result_dir": "../RESULTS"
 }
