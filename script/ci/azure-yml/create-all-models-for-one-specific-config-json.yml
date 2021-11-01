@@ -29,7 +29,7 @@ stages:
         vmImage: $(image_name)
         name: $(agent_pool_name)
       condition: eq(variables['Build.Reason'], 'IndividualCI')
-      timeoutInMinutes: 20
+      timeoutInMinutes: 300
       steps:
        #Boost
 #       - script: sudo apt-get install libboost-all-dev libtbb-dev
