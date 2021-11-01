@@ -42,7 +42,6 @@ for D in */ ; do
 	
 	cd ..
 	git add *
-	git add --force ./build/tools/prism-log-extractor/Prism-Log-Extractor
 	echo added git files.
 	git status
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "upload one reduced model: (${number})"

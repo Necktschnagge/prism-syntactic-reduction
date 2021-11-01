@@ -9,6 +9,7 @@ user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -
 git switch -c ${git_branch_for_results} #switch to new branch pointing to current HEAD
 cp script/ci/azure-yml/distribute-generated-models.yml azure-pipelines.yml
 git add *
+git add --force ./build/tools/prism-log-extractor/Prism-Log-Extractor
 git status
 git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "Automatic upload of all generated models"
 git status
