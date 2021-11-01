@@ -223,6 +223,6 @@ endmodule
 formula failure = x_cfblk3_1_1954894999 = error;
 
 rewards "time"
-    true : 1;
+    0=0 : 1;
 endrewards
 

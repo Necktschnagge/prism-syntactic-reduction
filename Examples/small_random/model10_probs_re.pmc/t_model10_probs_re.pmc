@@ -72,19 +72,19 @@ global    y_cfblk4_24216364_2 : [0 .. 4];
 global    x_cfblk1_1_2742682393_2 : [0 .. 4];
  
 init
-(cf=cfblk3_Output_1) &
-(y_cfblk1_4201777480=ok) &
-(y_cfblk3_4280048266=ok) &
-(y_cfblk4_24216364=ok) &
-(y_cfblk5_63351757=ok) &
-(x_cfblk1_1_2742682393=ok) &
-(redundancy_model10_cfblk3_0=c) &
-(y_cfblk3_4280048266_2=ok) &
-(redundancy_model10_cfblk1_1=no) &
-(y_cfblk1_4201777480_2=ok) &
-(redundancy_model10_cfblk4_2=c) &
-(y_cfblk4_24216364_2=ok) &
-(x_cfblk1_1_2742682393_2=ok)
+(cf = cfblk3_Output_1) &
+(y_cfblk1_4201777480 = ok) &
+(y_cfblk3_4280048266 = ok) &
+(y_cfblk4_24216364 = ok) &
+(y_cfblk5_63351757 = ok) &
+(x_cfblk1_1_2742682393 = ok) &
+(redundancy_model10_cfblk3_0 = c) &
+(y_cfblk3_4280048266_2 = ok) &
+(redundancy_model10_cfblk1_1 = no) &
+(y_cfblk1_4201777480_2 = ok) &
+(redundancy_model10_cfblk4_2 = c) &
+(y_cfblk4_24216364_2 = ok) &
+(x_cfblk1_1_2742682393_2 = ok)
 endinit
 
 module control_flowerror_propagation
@@ -143,6 +143,6 @@ endmodule
 formula failure = x_cfblk1_1_2742682393 = error;
 
 rewards "time"
-    true : 1;
+    1=1 : 1;
 endrewards
 
