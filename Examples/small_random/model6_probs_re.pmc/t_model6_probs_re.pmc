@@ -76,12 +76,13 @@ const int error = 3;
 
 const int c = 4;
 
+
  global  cf : [0 .. 33];
 global    y_cfblk1_2652237136 : [0 .. 4];
 global    y_cfblk2_2691372529 : [0 .. 4];
 global    y_cfblk3_2730507922 : [0 .. 4];
 global    y_cfblk4_2769643315 : [0 .. 4];
-global    y_cfblk4_2769643315 : [0 .. 4];
+global    y_cfblk5_2808778708 : [0 .. 4];
 global    x_cfblk1_1_629837068 : [0 .. 4];
 global    x_cfblk4_1_209273680 : [0 .. 4];
 global    x_cfblk5_1_1500741649 : [0 .. 4];
@@ -102,7 +103,7 @@ init
 	(y_cfblk2_2691372529 = ok) &
 	(y_cfblk3_2730507922=ok) &
 	(y_cfblk4_2769643315=ok) &
-	(y_cfblk4_2769643315=ok) &
+	(y_cfblk5_2808778708=ok) &
 	(x_cfblk1_1_629837068=ok) &
 	(x_cfblk4_1_209273680=ok) &
 	(x_cfblk5_1_1500741649=ok) &
