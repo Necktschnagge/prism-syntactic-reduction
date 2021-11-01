@@ -1,0 +1,105 @@
+PRISM
+=====
+
+Version: 4.3.1.dev
+Date: Mon Nov 01 17:20:44 UTC 2021
+Hostname: fv-az99-243
+Memory limits: cudd=10g, java(heap)=1g
+Command line: prism ../../../../RESULTS/prism_model/reduced_model.prism -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -reorderoptions converge -reorder -mtbdd -cuddmaxmem 10g
+
+Parsing model file "../../../../RESULTS/prism_model/reduced_model.prism"...
+
+1 property:
+(1) filter(printall, Pmax=? [ F<100 "deadlock" ], "init")
+
+Type:        DTMC
+Modules:     control_flowerror_propagation 
+Variables:   colored_0 colored_7 colored_8 colored_9 colored_11 colored_5 colored_4 colored_6 colored_3 colored_10 colored_1 colored_2 
+
+---------------------------------------------------------------------
+
+Model checking: filter(printall, Pmax=? [ F<100 "deadlock" ], "init")
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 31 iterations in 0.01 seconds (average 0.000226, setup 0.00)
+
+Time for model construction: 0.055 seconds.
+
+Type:        DTMC
+States:      910 (25 initial)
+Transitions: 1103
+
+Transition matrix: 2806 nodes (6 terminal), 1103 minterms, vars: 38r/38c
+
+Reordering... 
+Reordering until convergence, iteration 1...done (took 0.031 seconds)
+  Iteration 1: transition matrix 35.1%, overall 26.9%
+Reordering until convergence, iteration 2...done (took 0.029 seconds)
+  Iteration 2: transition matrix 36.6%, overall 28.5%
+Reordering until convergence, iteration 3...done (took 0.027 seconds)
+
+Reordering... done (took 0.088 seconds)
+MTBDD nodes of transition matrix: 1780 (2806 before reordering, 36.6% reduction)
+Number of overall MTBDD nodes: 2827 (3952 before reordering, 28.5% reduction)
+
+---------------------------------------------------------------------
+Rebuilding reordered model...
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 31 iterations in 0.01 seconds (average 0.000290, setup 0.00)
+
+Time for model construction: 0.029 seconds.
+
+Type:        DTMC
+States:      910 (25 initial)
+Transitions: 1103
+
+Transition matrix: 1780 nodes (6 terminal), 1103 minterms, vars: 38r/38c
+
+Warning: "Pmin=?" and "Pmax=?" operators are identical to "P=?" for DTMCs/CTMCs
+
+yes = 0, no = 910, maybe = 0
+
+Results (including zeros) for filter "init":
+0:(0,0,1,1,1,0,1,1,1,0,2,2)=0.0
+1:(0,0,1,1,1,1,1,1,1,0,2,2)=0.0
+2:(0,0,1,1,1,2,1,1,1,0,2,2)=0.0
+3:(0,0,1,1,1,3,1,1,1,0,2,2)=0.0
+4:(0,0,1,1,1,4,1,1,1,0,2,2)=0.0
+5:(0,1,1,1,1,0,1,1,1,0,2,2)=0.0
+6:(0,1,1,1,1,1,1,1,1,0,2,2)=0.0
+9:(0,1,1,1,1,2,1,1,1,0,2,2)=0.0
+10:(0,1,1,1,1,3,1,1,1,0,2,2)=0.0
+13:(0,1,1,1,1,4,1,1,1,0,2,2)=0.0
+37:(0,2,1,1,1,0,1,1,1,0,2,2)=0.0
+38:(0,2,1,1,1,1,1,1,1,0,2,2)=0.0
+39:(0,2,1,1,1,2,1,1,1,0,2,2)=0.0
+40:(0,2,1,1,1,3,1,1,1,0,2,2)=0.0
+41:(0,2,1,1,1,4,1,1,1,0,2,2)=0.0
+42:(0,3,1,1,1,0,1,1,1,0,2,2)=0.0
+43:(0,3,1,1,1,1,1,1,1,0,2,2)=0.0
+46:(0,3,1,1,1,2,1,1,1,0,2,2)=0.0
+47:(0,3,1,1,1,3,1,1,1,0,2,2)=0.0
+50:(0,3,1,1,1,4,1,1,1,0,2,2)=0.0
+74:(0,4,1,1,1,0,1,1,1,0,2,2)=0.0
+75:(0,4,1,1,1,1,1,1,1,0,2,2)=0.0
+76:(0,4,1,1,1,2,1,1,1,0,2,2)=0.0
+77:(0,4,1,1,1,3,1,1,1,0,2,2)=0.0
+78:(0,4,1,1,1,4,1,1,1,0,2,2)=0.0
+
+Range of values over initial states: [0.0,0.0]
+
+Time for model checking: 0.003 seconds.
+
+Result: [0.0,0.0] (range of values over initial states)
+
+---------------------------------------------------------------------
+
+Note: There was 1 warning during computation.
+
