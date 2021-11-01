@@ -12,13 +12,11 @@ trigger:
 
 
 stages:
- - stage: distribute_generated_models
+ - stage: run_prism
  
    jobs:
-    - job: Cloud_Ubuntu
-      # This job builds the prism binaries on an ubuntu cloud vm
-      # and uploads the binaries back into the git repository.
-      # This job is intended to run once to get prism binaries in the repository forever.
+    - job: Prism_Cloud
+    
       strategy:
         matrix:
           ubuntu_20_04:
@@ -28,15 +26,39 @@ stages:
         vmImage: $(image_name)
         name: $(agent_pool_name)
       
-      timeoutInMinutes: 60
+      timeoutInMinutes: 300
+
       steps:
-       - script: ./script/ci/distribute_models.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$BUILD_SOURCEBRANCH"
-         displayName: "Run distribute_models.sh "
+       - script: git submodule update --init --recursive
+         displayName: "Init Git Submodules"
          condition: succeeded()
-       - script: echo $BUILD_SOURCEBRANCH
-         displayName: "cHECK BRANCH VIA AZURE VARIABLES"
+       - script: sudo apt-get update && sudo apt-get install libboost-all-dev libtbb-dev
+         displayName: "Linux: Install Boost"
+         condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
+       - script: brew install boost
+         displayName: "Mac: Install Boost"
+         condition: and(succeeded(), eq( variables['Agent.OS'], 'Darwin' ))
+       - script:  choco install boost-msvc-14.2 #nuget install boost_regex-vc142 -Version 1.76.0
+         displayName: "Windows: Install Boost"#
+         condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT'))
+       - script: cmake -S . -B ./build/ 
+         displayName: "CMake: Create Project"
          condition: succeeded()
-       #- script: sudo apt-get install -y openjdk-8-jdk
-       #  displayName: "Install custom Java version"
-       #  condition: succeeded()
-       
+       - script: cmake --build ./build
+         displayName: "CMake: Compile and Link"
+         condition: succeeded()
+       - script: cd artifacts/prism-sttt17/prism/bin/ && ./prism '../../../../RESULTS/prism_model/reduced_model.prism' -pf 'filter(printall, Pmax=? [ F "failure" ], "init")' -reorder -reorderoptions converge -mtbdd -cuddmaxmem 10g | tee ../../../../RESULTS/prism_model/log.txt
+         displayName: 'Run PRISM on reduced_model'
+         condition: succeeded()
+       - script: ./build/tools/prism-log-extractor/Prism-Log-Extractor RESULTS/prism_model/log.txt RESULTS/prism_model/prism_data.json
+         displayName: 'Extract data from PRISM log'
+         condition: succeeded()
+       - script: cat RESULTS/prism_model/log.txt
+         displayName: 'Show log'
+         condition: succeeded()
+       - script: cat RESULTS/prism_model/prism_data.json
+         displayName: 'Show extract data'
+         condition: succeeded()
+       - script: ./script/ci/copy_results_json.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$BUILD_SOURCEBRANCH"
+         displayName: "Upload of results JSON"
+         condition: succeeded()
