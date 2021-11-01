@@ -1,0 +1,208 @@
+dtmc
+
+const int cfblk1_Output_1 = 0;
+
+const int cfblk4_Output_2 = 1;
+
+const int cfblk5_Output_3 = 2;
+
+const int cfblk3_Output_4 = 3;
+
+const int cfblk2_Output_5 = 4;
+
+const int cfblk1_Update_6 = 5;
+
+const int cfblk4_Update_7 = 6;
+
+const int cfblk5_Update_8 = 7;
+
+const int check_redandancy0 = 8;
+
+const int cfblk1_Output_1_2 = 9;
+
+const int cfblk1_Output_1_3 = 10;
+
+const int compare0 = 11;
+
+const int stop_system = 12;
+
+const int check_redandancy1 = 13;
+
+const int cfblk4_Output_2_2 = 14;
+
+const int cfblk4_Output_2_3 = 15;
+
+const int compare1 = 16;
+
+const int check_redandancy2 = 17;
+
+const int cfblk3_Output_4_2 = 18;
+
+const int cfblk3_Output_4_3 = 19;
+
+const int compare2 = 20;
+
+const int check_redandancy3 = 21;
+
+const int cfblk2_Output_5_2 = 22;
+
+const int cfblk2_Output_5_3 = 23;
+
+const int compare3 = 24;
+
+const int check_redandancy4 = 25;
+
+const int cfblk1_Update_6_2 = 26;
+
+const int cfblk1_Update_6_3 = 27;
+
+const int compare4 = 28;
+
+const int check_redandancy5 = 29;
+
+const int cfblk4_Update_7_2 = 30;
+
+const int cfblk4_Update_7_3 = 31;
+
+const int compare5 = 32;
+
+const int v = 0;
+
+const int ok = 1;
+
+const int no = 2;
+
+const int error = 3;
+
+const int c = 4;
+
+ global  colored_0 : [0 .. 33];
+global    colored_8 : [0 .. 4];
+global    colored_9 : [0 .. 4];
+global    colored_10 : [0 .. 4];
+global    colored_11 : [0 .. 4];
+
+global    colored_5 : [0 .. 4];
+global    colored_6 : [0 .. 4];
+global    colored_7 : [0 .. 4];
+global    colored_1 : [0 .. 4];
+global    colored_12 : [0 .. 4];
+global    colored_4 : [0 .. 4];
+
+global    colored_3 : [0 .. 4];
+
+global    colored_2 : [0 .. 4];
+
+
+
+
+init (colored_0=0) & (
+	(colored_0= cfblk1_Output_1) &
+	(1=1) &
+	(colored_9= ok) &
+	(1=1) &
+	(1=1) &
+	(1=1) &
+	(colored_5=ok) &
+	(colored_6=ok) &
+	(colored_7=ok) &
+	(colored_1=c) &
+	(1=1) &
+	(colored_4=c) &
+	(1=1) &
+	(colored_3=v) &
+	(1=1) &
+	(colored_2=v) &
+	(1=1) &
+	(1=1) &
+	(1=1)
+)endinit
+
+module control_flowerror_propagation
+ 
+    
+    [cfblk1_Output_1] colored_0= cfblk1_Output_1& (colored_9= ok& colored_5= ok) -> 0.9800000000000001:(colored_0'= check_redandancy0) & (colored_8'= ok) + 2.0e-2:(colored_0'= check_redandancy0) & (colored_8'= error);
+    [cfblk1_Output_1] colored_0= cfblk1_Output_1& (colored_9!= ok| colored_5!= ok) -> 1.0:(colored_0'= check_redandancy0) & (colored_8'= error);
+    [cfblk4_Output_2] colored_0= cfblk4_Output_2& (colored_9= ok& colored_6= ok) -> 0.9800000000000001:(colored_0'= check_redandancy1) & (colored_11'= ok) + 2.0e-2:(colored_0'= check_redandancy1) & (colored_11'= error);
+    [cfblk4_Output_2] colored_0= cfblk4_Output_2& (colored_9!= ok| colored_6!= ok) -> 1.0:(colored_0'= check_redandancy1) & (colored_11'= error);
+    [cfblk5_Output_3] colored_0= cfblk5_Output_3& (colored_8= ok& colored_7= ok) -> 0.9800000000000001:(colored_0'= cfblk3_Output_4) & (colored_13'= ok) + 2.0e-2:(colored_0'= cfblk3_Output_4) & (colored_13'= error);
+    [cfblk5_Output_3] colored_0= cfblk5_Output_3& (colored_8!= ok| colored_7!= ok) -> 1.0:(colored_0'= cfblk3_Output_4) & (colored_13'= error);
+    [cfblk3_Output_4] colored_0= cfblk3_Output_4& (colored_11= ok& colored_13= ok) -> 0.9740022399360001:(colored_0'= check_redandancy2) & (colored_10'= ok) + 2.5997760063999998e-2:(colored_0'= check_redandancy2) & (colored_10'= error);
+    [cfblk3_Output_4] colored_0= cfblk3_Output_4& (colored_11!= ok| colored_13!= ok) -> 1.0:(colored_0'= check_redandancy2) & (colored_10'= error);
+    [cfblk2_Output_5] colored_0= cfblk2_Output_5& (colored_10= ok& colored_11= ok) -> 0.9740022399360001:(colored_0'= check_redandancy3) & (colored_9'= ok) + 2.5997760063999998e-2:(colored_0'= check_redandancy3) & (colored_9'= error);
+    [cfblk2_Output_5] colored_0= cfblk2_Output_5& (colored_10!= ok| colored_11!= ok) -> 1.0:(colored_0'= check_redandancy3) & (colored_9'= error);
+    [cfblk1_Update_6] colored_0= cfblk1_Update_6& (colored_9= ok& colored_5= ok) -> 0.9800000000000001:(colored_0'= check_redandancy4) & (colored_5'= ok) + 2.0e-2:(colored_0'= check_redandancy4) & (colored_5'= error);
+    [cfblk1_Update_6] colored_0= cfblk1_Update_6& (colored_9!= ok| colored_5!= ok) -> 1.0:(colored_0'= check_redandancy4) & (colored_5'= error);
+    [cfblk4_Update_7] colored_0= cfblk4_Update_7& (colored_9= ok& colored_6= ok) -> 0.9800000000000001:(colored_0'= check_redandancy5) & (colored_6'= ok) + 2.0e-2:(colored_0'= check_redandancy5) & (colored_6'= error);
+    [cfblk4_Update_7] colored_0= cfblk4_Update_7& (colored_9!= ok| colored_6!= ok) -> 1.0:(colored_0'= check_redandancy5) & (colored_6'= error);
+    [cfblk5_Update_8] colored_0= cfblk5_Update_8& (colored_8= ok& colored_7= ok) -> 0.9800000000000001:(colored_0'= cfblk1_Output_1) & (colored_7'= ok) + 2.0e-2:(colored_0'= cfblk1_Output_1) & (colored_7'= error);
+    [cfblk5_Update_8] colored_0= cfblk5_Update_8& (colored_8!= ok| colored_7!= ok) -> 1.0:(colored_0'= cfblk1_Output_1) & (colored_7'= error);
+    [check_redandancy0] colored_0= check_redandancy0& colored_1= no-> (colored_0'= cfblk4_Output_2);
+    [check_redandancy0] colored_0= check_redandancy0& (colored_1= v| colored_1= c) -> (colored_0'= cfblk1_Output_1_2);
+    [cfblk1_Output_1_2] colored_0= cfblk1_Output_1_2& (colored_9= ok& colored_5= ok) -> 0.9800000000000001:(colored_0'= compare0) & (colored_12'= ok) + 2.0e-2:(colored_0'= compare0) & (colored_12'= error);
+    [cfblk1_Output_1_2] colored_0= cfblk1_Output_1_2& (colored_9!= ok| colored_5!= ok) -> 1.0:(colored_0'= compare0) & (colored_12'= error);
+    [cfblk1_Output_1_3] colored_0= cfblk1_Output_1_3& (colored_9= ok& colored_5= ok) -> 0.9800000000000001:(colored_0'= cfblk4_Output_2) & (colored_8'= ok) + 2.0e-2:(colored_0'= cfblk4_Output_2) & (colored_8'= error);
+    [cfblk1_Output_1_3] colored_0= cfblk1_Output_1_3& (colored_9!= ok| colored_5!= ok) -> 1.0:(colored_0'= cfblk4_Output_2) & (colored_8'= error);
+    [compare0] ((colored_0= compare0& colored_1= c) & colored_8= ok) & colored_12= ok-> (colored_0'= cfblk4_Output_2);
+    [compare0] (colored_0= compare0& colored_1= c) & (colored_8= error| colored_12= error) -> (colored_0'= stop_system);
+    [compare0] ((colored_0= compare0& colored_1= v) & colored_8= ok) & colored_12= ok-> (colored_0'= cfblk4_Output_2);
+    [compare0] (colored_0= compare0& colored_1= v) & (colored_8= error| colored_12= error) -> (colored_0'= cfblk1_Output_1_3);
+    [stop_system] colored_0= stop_system-> 1.0:(colored_0'= cfblk1_Output_1);
+    [check_redandancy1] colored_0= check_redandancy1& colored_4= no-> (colored_0'= cfblk5_Output_3);
+    [check_redandancy1] colored_0= check_redandancy1& (colored_4= v| colored_4= c) -> (colored_0'= cfblk4_Output_2_2);
+    [cfblk4_Output_2_2] colored_0= cfblk4_Output_2_2& (colored_9= ok& colored_6= ok) -> 0.9800000000000001:(colored_0'= compare1) & (colored_12'= ok) + 2.0e-2:(colored_0'= compare1) & (colored_12'= error);
+    [cfblk4_Output_2_2] colored_0= cfblk4_Output_2_2& (colored_9!= ok| colored_6!= ok) -> 1.0:(colored_0'= compare1) & (colored_12'= error);
+    [cfblk4_Output_2_3] colored_0= cfblk4_Output_2_3& (colored_9= ok& colored_6= ok) -> 0.9800000000000001:(colored_0'= cfblk5_Output_3) & (colored_11'= ok) + 2.0e-2:(colored_0'= cfblk5_Output_3) & (colored_11'= error);
+    [cfblk4_Output_2_3] colored_0= cfblk4_Output_2_3& (colored_9!= ok| colored_6!= ok) -> 1.0:(colored_0'= cfblk5_Output_3) & (colored_11'= error);
+    [compare1] ((colored_0= compare1& colored_4= c) & colored_11= ok) & colored_12= ok-> (colored_0'= cfblk5_Output_3);
+    [compare1] (colored_0= compare1& colored_4= c) & (colored_11= error| colored_12= error) -> (colored_0'= stop_system);
+    [compare1] ((colored_0= compare1& colored_4= v) & colored_11= ok) & colored_12= ok-> (colored_0'= cfblk5_Output_3);
+    [compare1] (colored_0= compare1& colored_4= v) & (colored_11= error| colored_12= error) -> (colored_0'= cfblk4_Output_2_3);
+    [check_redandancy2] colored_0= check_redandancy2& colored_3= no-> (colored_0'= cfblk2_Output_5);
+    [check_redandancy2] colored_0= check_redandancy2& (colored_3= v| colored_3= c) -> (colored_0'= cfblk3_Output_4_2);
+    [cfblk3_Output_4_2] colored_0= cfblk3_Output_4_2& (colored_11= ok& colored_13= ok) -> 0.9740022399360001:(colored_0'= compare2) & (colored_12'= ok) + 2.5997760063999998e-2:(colored_0'= compare2) & (colored_12'= error);
+    [cfblk3_Output_4_2] colored_0= cfblk3_Output_4_2& (colored_11!= ok| colored_13!= ok) -> 1.0:(colored_0'= compare2) & (colored_12'= error);
+    [cfblk3_Output_4_3] colored_0= cfblk3_Output_4_3& (colored_11= ok& colored_13= ok) -> 0.9740022399360001:(colored_0'= cfblk2_Output_5) & (colored_10'= ok) + 2.5997760063999998e-2:(colored_0'= cfblk2_Output_5) & (colored_10'= error);
+    [cfblk3_Output_4_3] colored_0= cfblk3_Output_4_3& (colored_11!= ok| colored_13!= ok) -> 1.0:(colored_0'= cfblk2_Output_5) & (colored_10'= error);
+    [compare2] ((colored_0= compare2& colored_3= c) & colored_10= ok) & colored_12= ok-> (colored_0'= cfblk2_Output_5);
+    [compare2] (colored_0= compare2& colored_3= c) & (colored_10= error| colored_12= error) -> (colored_0'= stop_system);
+    [compare2] ((colored_0= compare2& colored_3= v) & colored_10= ok) & colored_12= ok-> (colored_0'= cfblk2_Output_5);
+    [compare2] (colored_0= compare2& colored_3= v) & (colored_10= error| colored_12= error) -> (colored_0'= cfblk3_Output_4_3);
+    [check_redandancy3] colored_0= check_redandancy3& colored_2= no-> (colored_0'= cfblk1_Update_6);
+    [check_redandancy3] colored_0= check_redandancy3& (colored_2= v| colored_2= c) -> (colored_0'= cfblk2_Output_5_2);
+    [cfblk2_Output_5_2] colored_0= cfblk2_Output_5_2& (colored_10= ok& colored_11= ok) -> 0.9740022399360001:(colored_0'= compare3) & (colored_12'= ok) + 2.5997760063999998e-2:(colored_0'= compare3) & (colored_12'= error);
+    [cfblk2_Output_5_2] colored_0= cfblk2_Output_5_2& (colored_10!= ok| colored_11!= ok) -> 1.0:(colored_0'= compare3) & (colored_12'= error);
+    [cfblk2_Output_5_3] colored_0= cfblk2_Output_5_3& (colored_10= ok& colored_11= ok) -> 0.9740022399360001:(colored_0'= cfblk1_Update_6) & (colored_9'= ok) + 2.5997760063999998e-2:(colored_0'= cfblk1_Update_6) & (colored_9'= error);
+    [cfblk2_Output_5_3] colored_0= cfblk2_Output_5_3& (colored_10!= ok| colored_11!= ok) -> 1.0:(colored_0'= cfblk1_Update_6) & (colored_9'= error);
+    [compare3] ((colored_0= compare3& colored_2= c) & colored_9= ok) & colored_12= ok-> (colored_0'= cfblk1_Update_6);
+    [compare3] (colored_0= compare3& colored_2= c) & (colored_9= error| colored_12= error) -> (colored_0'= stop_system);
+    [compare3] ((colored_0= compare3& colored_2= v) & colored_9= ok) & colored_12= ok-> (colored_0'= cfblk1_Update_6);
+    [compare3] (colored_0= compare3& colored_2= v) & (colored_9= error| colored_12= error) -> (colored_0'= cfblk2_Output_5_3);
+    [check_redandancy4] colored_0= check_redandancy4& colored_1= no-> (colored_0'= cfblk4_Update_7);
+    [check_redandancy4] colored_0= check_redandancy4& (colored_1= v| colored_1= c) -> (colored_0'= cfblk1_Update_6_2);
+    [cfblk1_Update_6_2] colored_0= cfblk1_Update_6_2& (colored_9= ok& colored_5= ok) -> 0.9800000000000001:(colored_0'= compare4) & (colored_11'= ok) + 2.0e-2:(colored_0'= compare4) & (colored_11'= error);
+    [cfblk1_Update_6_2] colored_0= cfblk1_Update_6_2& (colored_9!= ok| colored_5!= ok) -> 1.0:(colored_0'= compare4) & (colored_11'= error);
+    [cfblk1_Update_6_3] colored_0= cfblk1_Update_6_3& (colored_9= ok& colored_5= ok) -> 0.9800000000000001:(colored_0'= cfblk4_Update_7) & (colored_5'= ok) + 2.0e-2:(colored_0'= cfblk4_Update_7) & (colored_5'= error);
+    [cfblk1_Update_6_3] colored_0= cfblk1_Update_6_3& (colored_9!= ok| colored_5!= ok) -> 1.0:(colored_0'= cfblk4_Update_7) & (colored_5'= error);
+    [compare4] ((colored_0= compare4& colored_1= c) & colored_5= ok) & colored_11= ok-> (colored_0'= cfblk4_Update_7);
+    [compare4] (colored_0= compare4& colored_1= c) & (colored_5= error| colored_11= error) -> (colored_0'= stop_system);
+    [compare4] ((colored_0= compare4& colored_1= v) & colored_5= ok) & colored_11= ok-> (colored_0'= cfblk4_Update_7);
+    [compare4] (colored_0= compare4& colored_1= v) & (colored_5= error| colored_11= error) -> (colored_0'= cfblk1_Update_6_3);
+    [check_redandancy5] colored_0= check_redandancy5& colored_4= no-> (colored_0'= cfblk5_Update_8);
+    [check_redandancy5] colored_0= check_redandancy5& (colored_4= v| colored_4= c) -> (colored_0'= cfblk4_Update_7_2);
+    [cfblk4_Update_7_2] colored_0= cfblk4_Update_7_2& (colored_9= ok& colored_6= ok) -> 0.9800000000000001:(colored_0'= compare5) & (colored_10'= ok) + 2.0e-2:(colored_0'= compare5) & (colored_10'= error);
+    [cfblk4_Update_7_2] colored_0= cfblk4_Update_7_2& (colored_9!= ok| colored_6!= ok) -> 1.0:(colored_0'= compare5) & (colored_10'= error);
+    [cfblk4_Update_7_3] colored_0= cfblk4_Update_7_3& (colored_9= ok& colored_6= ok) -> 0.9800000000000001:(colored_0'= cfblk5_Update_8) & (colored_6'= ok) + 2.0e-2:(colored_0'= cfblk5_Update_8) & (colored_6'= error);
+    [cfblk4_Update_7_3] colored_0= cfblk4_Update_7_3& (colored_9!= ok| colored_6!= ok) -> 1.0:(colored_0'= cfblk5_Update_8) & (colored_6'= error);
+    [compare5] ((colored_0= compare5& colored_4= c) & colored_6= ok) & colored_10= ok-> (colored_0'= cfblk5_Update_8);
+    [compare5] (colored_0= compare5& colored_4= c) & (colored_6= error| colored_10= error) -> (colored_0'= stop_system);
+    [compare5] ((colored_0= compare5& colored_4= v) & colored_6= ok) & colored_10= ok-> (colored_0'= cfblk5_Update_8);
+    [compare5] (colored_0= compare5& colored_4= v) & (colored_6= error| colored_10= error) -> (colored_0'= cfblk4_Update_7_3);
+endmodule
+
+formula failure = colored_7 = error;
+
+rewards"time"
+    1=1: 1;
+endrewards
+
