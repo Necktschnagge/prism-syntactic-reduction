@@ -1,0 +1,77 @@
+PRISM
+=====
+
+Version: 4.3.1.dev
+Date: Mon Nov 01 10:48:10 UTC 2021
+Hostname: fv-az146-670
+Memory limits: cudd=10g, java(heap)=1g
+Command line: prism ../../../../RESULTS/prism_model/reduced_model.prism -pf 'filter(printall, Pmax=? [ F<100 "deadlock" ], "init")' -reorderoptions converge -mtbdd -cuddmaxmem 10g
+
+Parsing model file "../../../../RESULTS/prism_model/reduced_model.prism"...
+
+1 property:
+(1) filter(printall, Pmax=? [ F<100 "deadlock" ], "init")
+
+Type:        DTMC
+Modules:     control_flowerror_propagation 
+Variables:   colored_0 colored_7 colored_8 colored_9 colored_11 colored_5 colored_4 colored_6 colored_3 colored_10 colored_1 colored_2 
+
+---------------------------------------------------------------------
+
+Model checking: filter(printall, Pmax=? [ F<100 "deadlock" ], "init")
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 31 iterations in 0.01 seconds (average 0.000290, setup 0.00)
+
+Time for model construction: 0.055 seconds.
+
+Type:        DTMC
+States:      910 (25 initial)
+Transitions: 1103
+
+Transition matrix: 2806 nodes (6 terminal), 1103 minterms, vars: 38r/38c
+
+Warning: "Pmin=?" and "Pmax=?" operators are identical to "P=?" for DTMCs/CTMCs
+
+yes = 0, no = 910, maybe = 0
+
+Results (including zeros) for filter "init":
+0:(0,1,1,0,1,1,1,1,2,0,2,0)=0.0
+1:(0,1,1,0,1,1,1,1,2,1,2,0)=0.0
+2:(0,1,1,0,1,1,1,1,2,2,2,0)=0.0
+3:(0,1,1,0,1,1,1,1,2,3,2,0)=0.0
+4:(0,1,1,0,1,1,1,1,2,4,2,0)=0.0
+5:(0,1,1,1,1,1,1,1,2,0,2,0)=0.0
+6:(0,1,1,1,1,1,1,1,2,1,2,0)=0.0
+7:(0,1,1,1,1,1,1,1,2,2,2,0)=0.0
+8:(0,1,1,1,1,1,1,1,2,3,2,0)=0.0
+9:(0,1,1,1,1,1,1,1,2,4,2,0)=0.0
+24:(0,1,1,2,1,1,1,1,2,0,2,0)=0.0
+25:(0,1,1,2,1,1,1,1,2,1,2,0)=0.0
+26:(0,1,1,2,1,1,1,1,2,2,2,0)=0.0
+27:(0,1,1,2,1,1,1,1,2,3,2,0)=0.0
+28:(0,1,1,2,1,1,1,1,2,4,2,0)=0.0
+29:(0,1,1,3,1,1,1,1,2,0,2,0)=0.0
+30:(0,1,1,3,1,1,1,1,2,1,2,0)=0.0
+31:(0,1,1,3,1,1,1,1,2,2,2,0)=0.0
+32:(0,1,1,3,1,1,1,1,2,3,2,0)=0.0
+33:(0,1,1,3,1,1,1,1,2,4,2,0)=0.0
+48:(0,1,1,4,1,1,1,1,2,0,2,0)=0.0
+49:(0,1,1,4,1,1,1,1,2,1,2,0)=0.0
+50:(0,1,1,4,1,1,1,1,2,2,2,0)=0.0
+51:(0,1,1,4,1,1,1,1,2,3,2,0)=0.0
+52:(0,1,1,4,1,1,1,1,2,4,2,0)=0.0
+
+Range of values over initial states: [0.0,0.0]
+
+Time for model checking: 0.003 seconds.
+
+Result: [0.0,0.0] (range of values over initial states)
+
+---------------------------------------------------------------------
+
+Note: There was 1 warning during computation.
+
