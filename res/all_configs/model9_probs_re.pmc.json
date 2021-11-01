@@ -1,0 +1,9 @@
+{
+	"model_path" : "../Examples/small_random/model9_probs_re.pmc/t_model9_probs_re.pmc",
+	"result_dir" : "../RESULTS",
+	"exclude_vars" :
+		[
+			"x_cfblk1_1_3402568957"
+		],
+	"prism_command" : ".\/prism '..\/..\/..\/..\/RESULTS\/prism_model\/reduced_model.prism' -pf 'filter(printall, Pmax=? [ F failure ], \"init\")' -reorder -reorderoptions converge -mtbdd -cuddmaxmem 10g"
+}
