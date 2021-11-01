@@ -56,7 +56,7 @@ const int error = 3;
 
 const int c = 4;
 
-global    cf : [0 .. 23] init cfblk1_Output_1;
+global    cf : [0 .. 23];
 global    y_cfblk1_77234047 : [0 .. 4];
 global    y_cfblk2_116369440 : [0 .. 4];
 global    y_cfblk3_155504833 : [0 .. 4];
