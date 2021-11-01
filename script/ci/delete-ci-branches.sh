@@ -14,3 +14,11 @@ do
 	echo pure branch name: ${branch_name}
 	git push ${remote_name} --delete ${branch_name}
 done
+
+git branch -r | grep ${remote_name}\/ci-distributed-json-.* | while read line 
+do
+	echo Delte branch: ${line}
+	branch_name=$(echo ${line} | sed -E "s/${remote_name}\///")
+	echo pure branch name: ${branch_name}
+	git push ${remote_name} --delete ${branch_name}
+done
