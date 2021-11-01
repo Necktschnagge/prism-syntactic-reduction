@@ -18,7 +18,7 @@ user_repo_id=$(echo "${git_repo_url}" | sed -E 's/https:\/\/\w*.\w*\///' | sed -
 
 
 prism_command=$(jq -r '.prism_command' ./res/config.json)
-echo Loaded prism command from3json: ${prism_command}
+echo Loaded prism command from json: ${prism_command}
 
 cd ./RESULTS
 ls -la
@@ -42,6 +42,7 @@ for D in */ ; do
 	
 	cd ..
 	git add *
+	git add --force ./build/tools/prism-log-extractor/Prism-Log-Extractor
 	echo added git files.
 	git status
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" commit -m "upload one reduced model: (${number})"
