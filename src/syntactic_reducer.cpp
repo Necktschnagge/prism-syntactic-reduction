@@ -858,7 +858,11 @@ void find_all_global_coverings_with_max_groupings(
 				min_selection_size_so_far = size_selection;
 				combinations_of_max_groupings.clear(); // discard all previously found combinations that took more selected items.
 			}
-			combinations_of_max_groupings.push_back(rec);
+			consideration rec2{ rec };
+			for (auto& s : rec2.sel) {
+				if (s == selected::UNDECIDED) s = selected::NO;
+			}
+			combinations_of_max_groupings.push_back(rec2);
 			return;
 		}
 		if (rec.count() >= min_selection_size_so_far) // did not reached goal, but with the next selection we will exceed min_selection_size_so_far
@@ -872,6 +876,8 @@ void find_all_global_coverings_with_max_groupings(
 		std::size_t sel_i = 0;
 		std::size_t sel_rest_size = 0;
 		for (std::size_t i = 0; i < max_groupings.size(); ++i) {
+			if (rec.sel[i] == selected::NO)
+				continue;
 			const auto rest_usage_size = (max_groupings[i].id & rest_goal).count();
 			if (rest_usage_size > sel_rest_size) {
 				sel_rest_size = rest_usage_size;
@@ -1610,7 +1616,7 @@ int cli(int argc, char** argv) {
 
 	// all_partitions.json
 	write_all_partitionings(results_directory, all_partitionings_with_minimal_size);
-	
+
 	// meta.json
 	write_meta_json(results_directory, all_partitionings_with_minimal_size.size());
 
@@ -1654,7 +1660,7 @@ int cli(int argc, char** argv) {
 	std::ofstream config_json_ofstream;
 	config_json_ofstream.open(config_json_path);
 	config_json_ofstream << config.dump(3);
-	
+
 	return 0;
 }
 
