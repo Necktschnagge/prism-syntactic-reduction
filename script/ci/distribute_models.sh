@@ -40,7 +40,7 @@ for D in */ ; do
 	echo "See id file here:"
 	cat prism_model/id.txt
 	
-	sleep 10s
+	sleep 25s
 	
 	cd ..
 	git add *

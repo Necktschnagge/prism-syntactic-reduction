@@ -28,7 +28,7 @@ stages:
         vmImage: $(image_name)
         name: $(agent_pool_name)
       
-      timeoutInMinutes: 60
+      timeoutInMinutes: 600
       steps:
        - script: ./script/ci/distribute_models.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$BUILD_SOURCEBRANCH"
          displayName: "Run distribute_models.sh "
