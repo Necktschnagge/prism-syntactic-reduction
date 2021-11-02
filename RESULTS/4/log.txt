@@ -1,0 +1,107 @@
+PRISM
+=====
+
+Version: 4.3.1.dev
+Date: Tue Nov 02 08:02:48 UTC 2021
+Hostname: fv-az209-179
+Memory limits: cudd=10g, java(heap)=1g
+Command line: prism ../../../../RESULTS/prism_model/reduced_model.prism -pf 'filter(printall, Pmax=? [ F failure ], "init")' -reorder -reorderoptions converge -mtbdd -cuddmaxmem 10g
+
+Parsing model file "../../../../RESULTS/prism_model/reduced_model.prism"...
+
+1 property:
+(1) filter(printall, Pmax=? [ F failure ], "init")
+
+Type:        DTMC
+Modules:     control_flowerror_propagation 
+Variables:   colored_0 colored_4 colored_5 colored_7 colored_3 colored_2 colored_6 colored_1 
+
+---------------------------------------------------------------------
+
+Model checking: filter(printall, Pmax=? [ F failure ], "init")
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 4 iterations in 0.00 seconds (average 0.000000, setup 0.00)
+
+Time for model construction: 0.057 seconds.
+
+Warning: Deadlocks detected and fixed in 10 states
+
+Type:        DTMC
+States:      135 (25 initial)
+Transitions: 160
+
+Transition matrix: 190 nodes (4 terminal), 160 minterms, vars: 26r/26c
+
+Reordering... 
+Reordering until convergence, iteration 1...done (took 0.007 seconds)
+  Iteration 1: transition matrix 3.2%, overall 5.1%
+Reordering until convergence, iteration 2...done (took 0.006 seconds)
+
+Reordering... done (took 0.015 seconds)
+MTBDD nodes of transition matrix: 184 (190 before reordering, 3.2% reduction)
+Number of overall MTBDD nodes: 374 (394 before reordering, 5.1% reduction)
+
+---------------------------------------------------------------------
+Rebuilding reordered model...
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 4 iterations in 0.00 seconds (average 0.000000, setup 0.00)
+
+Time for model construction: 0.012 seconds.
+
+Warning: Deadlocks detected and fixed in 10 states
+
+Type:        DTMC
+States:      135 (25 initial)
+Transitions: 160
+
+Transition matrix: 184 nodes (4 terminal), 160 minterms, vars: 26r/26c
+
+Warning: "Pmin=?" and "Pmax=?" operators are identical to "P=?" for DTMCs/CTMCs
+
+yes = 0, no = 135, maybe = 0
+
+Results (including zeros) for filter "init":
+0:(0,0,4,2,1,1,0,1)=0.0
+1:(0,0,4,2,1,1,1,1)=0.0
+2:(0,0,4,2,1,1,2,1)=0.0
+3:(0,0,4,2,1,1,3,1)=0.0
+4:(0,0,4,2,1,1,4,1)=0.0
+5:(0,1,4,2,1,1,0,1)=0.0
+6:(0,1,4,2,1,1,1,1)=0.0
+7:(0,1,4,2,1,1,2,1)=0.0
+8:(0,1,4,2,1,1,3,1)=0.0
+9:(0,1,4,2,1,1,4,1)=0.0
+10:(0,2,4,2,1,1,0,1)=0.0
+11:(0,2,4,2,1,1,1,1)=0.0
+12:(0,2,4,2,1,1,2,1)=0.0
+13:(0,2,4,2,1,1,3,1)=0.0
+14:(0,2,4,2,1,1,4,1)=0.0
+15:(0,3,4,2,1,1,0,1)=0.0
+16:(0,3,4,2,1,1,1,1)=0.0
+17:(0,3,4,2,1,1,2,1)=0.0
+18:(0,3,4,2,1,1,3,1)=0.0
+19:(0,3,4,2,1,1,4,1)=0.0
+20:(0,4,4,2,1,1,0,1)=0.0
+21:(0,4,4,2,1,1,1,1)=0.0
+22:(0,4,4,2,1,1,2,1)=0.0
+23:(0,4,4,2,1,1,3,1)=0.0
+24:(0,4,4,2,1,1,4,1)=0.0
+
+Range of values over initial states: [0.0,0.0]
+
+Time for model checking: 0.006 seconds.
+
+Result: [0.0,0.0] (range of values over initial states)
+
+---------------------------------------------------------------------
+
+Note: There were 3 warnings during computation.
+
