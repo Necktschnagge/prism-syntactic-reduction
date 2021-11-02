@@ -772,7 +772,7 @@ void find_local_groupings(
 			}
 		};
 
-		constexpr uint8_t count_threads{ 1 };
+		constexpr uint8_t count_threads{ 3 };
 
 		std::array<std::thread, count_threads> produce_and_merge_threads;
 
