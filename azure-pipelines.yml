@@ -39,7 +39,10 @@ stages:
        - script: git submodule update --init --recursive
          displayName: "Init Git Submodules"
          condition: succeeded()
-       - script: cmake -S . -B ./build/ 
+       - script: cmake --version 
+         displayName: "CMake: Version"
+         condition: succeeded()
+        - script: cmake -S . -B ./build/ 
          displayName: "CMake: Create Project"
          condition: succeeded()
        - script: cmake --build ./build
