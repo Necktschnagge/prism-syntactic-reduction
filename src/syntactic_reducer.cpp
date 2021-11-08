@@ -19,7 +19,6 @@
 #include <sstream>
 #include <bitset>
 #include <algorithm>
-#include <execution>
 #include <locale>
 #include <codecvt>
 
@@ -627,7 +626,7 @@ void find_local_groupings(
 #ifdef __clang__
 		if (!std::is_sorted(all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
 #else
-		if (!std::is_sorted(std::execution::par, all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
+		if (!std::is_sorted(all_sets.back().cbegin(), all_sets.back().cend(), COMP_BITSET)) {
 #endif
 			standard_logger().warn("Loaded data not yet sorted.");
 			std::sort(all_sets.back().begin(), all_sets.back().end(), COMP_BITSET);
