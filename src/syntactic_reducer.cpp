@@ -412,6 +412,64 @@ std::vector<collapse_node::big_int> calc_max_local_first_coloring(
 }
 
 
+std::vector<collapse_node::big_int> calc_welsh_powell_coloring(const grouping_enemies_table& enemies) {
+
+	std::vector<std::size_t> f_color = std::vector<std::size_t>(enemies.size(), 0);
+
+	std::vector<std::size_t> o_descending_var_id_ordering;
+	for (std::size_t i = 0; i < enemies.size(); ++i) {
+		o_descending_var_id_ordering.push_back(i);
+	}
+	std::sort(
+		o_descending_var_id_ordering.begin(),
+		o_descending_var_id_ordering.end(),
+		[&](const std::size_t& l, const std::size_t& r) {
+			return enemies[l].size() > enemies[r].size();
+		}
+	);
+	for (std::size_t color = 1; color <= enemies.size(); ++color) {
+		for (const auto& id : o_descending_var_id_ordering) {
+			if (f_color[id] == 0) {
+				bool exists_v{ false };
+				for (const auto v : enemies[id]) {
+					if (f_color[v] == color) {
+						exists_v = true;
+						goto calc_welsh_powell_coloring_continue;
+					}
+				}
+			calc_welsh_powell_coloring_continue:
+				if (!exists_v) {
+					f_color[id] = color;
+				}
+			}
+		}
+	}
+
+	std::size_t max_color{ 0 };
+	for (std::size_t iter = 0; iter < f_color.size(); ++iter) {
+		if (f_color[iter] > max_color)
+			max_color = f_color[iter];
+	}
+
+	std::vector<collapse_node::big_int> result_partitioning = std::vector<collapse_node::big_int>(max_color, collapse_node::big_int());
+
+	for (std::size_t var_id = 0; var_id < enemies.size(); ++var_id) {
+		result_partitioning[f_color[var_id] - 1].set(var_id, true);
+	}
+
+std:sort(
+	result_partitioning.begin(),
+	result_partitioning.end(),
+	[](const collapse_node::big_int& left, const collapse_node::big_int& right) {
+		return left.to_string() < right.to_string();
+	}
+);
+
+return result_partitioning;
+
+}
+
+
 std::vector<collapse_node::big_int> starke_coloring(const grouping_enemies_table& enemies) {
 	std::vector<std::size_t> removed_nodes;
 
@@ -1457,7 +1515,8 @@ void write_all_partitionings(
 	const std::filesystem::path & directory,
 	const std::vector<std::vector<collapse_node::big_int>>&all_partitionings_with_minimal_size,
 	const std::vector<collapse_node::big_int>&starke_coloring_result,
-	const std::vector<collapse_node::big_int>&max_grouping_first_coloring
+	const std::vector<collapse_node::big_int>&max_grouping_first_coloring,
+	const std::vector<collapse_node::big_int>&welsh_powell_coloring
 ) {
 	std::filesystem::create_directories(directory);
 	auto file = std::ofstream((directory / "all_partitionings.json").c_str());
@@ -1492,6 +1551,17 @@ void write_all_partitionings(
 		auto iter = std::find(all_partitionings_with_minimal_size.cbegin(), all_partitionings_with_minimal_size.cend(), max_grouping_first_coloring);
 		if (iter != all_partitionings_with_minimal_size.cend()) id_within_all = iter - all_partitionings_with_minimal_size.cbegin();
 		max_first_json["id_within_all"] = id_within_all;
+	}
+	{ // welsh_powell_coloring
+		auto& ref_sub_json{ json["welsh_powell_coloring"] };
+		nlohmann::json sub_json;
+		for (const auto& partition : welsh_powell_coloring)
+			sub_json["partitions"].push_back(partition.to_string());
+		ref_sub_json["partitioning"] = sub_json;
+		std::size_t id_within_all = -1;
+		auto iter = std::find(all_partitionings_with_minimal_size.cbegin(), all_partitionings_with_minimal_size.cend(), welsh_powell_coloring);
+		if (iter != all_partitionings_with_minimal_size.cend()) id_within_all = iter - all_partitionings_with_minimal_size.cbegin();
+		ref_sub_json["id_within_all"] = id_within_all;
 	}
 	file << json.dump(3);
 }
@@ -1717,6 +1787,8 @@ int cli(int argc, char** argv) {
 
 	std::vector<collapse_node::big_int> starke_coloring_result = starke_coloring(enemies_table);
 
+	std::vector<collapse_node::big_int> welsh_powell_coloring = calc_welsh_powell_coloring(enemies_table);
+
 	std::vector<collapse_node::big_int> max_local_first_coloring = calc_max_local_first_coloring(max_groupings);
 
 	// var_list.txt
@@ -1726,7 +1798,7 @@ int cli(int argc, char** argv) {
 	write_max_local_groupings(results_directory, max_groupings);
 
 	// all_partitions.json
-	write_all_partitionings(results_directory, all_partitionings_with_minimal_size, starke_coloring_result, max_local_first_coloring);
+	write_all_partitionings(results_directory, all_partitionings_with_minimal_size, starke_coloring_result, max_local_first_coloring, welsh_powell_coloring);
 
 	// meta.json
 	write_meta_json(results_directory, all_partitionings_with_minimal_size.size());
