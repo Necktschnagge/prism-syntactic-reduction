@@ -259,57 +259,6 @@ void print_coloring_from_graph_with_color_annotations(const std::map<std::string
 }
 
 
-void starke_coloring(std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph) {
-	// find a coloring
-	std::vector<std::string/*std::pair<std::string, std::set<std::string>>*/ > removed_nodes;
-
-	while (true) {
-		// while there are nodes, select one with min incidence:
-		auto selected{ graph.end() };
-		int min_seen{ std::numeric_limits<int>::max() };
-		for (auto iter{ graph.begin() }; iter != graph.end(); ++iter) {
-			if (is_active(iter->second)) {
-				int current_incidence{ count_active_neighbours(iter->second) };
-				if (current_incidence < min_seen) {
-					selected = iter;
-					min_seen = current_incidence;
-				}
-			}
-		}
-		if (selected == graph.end()) break; // all removed
-		// remove selected node:
-		const std::string& node_name{ selected->first };
-		// remove backward edges:
-		for (const auto& incident_node_name : neighbours(selected->second)) {
-			if (is_active(graph[incident_node_name])) {
-				--count_active_neighbours(graph[incident_node_name]);
-			}
-		}
-		// remove the node itself
-		removed_nodes.push_back(node_name);
-		is_active(graph[node_name]) = false;
-	}
-
-	// iterate list backwards and insert the smallest color not used by active neighbours:
-	for (auto ri{ removed_nodes.rbegin() }; ri != removed_nodes.rend(); ++ri) {
-		// select color
-		std::unordered_set<int> excluded;
-		auto& current_tuple{ graph[*ri] };
-		for (const auto& incident_node_name : neighbours(current_tuple)) {
-			if (is_active(graph[incident_node_name]))
-				excluded.insert(color(graph[incident_node_name]));
-		}
-		int c{ 0 };
-		for (; c < std::numeric_limits<int>::max(); ++c) {
-			if (excluded.find(c) == excluded.end())
-				break;
-		}
-		color(current_tuple) = c;
-		// reactivate
-		is_active(graph[*ri]) = true;
-	}
-
-}
 
 std::string to_string(const std::set<std::string>& s) {
 	std::string result;
@@ -414,6 +363,85 @@ struct collapse_node {
 	bool operator == (const collapse_node& another) const { return this->id == another.id; }
 	bool operator <(const collapse_node& another) const { return this->id.to_string() < another.id.to_string(); }
 };
+
+std::vector<collapse_node::big_int> starke_coloring(const grouping_enemies_table& enemies) {
+	std::vector<std::size_t> removed_nodes;
+
+	std::vector<bool> already_chosen = std::vector<bool>(enemies.size(), false);
+	std::vector<std::size_t> color = std::vector<std::size_t>(enemies.size(), 0);
+
+	const auto count_incidents = [&](std::size_t var_id) -> std::size_t {
+		std::size_t count{ 0 };
+		for (const auto& neighbour : enemies[var_id])
+			if (!already_chosen[neighbour])
+				++count;
+		return count;
+	};
+
+	while (true) {
+		// while there are nodes, select one with min incidence (for those it is easy to choose a color at the end)
+		std::size_t selected{ enemies.size() }; // init == past the end index
+		std::size_t min_seen{ std::numeric_limits<std::size_t>::max() }; // min incidence seen so far.
+
+		// select a node =~ variable which has not yet been chosen and which has min incidence
+		for (std::size_t iter = 0; iter != enemies.size(); ++iter) { // consider every variable
+			if (!already_chosen[iter]) {
+				std::size_t current_incidence{ count_incidents(iter) };
+				if (current_incidence < min_seen) {
+					selected = iter;
+					min_seen = current_incidence;
+				}
+			}
+		}
+
+		if (selected == enemies.size())
+			break; // all have been chosen.
+
+		// remove selected node:
+		already_chosen[selected] = true;
+		// remember order:
+		removed_nodes.push_back(selected);
+	}
+
+	// iterate list backwards and insert the smallest color not already used by any neighbour:
+	for (auto ri{ removed_nodes.rbegin() }; ri != removed_nodes.rend(); ++ri) {
+		// select color
+		std::unordered_set<std::size_t> excluded_colors;
+
+		//auto& current_tuple{ graph[*ri] };
+		for (const auto& en : enemies[*ri]) {
+			excluded_colors.insert(color[en]);
+		}
+		int c{ 1 };
+		for (; c < std::numeric_limits<int>::max(); ++c) {
+			if (excluded_colors.find(c) == excluded_colors.end())
+				break;
+		}
+		color[*ri] = c;
+	}
+
+	std::size_t max_color{ 0 };
+	for (std::size_t iter = 0; iter < color.size(); ++iter) {
+		if (color[iter] > max_color)
+			max_color = color[iter];
+	}
+
+	std::vector<collapse_node::big_int> result_partitioning = std::vector<collapse_node::big_int>(max_color, collapse_node::big_int());
+	for (std::size_t var_id = 0; var_id < enemies.size(); ++var_id) {
+		result_partitioning[color[var_id] - 1].set(var_id, true);
+	}
+std:sort(
+	result_partitioning.begin(),
+	result_partitioning.end(),
+	[](const collapse_node::big_int& left, const collapse_node::big_int& right) {
+		return left.to_string() < right.to_string();
+	}
+);
+
+return result_partitioning;
+
+}
+
 
 std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const std::vector<collapse_node>& the_array) {
 	constexpr std::size_t Cthreads = 16;
@@ -1377,7 +1405,11 @@ void write_max_local_groupings(const std::filesystem::path & directory, const st
 		file << group.id.to_string() << std::endl;
 }
 
-void write_all_partitionings(const std::filesystem::path & directory, const std::vector<std::vector<collapse_node::big_int>>&all_partitionings_with_minimal_size) {
+void write_all_partitionings(
+	const std::filesystem::path & directory,
+	const std::vector<std::vector<collapse_node::big_int>>&all_partitionings_with_minimal_size,
+	const std::vector<collapse_node::big_int>&starke_coloring_result
+) {
 	std::filesystem::create_directories(directory);
 	auto file = std::ofstream((directory / "all_partitionings.json").c_str());
 
@@ -1390,6 +1422,16 @@ void write_all_partitionings(const std::filesystem::path & directory, const std:
 			this_partitioning["partitions"].push_back(partition.to_string());
 		j_partitions[std::to_string(i)] = this_partitioning;
 	}
+
+	auto& starke_json{ json["starke_coloring"] };
+	nlohmann::json starke_partitioning;
+	for (const auto& partition : starke_coloring_result)
+		starke_partitioning["partitions"].push_back(partition.to_string());
+	starke_json["partitioning"] = starke_partitioning;
+	std::size_t id_within_all = -1;
+	auto iter = std::find(all_partitionings_with_minimal_size.cbegin(), all_partitionings_with_minimal_size.cend(), starke_coloring_result);
+	if (iter != all_partitionings_with_minimal_size.cend()) id_within_all = iter - all_partitionings_with_minimal_size.cbegin();
+	starke_json["id_within_all"] = id_within_all;
 
 	file << json.dump(3);
 }
@@ -1590,7 +1632,8 @@ int cli(int argc, char** argv) {
 	std::sort(all_var_names.begin(), all_var_names.end());
 	//## sanity check: no duplicates in this vector.
 
-	auto enemies_table = grouping_enemies_table(all_var_names.size());
+
+	grouping_enemies_table enemies_table = grouping_enemies_table(all_var_names.size());
 	for (std::size_t var_id{ 0 }; var_id < all_var_names.size(); ++var_id) {
 		if (!enemies_table[var_id].empty())
 			throw 9134872798; //### just a sanity check, remove please!
@@ -1608,6 +1651,12 @@ int cli(int argc, char** argv) {
 
 	find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, max_groupings, all_partitionings_with_minimal_size);  //  ####refactor maxthreads inner and outer threads config....
 
+	standard_logger().info("Applying concrete heuristics...");
+
+	standard_logger().info("Using own heuristic");
+
+	std::vector<collapse_node::big_int> starke_coloring_result = starke_coloring(enemies_table);
+
 	// var_list.txt
 	write_var_list_txt(results_directory, all_var_names);
 
@@ -1615,7 +1664,7 @@ int cli(int argc, char** argv) {
 	write_max_local_groupings(results_directory, max_groupings);
 
 	// all_partitions.json
-	write_all_partitionings(results_directory, all_partitionings_with_minimal_size);
+	write_all_partitionings(results_directory, all_partitionings_with_minimal_size, starke_coloring_result);
 
 	// meta.json
 	write_meta_json(results_directory, all_partitionings_with_minimal_size.size());

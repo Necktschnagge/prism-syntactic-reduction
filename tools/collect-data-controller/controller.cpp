@@ -55,6 +55,67 @@ const auto path_to_string = [](auto path) {
 	}
 };
 
+std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribution_of_states) {
+	const double min_value = distribution_of_states.cbegin()->first;
+	const double max_value = distribution_of_states.crbegin()->first;
+	const double x_range = max_value - min_value;
+	const double x_min = min_value - (x_range / 10);
+	const double x_max = max_value + (x_range / 10);
+	std::size_t count_models{ 0 };
+	for (const auto& pair : distribution_of_states) count_models += pair.second;
+	const double y_max{ static_cast<double>(count_models) * 5 / 4 };
+
+	std::stringstream ss;
+	ss << R"xxx(
+\begin{figure}
+\caption{Verteilung der states von Modell XX}
+%\label{}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+	xlabel = {x},
+	ylabel = {Zahl der Modelle},
+	xmin = )xxx" << x_min;
+
+	ss << R"xxx(,
+	xmax = )xxx" << x_max;
+
+	ss << R"xxx(,
+	ymin = 0,
+	ymax = )xxx" << y_max;
+
+	ss << R"xxx(,
+	legend pos = north west,
+	ymajorgrids = true,
+	grid style = dashed,
+]
+	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+
+	\addplot[color = red!50, ]
+		coordinates{
+			()xxx" << x_min << ", " << "0)";
+	std::size_t accumulated_models{ 0 };
+	for (const auto& pair : distribution_of_states) {
+		ss << "(" << static_cast<double>(pair.first) - 0.01 << ", " << accumulated_models << ")"; // just before new value
+		accumulated_models += pair.second;
+		ss << "(" << static_cast<double>(pair.first) << ", " << accumulated_models << ")"; // new value
+	}
+	ss << "(" << x_max << ", " << accumulated_models << ")"; // end of diagram
+
+	ss << R"xxx(
+	};
+
+	\addlegendentry{Modelle mit $\leq x$ states}
+	%\addlegendentry{ second legendary }
+
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+)xxx";
+
+	return ss.str();
+}
+
 int main(int argc, char** argv)
 {
 	init_logger();
@@ -156,6 +217,9 @@ int main(int argc, char** argv)
 		standard_logger().info(std::string("average:  ") + std::to_string(average));
 		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
 	}
+
+	const auto diagram_code = get_diagram_code(distribution_of_states);
+	standard_logger().info(diagram_code);
 
 #if false
 	std::string original_model_path_string{ argv[1] };
