@@ -1,0 +1,12 @@
+{
+   "count_transitions": 1729,
+   "nodes": 2422,
+   "result": {
+      "max": 0.27045163915746606,
+      "min": 0.27045163915746606
+   },
+   "states": {
+      "count": 1275,
+      "initial": 125
+   }
+}
