@@ -102,7 +102,7 @@ init
 (y_cfblk2_820757341_2=ok) &
 (redundancy_model18_cfblk3_3=no) &
 (y_cfblk3_859892734_2=ok) &
-(x_cfblk1_1_1546699507_2=ok
+(x_cfblk1_1_1546699507_2=ok)
 endinit
 
  module control_flowerror_propagation
