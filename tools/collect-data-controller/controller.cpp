@@ -55,26 +55,27 @@ const auto path_to_string = [](auto path) {
 	}
 };
 
-std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribution_of_states) {
-	const double min_value = distribution_of_states.cbegin()->first;
-	const double max_value = distribution_of_states.crbegin()->first;
+std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribution_of_criterium, std::string criterium) {
+	const double min_value = distribution_of_criterium.cbegin()->first;
+	const double max_value = distribution_of_criterium.crbegin()->first;
 	const double x_range = max_value - min_value;
 	const double x_min = min_value - (x_range / 10);
 	const double x_max = max_value + (x_range / 10);
 	std::size_t count_models{ 0 };
-	for (const auto& pair : distribution_of_states) count_models += pair.second;
-	const double y_max{ static_cast<double>(count_models) * 5 / 4 };
+	for (const auto& pair : distribution_of_criterium) count_models += pair.second;
+	const double y_max{ static_cast<double>(count_models) * 2 };
 
 	std::stringstream ss;
 	ss << R"xxx(
 \begin{figure}
-\caption{Verteilung der states von Modell XX}
+\caption{Verteilung der )xxx" << criterium;
+	ss << R"xxx( von Modell XX}
 %\label{}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
 	xlabel = {x},
-	ylabel = {Zahl der Modelle},
+	ylabel = {Anzahl der Modelle},
 	xmin = )xxx" << x_min;
 
 	ss << R"xxx(,
@@ -91,22 +92,22 @@ std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribut
 ]
 	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
 
-	\addplot[color = red!50, ]
+	\addplot[color = red!50, fill=red, fill opacity=0.5]
 		coordinates{
 			()xxx" << x_min << ", " << "0)";
 	std::size_t accumulated_models{ 0 };
-	for (const auto& pair : distribution_of_states) {
+	for (const auto& pair : distribution_of_criterium) {
 		ss << "(" << static_cast<double>(pair.first) - 0.01 << ", " << accumulated_models << ")"; // just before new value
 		accumulated_models += pair.second;
 		ss << "(" << static_cast<double>(pair.first) << ", " << accumulated_models << ")"; // new value
 	}
 	ss << "(" << x_max << ", " << accumulated_models << ")"; // end of diagram
+	ss << "(" << x_max << ", 0)"; // end of diagram
 
 	ss << R"xxx(
 	};
 
-	\addlegendentry{Modelle mit $\leq x$ states}
-	%\addlegendentry{ second legendary }
+	\addlegendentry{Modelle mit $\leq x$ )xxx" << criterium << R"xxx(}
 
 \end{axis}
 \end{tikzpicture}
@@ -218,8 +219,10 @@ int main(int argc, char** argv)
 		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
 	}
 
-	const auto diagram_code = get_diagram_code(distribution_of_states);
-	standard_logger().info(diagram_code);
+	const auto states_diagram_code = get_diagram_code(distribution_of_states, "states");
+	const auto nodes_diagram_code = get_diagram_code(distribution_of_nodes, "nodes");
+	standard_logger().info(states_diagram_code);
+	standard_logger().info(nodes_diagram_code);
 
 #if false
 	std::string original_model_path_string{ argv[1] };
