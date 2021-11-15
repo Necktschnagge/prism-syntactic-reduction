@@ -364,6 +364,54 @@ struct collapse_node {
 	bool operator <(const collapse_node& another) const { return this->id.to_string() < another.id.to_string(); }
 };
 
+std::vector<collapse_node::big_int> calc_max_local_first_coloring(
+	const std::vector<collapse_node>& max_groupings
+) {
+	std::vector<collapse_node::big_int> result;
+
+	collapse_node::big_int already_covered; // (0,0,0,0)
+	std::vector<collapse_node> copied_groupings{ max_groupings };
+
+	while (true) {
+		std::size_t max_grouping_size{ 0 };
+		std::size_t witness_id{ copied_groupings.size() };
+		for (std::size_t i = 0; i < copied_groupings.size(); ++i) {
+			if (copied_groupings[i].id.count() > max_grouping_size) {
+				max_grouping_size = copied_groupings[i].id.count();
+				witness_id = i;
+			}
+		}
+
+		if (max_grouping_size == 0) {
+			std::sort(
+				result.begin(),
+				result.end(),
+				[](const collapse_node::big_int& left, const collapse_node::big_int& right) {
+					return left.to_string() < right.to_string();
+				}
+			);
+			return result;
+		}
+		result.push_back(copied_groupings[witness_id].id);
+
+		already_covered |= copied_groupings[witness_id].id;
+
+		copied_groupings.erase(
+			std::remove_if(
+				copied_groupings.begin(),
+				copied_groupings.end(),
+				[&](collapse_node& grouping) {
+					grouping.id &= ~already_covered; // make remaining groups smaller
+					return grouping.id.none(); // remove if group remains empty
+				}
+			),
+			copied_groupings.cend()
+					);
+
+	}
+}
+
+
 std::vector<collapse_node::big_int> starke_coloring(const grouping_enemies_table& enemies) {
 	std::vector<std::size_t> removed_nodes;
 
@@ -662,7 +710,7 @@ void find_local_groupings(
 		}
 
 		next_free_index = 11;
-	}
+		}
 
 
 	while (true) {
@@ -833,7 +881,7 @@ void find_local_groupings(
 		++next_free_index;
 
 	}
-}
+	}
 
 enum class selected : char {
 	YES, NO, UNDECIDED
@@ -1408,7 +1456,8 @@ void write_max_local_groupings(const std::filesystem::path & directory, const st
 void write_all_partitionings(
 	const std::filesystem::path & directory,
 	const std::vector<std::vector<collapse_node::big_int>>&all_partitionings_with_minimal_size,
-	const std::vector<collapse_node::big_int>&starke_coloring_result
+	const std::vector<collapse_node::big_int>&starke_coloring_result,
+	const std::vector<collapse_node::big_int>&max_grouping_first_coloring
 ) {
 	std::filesystem::create_directories(directory);
 	auto file = std::ofstream((directory / "all_partitionings.json").c_str());
@@ -1422,17 +1471,28 @@ void write_all_partitionings(
 			this_partitioning["partitions"].push_back(partition.to_string());
 		j_partitions[std::to_string(i)] = this_partitioning;
 	}
-
-	auto& starke_json{ json["starke_coloring"] };
-	nlohmann::json starke_partitioning;
-	for (const auto& partition : starke_coloring_result)
-		starke_partitioning["partitions"].push_back(partition.to_string());
-	starke_json["partitioning"] = starke_partitioning;
-	std::size_t id_within_all = -1;
-	auto iter = std::find(all_partitionings_with_minimal_size.cbegin(), all_partitionings_with_minimal_size.cend(), starke_coloring_result);
-	if (iter != all_partitionings_with_minimal_size.cend()) id_within_all = iter - all_partitionings_with_minimal_size.cbegin();
-	starke_json["id_within_all"] = id_within_all;
-
+	{ // starke_coloring
+		auto& starke_json{ json["starke_coloring"] };
+		nlohmann::json starke_partitioning;
+		for (const auto& partition : starke_coloring_result)
+			starke_partitioning["partitions"].push_back(partition.to_string());
+		starke_json["partitioning"] = starke_partitioning;
+		std::size_t id_within_all = -1;
+		auto iter = std::find(all_partitionings_with_minimal_size.cbegin(), all_partitionings_with_minimal_size.cend(), starke_coloring_result);
+		if (iter != all_partitionings_with_minimal_size.cend()) id_within_all = iter - all_partitionings_with_minimal_size.cbegin();
+		starke_json["id_within_all"] = id_within_all;
+	}
+	{ // max_grouping_first_coloring
+		auto& max_first_json{ json["max_grouping_first_coloring"] };
+		nlohmann::json max_first_partitioning;
+		for (const auto& partition : max_grouping_first_coloring)
+			max_first_partitioning["partitions"].push_back(partition.to_string());
+		max_first_json["partitioning"] = max_first_partitioning;
+		std::size_t id_within_all = -1;
+		auto iter = std::find(all_partitionings_with_minimal_size.cbegin(), all_partitionings_with_minimal_size.cend(), max_grouping_first_coloring);
+		if (iter != all_partitionings_with_minimal_size.cend()) id_within_all = iter - all_partitionings_with_minimal_size.cbegin();
+		max_first_json["id_within_all"] = id_within_all;
+	}
 	file << json.dump(3);
 }
 
@@ -1657,6 +1717,8 @@ int cli(int argc, char** argv) {
 
 	std::vector<collapse_node::big_int> starke_coloring_result = starke_coloring(enemies_table);
 
+	std::vector<collapse_node::big_int> max_local_first_coloring = calc_max_local_first_coloring(max_groupings);
+
 	// var_list.txt
 	write_var_list_txt(results_directory, all_var_names);
 
@@ -1664,7 +1726,7 @@ int cli(int argc, char** argv) {
 	write_max_local_groupings(results_directory, max_groupings);
 
 	// all_partitions.json
-	write_all_partitionings(results_directory, all_partitionings_with_minimal_size, starke_coloring_result);
+	write_all_partitionings(results_directory, all_partitionings_with_minimal_size, starke_coloring_result, max_local_first_coloring);
 
 	// meta.json
 	write_meta_json(results_directory, all_partitionings_with_minimal_size.size());
