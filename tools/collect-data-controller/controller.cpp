@@ -68,13 +68,13 @@ std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribut
 	std::stringstream ss;
 	ss << R"xxx(
 \begin{figure}
-\caption{Verteilung der der states für Modell XX}
-\label{mc - size}
+\caption{Verteilung der states von Modell XX}
+%\label{}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-	ylabel = { Zahl der Modelle },
-	xlabel = { x },
+	xlabel = {x},
+	ylabel = {Zahl der Modelle},
 	xmin = )xxx" << x_min;
 
 	ss << R"xxx(,
@@ -89,7 +89,7 @@ std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribut
 	ymajorgrids = true,
 	grid style = dashed,
 ]
-	\path[name path = axis](axis cs : 0, 0) -- (axis cs : 1, 0);
+	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
 
 	\addplot[color = red!50, ]
 		coordinates{
@@ -105,7 +105,7 @@ std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribut
 	ss << R"xxx(
 	};
 
-	\addlegendentry{Modelle mit höchstens x states}
+	\addlegendentry{Modelle mit $\leq x$ states}
 	%\addlegendentry{ second legendary }
 
 \end{axis}
