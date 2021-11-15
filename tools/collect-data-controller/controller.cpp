@@ -57,10 +57,10 @@ const auto path_to_string = [](auto path) {
 
 std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribution_of_states) {
 	const double min_value = distribution_of_states.cbegin()->first;
-	const double max_value = distribution_of_states.cend()->first;
+	const double max_value = distribution_of_states.crbegin()->first;
 	const double x_range = max_value - min_value;
-	const double x_min = min_value - x_range / 10;
-	const double x_max = max_value + x_range / 10;
+	const double x_min = min_value - (x_range / 10);
+	const double x_max = max_value + (x_range / 10);
 	std::size_t count_models{ 0 };
 	for (const auto& pair : distribution_of_states) count_models += pair.second;
 	const double y_max{ static_cast<double>(count_models) * 5 / 4 };
