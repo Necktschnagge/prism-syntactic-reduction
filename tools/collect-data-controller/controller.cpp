@@ -10,9 +10,12 @@
 #include <iostream>
 #include <exception>
 #include <fstream>
+#include <sstream>
 
 #include <cstdlib>
 #include <filesystem>
+#include <locale>
+#include <codecvt>
 
 //#define debug_local
 
@@ -23,14 +26,6 @@ namespace {
 }
 
 using regex_iterator = boost::regex_iterator<std::string::const_iterator>;
-
-const auto R_RESULT_DEFINITION{ boost::regex(R"x(Result: (\[[0-9.]*,[0-9.]*\]|[0-9.]*))x") };
-const auto R_RESULT_RANGE_DEFINITION{ boost::regex(R"x(Result: \[([0-9.]*),([0-9.]*)\])x") };
-const auto R_RESULT_VALUE_DEFINITION{ boost::regex(R"x(Result: ([0-9.]*))x") };
-/* two formats are:
-Result: [0.6219940210224283,0.9984310374949624] (range of values over initial states)
-Result: 0.9978124110783552 (value in the initial state)
-*/
 
 
 
@@ -51,124 +46,185 @@ void init_logger() {
 	spdlog::register_logger(standard_logger);
 }
 
-std::tuple<long double, long double> extract_result(const std::string& prism_log_content) {
-	long double min{ 0 };
-	long double max{ 0 };
-
-	standard_logger().info("Searching result definition...");
-
-	std::list<std::pair<std::string::const_iterator, std::string::const_iterator>> result_locations;
-
-	auto search_result = regex_iterator(prism_log_content.cbegin(), prism_log_content.cend(), boost::regex(R_RESULT_DEFINITION));
-
-	while (search_result != regex_iterator()) {
-		result_locations.push_back(std::make_pair(search_result->prefix().end(), search_result->suffix().begin()));
-		++search_result;
-	}
-
-	standard_logger().info(std::string("Found ") + std::to_string(result_locations.size()) + " result definitions.");
-	if (result_locations.size() != 1) {
-		auto error_message = std::string("Expected 1 but found ") + std::to_string(result_locations.size()) + " result definitions";
-		throw std::logic_error(error_message);
-	}
-	standard_logger().info("Reading values...");
-	boost::match_results<std::string::const_iterator> m; // boost::smatch
-
-	if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_RESULT_VALUE_DEFINITION))) {
-		standard_logger().info("Found single value definition.");
-		max = min = std::stold(m[1]);
-	}
-	else if (boost::regex_match(result_locations.front().first, result_locations.front().second, m, boost::regex(R_RESULT_RANGE_DEFINITION))) {
-		standard_logger().info("Found range definition.");
-		min = std::stold(m[1]);
-		max = std::stold(m[2]);
+const auto path_to_string = [](auto path) {
+	if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
+		return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(path.c_str());
 	}
 	else {
-		throw std::logic_error("Internal software error.");
+		return std::string(path.c_str());
 	}
-	standard_logger().info(std::string("Recognized min=") + std::to_string(min) + "  and  max=" + std::to_string(max));
-
-	return std::make_tuple(min, max);
-}
-
-void prepare_files(int argc, char** argv, std::string& prism_log_content, std::ofstream& extracted_output_file) {
-#ifdef debug_local
-	std::string prism_log_file_path{ R"(C:\Users\F-NET-ADMIN\Desktop\some_prism_log.txt)" };
-	std::string output_file_path{ R"(C:\Users\F-NET-ADMIN\Desktop\extracted.json)" };
-
-#else
-	if (argc != 3) {
-		const char* error_message{ R"x(Wrong number of arguments. You need to pass exactly two arguments, the file name of prism log and the file where to output the extracted information.\n Type Prism-Log-Extractor path/to/prism.log path/to/extracted_information.json)x" };
-		throw std::logic_error(error_message);
-	}
-
-	std::string prism_log_file_path{ argv[1] };
-	std::string output_file_path{ argv[2] };
-#endif
-
-	standard_logger().info("Creating file objects...");
-
-	auto prism_log_file = std::ifstream(prism_log_file_path);
-	extracted_output_file = std::ofstream(output_file_path);
-	//## check if files could be opened here
-
-	standard_logger().info("Reading prism log...");
-
-	prism_log_content = std::string(std::istreambuf_iterator<char>(prism_log_file), std::istreambuf_iterator<char>());
-}
-
-nlohmann::json analyze(const std::string& prism_log_content) {
-
-	auto [min, max] = extract_result(prism_log_content);
-
-	standard_logger().info("Searching number of nodes...  SKIPPED");
-
-
-	standard_logger().info("Building json...");
-
-	nlohmann::json result;
-	result["result"] = { {"min", min}, {"max", max} };
-
-	standard_logger().info("Built up the following json:");
-	std::cout << "\n\n" << result.dump(3) << "\n\n";
-
-	return result;
-}
-
-class log_enumerator {
-	unsigned long long i{ 0 };
-	std::filesystem::path base_path;
-
-	std::filesystem::path log_file_path(unsigned long long i) { return base_path / (std::to_string(i) + ".log"); };
-public:
-	log_enumerator(const std::filesystem::path& base_path) : base_path(base_path) {}
-
-	inline std::string write_next() { return std::string(" >") + log_file_path(++i).string(); }
-	inline std::filesystem::path last() { return log_file_path(i); }
-	inline void print_last_log() {
-		auto path = last().string();
-		auto file_stream = std::ifstream(path);
-		bool ok = file_stream.is_open();
-		standard_logger().info(std::string("print: \"") + path + "\":\n" + (ok ? std::string(std::istreambuf_iterator<char>(file_stream), std::istreambuf_iterator<char>()) : "ERROR: file not opened"));
-		if (!ok) standard_logger().error("Could not open file");
-	}
-	decltype(i) ii() { return i; }
 };
+
+std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribution_of_criterium, std::string criterium) {
+	const double min_value = distribution_of_criterium.cbegin()->first;
+	const double max_value = distribution_of_criterium.crbegin()->first;
+	const double x_range = max_value - min_value;
+	const double x_min = min_value - (x_range / 10);
+	const double x_max = max_value + (x_range / 10);
+	std::size_t count_models{ 0 };
+	for (const auto& pair : distribution_of_criterium) count_models += pair.second;
+	const double y_max{ static_cast<double>(count_models) * 2 };
+
+	std::stringstream ss;
+	ss << R"xxx(
+\begin{figure}
+\caption{Verteilung der )xxx" << criterium;
+	ss << R"xxx( von Modell XX}
+%\label{}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+	xlabel = {x},
+	ylabel = {Anzahl der Modelle},
+	xmin = )xxx" << x_min;
+
+	ss << R"xxx(,
+	xmax = )xxx" << x_max;
+
+	ss << R"xxx(,
+	ymin = 0,
+	ymax = )xxx" << y_max;
+
+	ss << R"xxx(,
+	legend pos = north west,
+	ymajorgrids = true,
+	grid style = dashed,
+]
+	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+
+	\addplot[color = red!50, fill=red, fill opacity=0.5]
+		coordinates{
+			()xxx" << x_min << ", " << "0)";
+	std::size_t accumulated_models{ 0 };
+	for (const auto& pair : distribution_of_criterium) {
+		ss << "(" << static_cast<double>(pair.first) - 0.01 << ", " << accumulated_models << ")"; // just before new value
+		accumulated_models += pair.second;
+		ss << "(" << static_cast<double>(pair.first) << ", " << accumulated_models << ")"; // new value
+	}
+	ss << "(" << x_max << ", " << accumulated_models << ")"; // end of diagram
+	ss << "(" << x_max << ", 0)"; // end of diagram
+
+	ss << R"xxx(
+	};
+
+	\addlegendentry{Modelle mit $\leq x$ )xxx" << criterium << R"xxx(}
+
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+)xxx";
+
+	return ss.str();
+}
 
 int main(int argc, char** argv)
 {
 	init_logger();
+	standard_logger().flush_on(spdlog::level::info);
 
-	standard_logger().info("Listing arguments...");
-	for (int i = 0; i < argc; ++i) std::cout << i << "   " << argv[i] << "\n";
+	if (argc != 2) return 1;
 
-	if (argc != 4) {
-		standard_logger().error("Expected 1 application path and 3 arguments.");
-		return 1;
+	//const auto run_directory_string = std::string(argv[0]);
+	const auto arg_directory_string = std::string(argv[1]);
+
+	standard_logger().info(std::string("Given path which will be used:") + std::filesystem::path(arg_directory_string).string());
+
+	const std::string CURRENT_PATH_CHAR_STRING{ path_to_string(std::filesystem::current_path()) };
+	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING);
+
+	const auto results_directory = std::filesystem::path(arg_directory_string);//std::filesystem::path(run_directory_string).parent_path() /
+
+	standard_logger().info(std::string("Running on results directory:   ") + results_directory.string());
+
+	auto meta_json_istream = std::ifstream(results_directory / "meta.json");
+
+	nlohmann::json meta = nlohmann::json::parse(meta_json_istream);
+	standard_logger().info("Successfully parsed meta json.");
+
+	std::map<std::size_t, std::size_t> distribution_of_transitions;
+	std::map<std::size_t, std::size_t> distribution_of_states;
+	std::map<std::size_t, std::size_t> distribution_of_nodes;
+
+
+	standard_logger().info("Reading result json files...");
+
+	const std::size_t COUNT_MODELS{ meta["count_partitionings"] };
+	for (std::size_t i = 0; i < COUNT_MODELS; ++i) {
+		std::ifstream prism_data_istream = std::ifstream(results_directory / std::to_string(i) / "prism_data.json");
+		auto prism_data = nlohmann::json::parse(prism_data_istream);
+		//standard_logger().info(std::string("Read prism data:\n\n") + prism_data.dump(3));
+		const std::size_t COUNT_TRANSITIONS{ prism_data["count_transitions"] };
+		distribution_of_transitions.try_emplace(COUNT_TRANSITIONS, 0);
+		++distribution_of_transitions[COUNT_TRANSITIONS];
+		const std::size_t COUNT_STATES{ prism_data["states"]["count"] };
+		distribution_of_states.try_emplace(COUNT_STATES, 0);
+		++distribution_of_states[COUNT_STATES];
+		const std::size_t COUNT_NODES{ prism_data["nodes"] };
+		distribution_of_nodes.try_emplace(COUNT_NODES, 0);
+		++distribution_of_nodes[COUNT_NODES];
 	}
 
-	const std::string ORIGINAL_MODEL_FILE_NAME{ "model_original.prism" };
+	{
+		std::stringstream ss;
+		double average{ 0 };
+		ss << "\n\n\nDistribution of transitions :\n";
+		for (const auto& pair : distribution_of_transitions) {
+			ss << pair.first << "   :   " << pair.second << "\n";
+			average += pair.first * pair.second;
+		}
+		standard_logger().info(ss.str());
+		average /= static_cast<double>(meta["count_partitionings"]);
+		double variance{ 0 };
+		for (const auto& pair : distribution_of_nodes) {
+			variance += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
+		}
+		variance /= static_cast<double>(meta["count_partitionings"]);
+		standard_logger().info(std::string("average:  ") + std::to_string(average));
+		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
+	}
+	{
+		std::stringstream ss;
+		double average{ 0 };
+		ss << "\n\n\nDistribution of states :\n";
+		for (const auto& pair : distribution_of_states) {
+			ss << pair.first << "   :   " << pair.second << "\n";
+			average += pair.first * pair.second;
+		}
+		standard_logger().info(ss.str());
+		average = average / static_cast<double>(meta["count_partitionings"]);
+		double variance{ 0 };
+		for (const auto& pair : distribution_of_nodes) {
+			variance += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
+		}
+		variance /= static_cast<double>(meta["count_partitionings"]);
+		standard_logger().info(std::string("average:  ") + std::to_string(average));
+		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
+	}
+	{
+		std::stringstream ss;
+		double average{ 0 };
+		ss << "\n\n\nDistribution of nodes :\n";
+		for (const auto& pair : distribution_of_nodes) {
+			ss << pair.first << "   :   " << pair.second << "\n";
+			average += pair.first * pair.second;
+		}
+		standard_logger().info(ss.str());
+		average /= static_cast<double>(meta["count_partitionings"]);
+		double variance{ 0 };
+		for (const auto& pair : distribution_of_nodes) {
+			variance += (static_cast<double>(pair.first) - average) * (static_cast<double>(pair.first) - average) * pair.second;
+		}
+		variance /= static_cast<double>(meta["count_partitionings"]);
+		standard_logger().info(std::string("average:  ") + std::to_string(average));
+		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
+	}
 
+	const auto states_diagram_code = get_diagram_code(distribution_of_states, "states");
+	const auto nodes_diagram_code = get_diagram_code(distribution_of_nodes, "nodes");
+	standard_logger().info(states_diagram_code);
+	standard_logger().info(nodes_diagram_code);
+
+#if false
 	std::string original_model_path_string{ argv[1] };
 	std::string syntactic_reducer_path_string{ argv[2] };
 	std::string artifact_path_string{ argv[3] };
@@ -178,7 +234,7 @@ int main(int argc, char** argv)
 	auto artifact_path = std::filesystem::path(artifact_path_string) / "collect-data";
 	auto copied_original_model_path = artifact_path / ORIGINAL_MODEL_FILE_NAME;
 
-	log_enumerator logs(artifact_path);
+	//log_enumerator logs(artifact_path);
 
 	/*
 	copy original model into artifact path
@@ -200,7 +256,7 @@ int main(int argc, char** argv)
 	in : modle path, artifact output path
 	out: json path containing all information about created files.
 	*/
-	std::string command_call_syntactic_reducer = syntactic_reducer_path.string() + " " + copied_original_model_path.string() + " " + artifact_path.string() + logs.write_next() ;
+	std::string command_call_syntactic_reducer = syntactic_reducer_path.string() + " " + copied_original_model_path.string() + " " + artifact_path.string() + logs.write_next();
 	standard_logger().info("Call Syntactic-Reducer...");
 	standard_logger().info(command_call_syntactic_reducer);
 	system(command_call_syntactic_reducer.c_str());
@@ -246,6 +302,7 @@ int main(int argc, char** argv)
 		throw e;
 	}
 	*/
+#endif
 	standard_logger().info("");
 	standard_logger().info("Finished.");
 }

@@ -20,6 +20,8 @@
 #include <bitset>
 #include <algorithm>
 #include <execution>
+#include <locale>
+#include <codecvt>
 
 using grouping_enemies_table = std::vector<std::set<std::size_t>>; /// [var_id_x] |-> { var_id_y | var_id_x and var_id_y cannot be merged }
 
@@ -257,57 +259,6 @@ void print_coloring_from_graph_with_color_annotations(const std::map<std::string
 }
 
 
-void starke_coloring(std::map<std::string, std::tuple<bool, int, std::set<std::string>, int>>& graph) {
-	// find a coloring
-	std::vector<std::string/*std::pair<std::string, std::set<std::string>>*/ > removed_nodes;
-
-	while (true) {
-		// while there are nodes, select one with min incidence:
-		auto selected{ graph.end() };
-		int min_seen{ std::numeric_limits<int>::max() };
-		for (auto iter{ graph.begin() }; iter != graph.end(); ++iter) {
-			if (is_active(iter->second)) {
-				int current_incidence{ count_active_neighbours(iter->second) };
-				if (current_incidence < min_seen) {
-					selected = iter;
-					min_seen = current_incidence;
-				}
-			}
-		}
-		if (selected == graph.end()) break; // all removed
-		// remove selected node:
-		const std::string& node_name{ selected->first };
-		// remove backward edges:
-		for (const auto& incident_node_name : neighbours(selected->second)) {
-			if (is_active(graph[incident_node_name])) {
-				--count_active_neighbours(graph[incident_node_name]);
-			}
-		}
-		// remove the node itself
-		removed_nodes.push_back(node_name);
-		is_active(graph[node_name]) = false;
-	}
-
-	// iterate list backwards and insert the smallest color not used by active neighbours:
-	for (auto ri{ removed_nodes.rbegin() }; ri != removed_nodes.rend(); ++ri) {
-		// select color
-		std::unordered_set<int> excluded;
-		auto& current_tuple{ graph[*ri] };
-		for (const auto& incident_node_name : neighbours(current_tuple)) {
-			if (is_active(graph[incident_node_name]))
-				excluded.insert(color(graph[incident_node_name]));
-		}
-		int c{ 0 };
-		for (; c < std::numeric_limits<int>::max(); ++c) {
-			if (excluded.find(c) == excluded.end())
-				break;
-		}
-		color(current_tuple) = c;
-		// reactivate
-		is_active(graph[*ri]) = true;
-	}
-
-}
 
 std::string to_string(const std::set<std::string>& s) {
 	std::string result;
@@ -412,6 +363,191 @@ struct collapse_node {
 	bool operator == (const collapse_node& another) const { return this->id == another.id; }
 	bool operator <(const collapse_node& another) const { return this->id.to_string() < another.id.to_string(); }
 };
+
+std::vector<collapse_node::big_int> calc_max_local_first_coloring(
+	const std::vector<collapse_node>& max_groupings
+) {
+	std::vector<collapse_node::big_int> result;
+
+	collapse_node::big_int already_covered; // (0,0,0,0)
+	std::vector<collapse_node> copied_groupings{ max_groupings };
+
+	while (true) {
+		std::size_t max_grouping_size{ 0 };
+		std::size_t witness_id{ copied_groupings.size() };
+		for (std::size_t i = 0; i < copied_groupings.size(); ++i) {
+			if (copied_groupings[i].id.count() > max_grouping_size) {
+				max_grouping_size = copied_groupings[i].id.count();
+				witness_id = i;
+			}
+		}
+
+		if (max_grouping_size == 0) {
+			std::sort(
+				result.begin(),
+				result.end(),
+				[](const collapse_node::big_int& left, const collapse_node::big_int& right) {
+					return left.to_string() < right.to_string();
+				}
+			);
+			return result;
+		}
+		result.push_back(copied_groupings[witness_id].id);
+
+		already_covered |= copied_groupings[witness_id].id;
+
+		copied_groupings.erase(
+			std::remove_if(
+				copied_groupings.begin(),
+				copied_groupings.end(),
+				[&](collapse_node& grouping) {
+					grouping.id &= ~already_covered; // make remaining groups smaller
+					return grouping.id.none(); // remove if group remains empty
+				}
+			),
+			copied_groupings.cend()
+					);
+
+	}
+}
+
+
+std::vector<collapse_node::big_int> calc_welsh_powell_coloring(const grouping_enemies_table& enemies) {
+
+	std::vector<std::size_t> f_color = std::vector<std::size_t>(enemies.size(), 0);
+
+	std::vector<std::size_t> o_descending_var_id_ordering;
+	for (std::size_t i = 0; i < enemies.size(); ++i) {
+		o_descending_var_id_ordering.push_back(i);
+	}
+	std::sort(
+		o_descending_var_id_ordering.begin(),
+		o_descending_var_id_ordering.end(),
+		[&](const std::size_t& l, const std::size_t& r) {
+			return enemies[l].size() > enemies[r].size();
+		}
+	);
+	for (std::size_t color = 1; color <= enemies.size(); ++color) {
+		for (const auto& id : o_descending_var_id_ordering) {
+			if (f_color[id] == 0) {
+				bool exists_v{ false };
+				for (const auto v : enemies[id]) {
+					if (f_color[v] == color) {
+						exists_v = true;
+						goto calc_welsh_powell_coloring_continue;
+					}
+				}
+			calc_welsh_powell_coloring_continue:
+				if (!exists_v) {
+					f_color[id] = color;
+				}
+			}
+		}
+	}
+
+	std::size_t max_color{ 0 };
+	for (std::size_t iter = 0; iter < f_color.size(); ++iter) {
+		if (f_color[iter] > max_color)
+			max_color = f_color[iter];
+	}
+
+	std::vector<collapse_node::big_int> result_partitioning = std::vector<collapse_node::big_int>(max_color, collapse_node::big_int());
+
+	for (std::size_t var_id = 0; var_id < enemies.size(); ++var_id) {
+		result_partitioning[f_color[var_id] - 1].set(var_id, true);
+	}
+
+std:sort(
+	result_partitioning.begin(),
+	result_partitioning.end(),
+	[](const collapse_node::big_int& left, const collapse_node::big_int& right) {
+		return left.to_string() < right.to_string();
+	}
+);
+
+return result_partitioning;
+
+}
+
+
+std::vector<collapse_node::big_int> starke_coloring(const grouping_enemies_table& enemies) {
+	std::vector<std::size_t> removed_nodes;
+
+	std::vector<bool> already_chosen = std::vector<bool>(enemies.size(), false);
+	std::vector<std::size_t> color = std::vector<std::size_t>(enemies.size(), 0);
+
+	const auto count_incidents = [&](std::size_t var_id) -> std::size_t {
+		std::size_t count{ 0 };
+		for (const auto& neighbour : enemies[var_id])
+			if (!already_chosen[neighbour])
+				++count;
+		return count;
+	};
+
+	while (true) {
+		// while there are nodes, select one with min incidence (for those it is easy to choose a color at the end)
+		std::size_t selected{ enemies.size() }; // init == past the end index
+		std::size_t min_seen{ std::numeric_limits<std::size_t>::max() }; // min incidence seen so far.
+
+		// select a node =~ variable which has not yet been chosen and which has min incidence
+		for (std::size_t iter = 0; iter != enemies.size(); ++iter) { // consider every variable
+			if (!already_chosen[iter]) {
+				std::size_t current_incidence{ count_incidents(iter) };
+				if (current_incidence < min_seen) {
+					selected = iter;
+					min_seen = current_incidence;
+				}
+			}
+		}
+
+		if (selected == enemies.size())
+			break; // all have been chosen.
+
+		// remove selected node:
+		already_chosen[selected] = true;
+		// remember order:
+		removed_nodes.push_back(selected);
+	}
+
+	// iterate list backwards and insert the smallest color not already used by any neighbour:
+	for (auto ri{ removed_nodes.rbegin() }; ri != removed_nodes.rend(); ++ri) {
+		// select color
+		std::unordered_set<std::size_t> excluded_colors;
+
+		//auto& current_tuple{ graph[*ri] };
+		for (const auto& en : enemies[*ri]) {
+			excluded_colors.insert(color[en]);
+		}
+		int c{ 1 };
+		for (; c < std::numeric_limits<int>::max(); ++c) {
+			if (excluded_colors.find(c) == excluded_colors.end())
+				break;
+		}
+		color[*ri] = c;
+	}
+
+	std::size_t max_color{ 0 };
+	for (std::size_t iter = 0; iter < color.size(); ++iter) {
+		if (color[iter] > max_color)
+			max_color = color[iter];
+	}
+
+	std::vector<collapse_node::big_int> result_partitioning = std::vector<collapse_node::big_int>(max_color, collapse_node::big_int());
+	for (std::size_t var_id = 0; var_id < enemies.size(); ++var_id) {
+		result_partitioning[color[var_id] - 1].set(var_id, true);
+	}
+std:sort(
+	result_partitioning.begin(),
+	result_partitioning.end(),
+	[](const collapse_node::big_int& left, const collapse_node::big_int& right) {
+		return left.to_string() < right.to_string();
+	}
+);
+
+return result_partitioning;
+
+}
+
 
 std::vector<collapse_node> enlarge_sets(const collapse_node& the_unique, const std::vector<collapse_node>& the_array) {
 	constexpr std::size_t Cthreads = 16;
@@ -632,7 +768,7 @@ void find_local_groupings(
 		}
 
 		next_free_index = 11;
-	}
+		}
 
 
 	while (true) {
@@ -803,7 +939,7 @@ void find_local_groupings(
 		++next_free_index;
 
 	}
-}
+	}
 
 enum class selected : char {
 	YES, NO, UNDECIDED
@@ -856,7 +992,11 @@ void find_all_global_coverings_with_max_groupings(
 				min_selection_size_so_far = size_selection;
 				combinations_of_max_groupings.clear(); // discard all previously found combinations that took more selected items.
 			}
-			combinations_of_max_groupings.push_back(rec);
+			consideration rec2{ rec };
+			for (auto& s : rec2.sel) {
+				if (s == selected::UNDECIDED) s = selected::NO;
+			}
+			combinations_of_max_groupings.push_back(rec2);
 			return;
 		}
 		if (rec.count() >= min_selection_size_so_far) // did not reached goal, but with the next selection we will exceed min_selection_size_so_far
@@ -870,6 +1010,8 @@ void find_all_global_coverings_with_max_groupings(
 		std::size_t sel_i = 0;
 		std::size_t sel_rest_size = 0;
 		for (std::size_t i = 0; i < max_groupings.size(); ++i) {
+			if (rec.sel[i] == selected::NO)
+				continue;
 			const auto rest_usage_size = (max_groupings[i].id & rest_goal).count();
 			if (rest_usage_size > sel_rest_size) {
 				sel_rest_size = rest_usage_size;
@@ -1369,9 +1511,15 @@ void write_max_local_groupings(const std::filesystem::path & directory, const st
 		file << group.id.to_string() << std::endl;
 }
 
-void write_all_partitionings(const std::filesystem::path & directory, const std::vector<std::vector<collapse_node::big_int>>&all_partitionings_with_minimal_size) {
+void write_all_partitionings(
+	const std::filesystem::path & directory,
+	const std::vector<std::vector<collapse_node::big_int>>&all_partitionings_with_minimal_size,
+	const std::vector<collapse_node::big_int>&starke_coloring_result,
+	const std::vector<collapse_node::big_int>&max_grouping_first_coloring,
+	const std::vector<collapse_node::big_int>&welsh_powell_coloring
+) {
 	std::filesystem::create_directories(directory);
-	auto file = std::ofstream((directory / "all_partitions.json").c_str());
+	auto file = std::ofstream((directory / "all_partitionings.json").c_str());
 
 	nlohmann::json json;
 	auto& j_partitions{ json["partitionings"] };
@@ -1382,6 +1530,48 @@ void write_all_partitionings(const std::filesystem::path & directory, const std:
 			this_partitioning["partitions"].push_back(partition.to_string());
 		j_partitions[std::to_string(i)] = this_partitioning;
 	}
+	{ // starke_coloring
+		auto& starke_json{ json["starke_coloring"] };
+		nlohmann::json starke_partitioning;
+		for (const auto& partition : starke_coloring_result)
+			starke_partitioning["partitions"].push_back(partition.to_string());
+		starke_json["partitioning"] = starke_partitioning;
+		std::size_t id_within_all = -1;
+		auto iter = std::find(all_partitionings_with_minimal_size.cbegin(), all_partitionings_with_minimal_size.cend(), starke_coloring_result);
+		if (iter != all_partitionings_with_minimal_size.cend()) id_within_all = iter - all_partitionings_with_minimal_size.cbegin();
+		starke_json["id_within_all"] = id_within_all;
+	}
+	{ // max_grouping_first_coloring
+		auto& max_first_json{ json["max_grouping_first_coloring"] };
+		nlohmann::json max_first_partitioning;
+		for (const auto& partition : max_grouping_first_coloring)
+			max_first_partitioning["partitions"].push_back(partition.to_string());
+		max_first_json["partitioning"] = max_first_partitioning;
+		std::size_t id_within_all = -1;
+		auto iter = std::find(all_partitionings_with_minimal_size.cbegin(), all_partitionings_with_minimal_size.cend(), max_grouping_first_coloring);
+		if (iter != all_partitionings_with_minimal_size.cend()) id_within_all = iter - all_partitionings_with_minimal_size.cbegin();
+		max_first_json["id_within_all"] = id_within_all;
+	}
+	{ // welsh_powell_coloring
+		auto& ref_sub_json{ json["welsh_powell_coloring"] };
+		nlohmann::json sub_json;
+		for (const auto& partition : welsh_powell_coloring)
+			sub_json["partitions"].push_back(partition.to_string());
+		ref_sub_json["partitioning"] = sub_json;
+		std::size_t id_within_all = -1;
+		auto iter = std::find(all_partitionings_with_minimal_size.cbegin(), all_partitionings_with_minimal_size.cend(), welsh_powell_coloring);
+		if (iter != all_partitionings_with_minimal_size.cend()) id_within_all = iter - all_partitionings_with_minimal_size.cbegin();
+		ref_sub_json["id_within_all"] = id_within_all;
+	}
+	file << json.dump(3);
+}
+
+void write_meta_json(const std::filesystem::path & directory, std::size_t number_of_partitionings) {
+	std::filesystem::create_directories(directory);
+	auto file = std::ofstream((directory / "meta.json").c_str());
+
+	nlohmann::json json;
+	json["count_partitionings"] = number_of_partitionings;
 
 	file << json.dump(3);
 }
@@ -1430,47 +1620,83 @@ file_token construct_reduced_model(
 }
 
 
+const auto path_to_string = [](auto path) {
+	if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
+		return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(path.c_str());
+	}
+	else {
+		return std::string(path.c_str());
+	}
+};
+
 int cli(int argc, char** argv) {
+	standard_logger().info("This is Syntactic Reducer 1.0\n\n");
+	//standard_logger().info(std::string("Running config json: ") + argv[0]);
+	const std::string CURRENT_PATH_CHAR_STRING{ path_to_string(std::filesystem::current_path()) };
+	standard_logger().info(std::string("Current path:  ") + CURRENT_PATH_CHAR_STRING);
+	//std::filesystem::path CURRENT_PATH{ CURRENT_PATH_CHAR_STRING };
 
-	standard_logger().info(std::string("Running: ") + argv[0]);
-
-	std::shared_ptr<std::string> model_string_ptr;
-	std::filesystem::path artifacts_path;
-
+	standard_logger().info("Loading config json...");
+	/* Obtain config json path */
+	std::filesystem::path config_json_path{ argv[1] };
+	standard_logger().info(std::string("Given config json path:  ") + path_to_string(config_json_path));
+	config_json_path = std::filesystem::canonical(config_json_path);
+	const std::filesystem::path config_json_directory{ config_json_path.parent_path() };
+	standard_logger().info(std::string("Canonical config json path:  ") + path_to_string(config_json_path));
+	/* Load config json */
+	nlohmann::json config;
 	if (argc >= 2) {
-		std::ifstream model_ifstream;
-		model_ifstream.open(argv[1]);
-		model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
+		std::ifstream config_json_ifstream;
+		config_json_ifstream.open(config_json_path);
+		//auto config_json = std::string(std::istreambuf_iterator<char>(config_json_ifstream), std::istreambuf_iterator<char>());
+		try {
+			config = nlohmann::json::parse(config_json_ifstream);
+		}
+		catch (...) {
+			standard_logger().error("Exception on parsing config json!");
+			throw;
+		}
 	}
-
-	if (argc >= 3) {
-		artifacts_path = argv[2];
+	else {
+		standard_logger().error("Missing config json path!");
+		return 1;
 	}
-
-	if (!model_string_ptr) {
-		model_string_ptr = std::make_shared<std::string>(example_family());
+	standard_logger().info(std::string("Successfully loaded config json:\n\n") + config.dump(3) + "\n");
+	std::string prism_command = config["prism_command"];
+	std::string transformed_prism_command{};
+	for (const auto& c : prism_command) {
+		if (c == '/') transformed_prism_command.push_back('\\');
+		transformed_prism_command.push_back(c);
 	}
+	standard_logger().info("transformed json");
+	standard_logger().info(transformed_prism_command);
+	config["prism_command"] = transformed_prism_command;
 
-	auto output_files_directory = std::filesystem::path(argv[0]).parent_path().parent_path();
-	//auto output_files_directory = std::filesystem::path(".");
-	output_files_directory /= "RESULTS";
+	/* Load model */
+	standard_logger().info("Loading model...");
+	//standard_logger().debug(path_to_string(config_json_directory / std::string(config["model_path"])));
+	std::filesystem::path model_path{
+		std::filesystem::canonical(
+			config_json_directory / std::string(config["model_path"])
+		)
+	};
+	standard_logger().info(std::string("Canonical model path:  ") + path_to_string(model_path));
+	std::ifstream model_ifstream;
+	model_ifstream.open(model_path);
+	auto model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
+	standard_logger().info("Loading model   ...DONE!");
 
-	//output_files_directory
+	std::filesystem::path results_directory{ std::filesystem::weakly_canonical(config_json_directory / std::string(config["result_dir"])) };
+	standard_logger().info(std::string("Results will be written to directory:  ") + path_to_string(results_directory));
 
-	// debug code:
-	//std::ifstream model_ifstream;
-	//model_ifstream.open(R"(..\..\Examples\bsp.prism)");
-	//model_string_ptr = std::make_shared<std::string>(std::istreambuf_iterator<char>(model_ifstream), std::istreambuf_iterator<char>());
-
-
+	standard_logger().info("Loading list of excluded variables...");
 	// when here then all live set were computed.
-	std::vector<std::string> excluded_vars{ "y_Integrator_44480461", "x_cfblk5_1_1174489129" };
+	auto excluded_vars = std::vector<std::string>(config["exclude_vars"].cbegin(), config["exclude_vars"].cend());
+	//std::vector<std::string> excluded_vars{ "y_Integrator_44480461", "x_cfblk5_1_1174489129" };
 
 	standard_logger().info("Start parsing...");
 	auto ftoken = file_token(model_string_ptr);
-
 	ftoken.parse();
-
 	bool check = ftoken.is_sound_recursive();
 	standard_logger().info("Finished parsing.");
 
@@ -1536,7 +1762,8 @@ int cli(int argc, char** argv) {
 	std::sort(all_var_names.begin(), all_var_names.end());
 	//## sanity check: no duplicates in this vector.
 
-	auto enemies_table = grouping_enemies_table(all_var_names.size());
+
+	grouping_enemies_table enemies_table = grouping_enemies_table(all_var_names.size());
 	for (std::size_t var_id{ 0 }; var_id < all_var_names.size(); ++var_id) {
 		if (!enemies_table[var_id].empty())
 			throw 9134872798; //### just a sanity check, remove please!
@@ -1554,23 +1781,36 @@ int cli(int argc, char** argv) {
 
 	find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, max_groupings, all_partitionings_with_minimal_size);  //  ####refactor maxthreads inner and outer threads config....
 
+	standard_logger().info("Applying concrete heuristics...");
+
+	standard_logger().info("Using own heuristic");
+
+	std::vector<collapse_node::big_int> starke_coloring_result = starke_coloring(enemies_table);
+
+	std::vector<collapse_node::big_int> welsh_powell_coloring = calc_welsh_powell_coloring(enemies_table);
+
+	std::vector<collapse_node::big_int> max_local_first_coloring = calc_max_local_first_coloring(max_groupings);
+
 	// var_list.txt
-	write_var_list_txt(output_files_directory, all_var_names);
+	write_var_list_txt(results_directory, all_var_names);
 
 	// max_groupings.txt
-	write_max_local_groupings(output_files_directory, max_groupings);
+	write_max_local_groupings(results_directory, max_groupings);
 
 	// all_partitions.json
-	write_all_partitionings(output_files_directory, all_partitionings_with_minimal_size);
+	write_all_partitionings(results_directory, all_partitionings_with_minimal_size, starke_coloring_result, max_local_first_coloring, welsh_powell_coloring);
+
+	// meta.json
+	write_meta_json(results_directory, all_partitionings_with_minimal_size.size());
 
 	for (std::size_t i{ 0 }; i < all_partitionings_with_minimal_size.size(); ++i) {
 		file_token reduced_model = construct_reduced_model(ftoken, all_partitionings_with_minimal_size[i], all_var_names, var_name, const_table, live_vars, graph);
 
 		// reduced_model.prism
-		write_model_to_file(output_files_directory / std::to_string(i), reduced_model);
+		write_model_to_file(results_directory / std::to_string(i), reduced_model);
 
 		// partitioning.json
-		write_partitioning_to_file(output_files_directory / std::to_string(i), all_partitionings_with_minimal_size[i]);
+		write_partitioning_to_file(results_directory / std::to_string(i), all_partitionings_with_minimal_size[i]);
 	}
 
 	//## create a meta json to be able to start the prism stuff in consequence...
@@ -1584,21 +1824,26 @@ int cli(int argc, char** argv) {
 
 		*/
 
-	/*
-	starke_coloring(graph);
+		/*
+		starke_coloring(graph);
 
-	print_coloring_from_graph_with_color_annotations(graph, std::cout);
+		print_coloring_from_graph_with_color_annotations(graph, std::cout);
 
 
-	// copy the whole parse tree
-	file_token reduced_file(ftoken);
+		// copy the whole parse tree
+		file_token reduced_file(ftoken);
 
-	apply_coloring_to_file_token(reduced_file, var_name, const_table, live_vars, graph);
+		apply_coloring_to_file_token(reduced_file, var_name, const_table, live_vars, graph);
 
-	// print reduced model:
-	auto ofile = std::ofstream("reduced_model.prism");
-	print_model_to_stream(reduced_file, ofile);
-	*/
+		// print reduced model:
+		auto ofile = std::ofstream("reduced_model.prism");
+		print_model_to_stream(reduced_file, ofile);
+		*/
+
+	std::ofstream config_json_ofstream;
+	config_json_ofstream.open(config_json_path);
+	config_json_ofstream << config.dump(3);
+
 	return 0;
 }
 
@@ -1607,33 +1852,6 @@ int cli(int argc, char** argv) {
 int main(int argc, char** argv)
 {
 	init_logger();
-#if false
-	{
-		/* read and analyse all_sets file. */
-
-		std::ifstream read_all_sets("all_sets.txt");
-
-		std::string line;
-
-		std::map<int, int> count;
-		for (int x = 0; x < 20; ++x) {
-			count[x] = 0;
-		}
-
-		while (std::getline(read_all_sets, line)) {
-			++count[std::count(line.cbegin(), line.cend(), '1')];
-
-			if (std::count(line.cbegin(), line.cend(), '1') == 9) {
-				all_nodes_size_9.emplace_back(collapse_node::big_int(line), collapse_node::big_int());
-			}
-		}
-
-		for (int x = 0; x < 20; ++x) {
-			standard_logger().info(std::to_string(x) + "  :  " + std::to_string(count[x]));
-		}
-	}
-
-#endif
 	return cli(argc, argv);
 
 }

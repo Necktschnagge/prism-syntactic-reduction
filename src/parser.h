@@ -2325,9 +2325,10 @@ public:
 		auto it_dtmc = regex_iterator(_begin, _end, const_regexes::clauses::dtmc);
 
 		parse_error::assert_true(it_dtmc != regex_iterator(), R"(No "dtmc" found.)");
-		parse_error::assert_true(boost::regex_match(it_dtmc->prefix().begin(), it_dtmc->prefix().end(), const_regexes::primitives::spaces), R"(Found "dtmc", but input sequence does not start with "dtmc".)");
+		//parse_error::assert_true(boost::regex_match(it_dtmc->prefix().begin(), it_dtmc->prefix().end(), const_regexes::primitives::spaces), R"(Found "dtmc", but input sequence does not start with "dtmc".)");
 
-		_leading_spaces = std::make_shared<space_token>(this, it_dtmc->prefix().begin(), it_dtmc->prefix().end());
+
+		_leading_spaces = std::make_shared<space_token>(this, it_dtmc->prefix().end(), it_dtmc->prefix().end()); // I just ignore here what comes in front of dtmc ######
 		_dtmc_declaration = std::make_shared<dtmc_token>(*this, it_dtmc->prefix().end(), it_dtmc->suffix().begin());
 		_dtmc_body_component = std::make_shared<dtmc_body>(*this, it_dtmc->suffix().begin(), it_dtmc->suffix().end());
 	}
