@@ -66,35 +66,29 @@ std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribut
 	const double y_max{ static_cast<double>(count_models) * 2 };
 
 	std::stringstream ss;
-	ss << R"xxx(
-\begin{figure}
-\caption{Verteilung der )xxx" << criterium;
-	ss << R"xxx( von Modell XX}
-%\label{}
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-	xlabel = {x},
-	ylabel = {Anzahl der Modelle},
-	xmin = )xxx" << x_min;
+	ss << R"xxx(				\begin{tikzpicture}[scale=0.45]
+					\begin{axis}[
+						xlabel = {x},
+						ylabel = {Anzahl der Modelle},
+						xmin = )xxx" << x_min;
 
 	ss << R"xxx(,
-	xmax = )xxx" << x_max;
+						xmax = )xxx" << x_max;
 
 	ss << R"xxx(,
-	ymin = 0,
-	ymax = )xxx" << y_max;
+						ymin = 0,
+						ymax = )xxx" << y_max;
 
 	ss << R"xxx(,
-	legend pos = north west,
-	ymajorgrids = true,
-	grid style = dashed,
-]
-	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+						legend pos = north west,
+						ymajorgrids = true,
+						grid style = dashed,
+					]
+						\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
 
-	\addplot[color = red!50, fill=red, fill opacity=0.5]
-		coordinates{
-			()xxx" << x_min << ", " << "0)";
+						\addplot[color = red!50, fill=red, fill opacity=0.5]
+						coordinates{
+							()xxx" << x_min << ", " << "0)";
 	std::size_t accumulated_models{ 0 };
 	for (const auto& pair : distribution_of_criterium) {
 		ss << "(" << static_cast<double>(pair.first) - 0.01 << ", " << accumulated_models << ")"; // just before new value
@@ -105,13 +99,24 @@ std::string get_diagram_code(const std::map<std::size_t, std::size_t>& distribut
 	ss << "(" << x_max << ", 0)"; // end of diagram
 
 	ss << R"xxx(
-	};
+						};
 
-	\addlegendentry{Modelle mit $\leq x$ )xxx" << criterium << R"xxx(}
+						\node[rotate = 90](source) at(axis cs:100,5) { \mmfh };
+						\node(destination) at(axis cs:100,5) {};
+						\draw[->](source)--(destination);
 
-\end{axis}
-\end{tikzpicture}
-\end{figure}
+						\node[rotate = 90](source2) at(axis cs:100,5) { \wph };
+						\node(destination2) at(axis cs:100,5) {};
+						\draw[->](source2)--(destination2);
+
+						\node[rotate = 90](source3) at(axis cs:100,5) { \rnh };
+						\node(destination3) at(axis cs:100,5) {};
+						\draw[->](source3)--(destination3);
+
+						\addlegendentry{Modelle mit $\leq x$ )xxx" << criterium << R"xxx(}
+
+					\end{axis}
+				\end{tikzpicture}
 )xxx";
 
 	return ss.str();
@@ -219,10 +224,43 @@ int main(int argc, char** argv)
 		standard_logger().info(std::string("variance:  ") + std::to_string(variance));
 	}
 
-	const auto states_diagram_code = get_diagram_code(distribution_of_states, "states");
 	const auto nodes_diagram_code = get_diagram_code(distribution_of_nodes, "nodes");
-	standard_logger().info(states_diagram_code);
-	standard_logger().info(nodes_diagram_code);
+	const auto states_diagram_code = get_diagram_code(distribution_of_states, "states");
+
+	std::stringstream combine;
+	combine << R"xxx(
+\begin{figure}
+	\caption{Verteilung der nodes und states von Modell XX}
+	%\label{first-diagram}
+	\begin{center}
+		\scalebox{2}{
+			\makebox[0pt]{
+)xxx";
+	combine << nodes_diagram_code << states_diagram_code;
+	combine << R"xxx(			}
+		}
+	\end{center}
+	\begin{center}
+		\makebox[0pt]{
+			\begin{tabular}{|l|cc|cc|r|}
+				\hline
+				\textbf{} & \textbf{\#nodes} & \textbf{\% reduction} & \textbf{\#states} & \textbf{\% reduction} & \textbf{Zeit} \\
+				\hline
+				originales Modell & XXX & { \color{gray} 0} & XXX & { \color{gray} 0} & TTT \\
+				\hline
+				Maximum Merge First & XXX & YY & XXX & YY & TTT \\
+				Remove Nodes & XXX & YY & XXX & YY & TTT \\
+				Welsh-Powell & XXX & YY & XXX & YY & TTT \\
+				Minimum (red. Modelle) & XXX & YY & XXX & YY & \\
+				\hline
+			\end{tabular}
+		}
+	\end{center}
+\end{ figure }
+
+)xxx";
+
+	standard_logger().info(combine.str());
 
 #if false
 	std::string original_model_path_string{ argv[1] };
