@@ -121,8 +121,12 @@ void apply_coloring_to_file_token(file_token& reduced_file, const std::string& v
 				std::vector<std::string> vars = token->_equation->all_variables(const_table);
 				if (vars.size() > 0) { //ignored case of more than  variable
 					auto search = std::find(vector_of_live_vars.cbegin(), vector_of_live_vars.cend(), vars[0]);
-					if (search == vector_of_live_vars.cend()) {
-						std::shared_ptr<std::string> true_equation = std::make_shared<std::string>("1=1");
+					if (search == vector_of_live_vars.cend()) { // if there is no live var in equation token->_equation, so let's replace it
+						std::string var_string =
+							token->_equation->_left_expression->_identifier ?
+							token->_equation->_left_expression->_identifier->str() :
+							token->_equation->_right_expression->_identifier->str();
+						std::shared_ptr<std::string> true_equation = std::make_shared<std::string>(var_string + "=0");
 						token->_equation = std::make_shared<equation_token>(true_equation, true_equation->begin(), true_equation->end());
 						token->_equation->parse();
 					}
