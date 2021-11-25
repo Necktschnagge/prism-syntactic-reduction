@@ -1,0 +1,94 @@
+PRISM
+=====
+
+Version: 4.3.1.dev
+Date: Thu Nov 25 03:50:06 UTC 2021
+Hostname: fv-az378-372
+Memory limits: cudd=10g, java(heap)=1g
+Command line: prism ../../../../RESULTS/prism_model/reduced_model.prism -pf 'filter(printall, Pmax=? [ F failure ], "init")' -reorder -reorderoptions converge -mtbdd -cuddmaxmem 10g
+
+Parsing model file "../../../../RESULTS/prism_model/reduced_model.prism"...
+
+1 property:
+(1) filter(printall, Pmax=? [ F failure ], "init")
+
+Type:        DTMC
+Modules:     control_flowerror_propagation 
+Variables:   cf y_cfblk1_1626774391 y_cfblk2_1665909784 y_cfblk3_1705045177 y_cfblk4_1744180570 y_cfblk5_1783315963 x_cfblk1_1_3666926356 x_cfblk2_1_663427030 x_cfblk3_1_1954894999 redundancy_model11_cfblk1_0 y_cfblk1_1626774391_2 redundancy_model11_cfblk4_1 y_cfblk4_1744180570_2 redundancy_model11_cfblk2_2 y_cfblk2_1665909784_2 redundancy_model11_cfblk3_3 y_cfblk3_1705045177_2 x_cfblk1_1_3666926356_2 x_cfblk2_1_663427030_2 x_cfblk3_1_1954894999_2 
+
+---------------------------------------------------------------------
+
+Model checking: filter(printall, Pmax=? [ F failure ], "init")
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 63 iterations in 0.06 seconds (average 0.000889, setup 0.00)
+
+Time for model construction: 0.169 seconds.
+
+Type:        DTMC
+States:      3440 (1 initial)
+Transitions: 4197
+
+Transition matrix: 7549 nodes (6 terminal), 4197 minterms, vars: 63r/63c
+
+Reordering... 
+Reordering until convergence, iteration 1...done (took 0.124 seconds)
+  Iteration 1: transition matrix 69.7%, overall 57.2%
+Reordering until convergence, iteration 2...done (took 0.093 seconds)
+
+Reordering... done (took 0.218 seconds)
+MTBDD nodes of transition matrix: 2285 (7549 before reordering, 69.7% reduction)
+Number of overall MTBDD nodes: 4467 (10437 before reordering, 57.2% reduction)
+
+---------------------------------------------------------------------
+Rebuilding reordered model...
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 63 iterations in 0.03 seconds (average 0.000476, setup 0.00)
+
+Time for model construction: 0.113 seconds.
+
+Type:        DTMC
+States:      3440 (1 initial)
+Transitions: 4197
+
+Transition matrix: 2285 nodes (6 terminal), 4197 minterms, vars: 63r/63c
+
+Warning: "Pmin=?" and "Pmax=?" operators are identical to "P=?" for DTMCs/CTMCs
+
+Prob0: 25 iterations in 0.01 seconds (average 0.000440, setup 0.00)
+
+Prob1: 19 iterations in 0.01 seconds (average 0.000263, setup 0.00)
+
+yes = 456, no = 1280, maybe = 1704
+
+Computing remaining probabilities...
+Engine: MTBDD
+
+Iteration matrix MTBDD... [nodes=1650] [32.2 Kb]
+Diagonals MTBDD... [nodes=383] [7.5 Kb]
+
+Starting iterations...
+Iteration 2161: 5.00 sec so far
+
+Jacobi: 2599 iterations in 6.03 seconds (average 0.002320, setup 0.00)
+
+Results (including zeros) for filter "init":
+0:(1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,4,2,1,2,1)=0.27045163915746606
+
+Value in the initial state: 0.27045163915746606
+
+Time for model checking: 6.044 seconds.
+
+Result: 0.27045163915746606 (value in the initial state)
+
+---------------------------------------------------------------------
+
+Note: There was 1 warning during computation.
+
