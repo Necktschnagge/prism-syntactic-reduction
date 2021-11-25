@@ -1,0 +1,83 @@
+PRISM
+=====
+
+Version: 4.3.1.dev
+Date: Thu Nov 25 09:05:37 UTC 2021
+Hostname: fv-az99-552
+Memory limits: cudd=10g, java(heap)=1g
+Command line: prism ../../../../RESULTS/prism_model/reduced_model.prism -pf 'filter(printall, Pmax=? [ F failure ], "init")' -reorder -reorderoptions converge -mtbdd -cuddmaxmem 10g
+
+Parsing model file "../../../../RESULTS/prism_model/reduced_model.prism"...
+
+1 property:
+(1) filter(printall, Pmax=? [ F failure ], "init")
+
+Type:        DTMC
+Modules:     control_flowerror_propagation 
+Variables:   cf y_cfblk1_781621948 y_cfblk2_820757341 y_cfblk3_859892734 y_cfblk4_899028127 y_cfblk5_938163520 x_cfblk1_1_1546699507 x_cfblk5_1_2417604088 redundancy_model18_cfblk1_0 y_cfblk1_781621948_2 redundancy_model18_cfblk4_1 y_cfblk4_899028127_2 redundancy_model18_cfblk2_2 y_cfblk2_820757341_2 redundancy_model18_cfblk3_3 y_cfblk3_859892734_2 x_cfblk1_1_1546699507_2 
+
+---------------------------------------------------------------------
+
+Model checking: filter(printall, Pmax=? [ F failure ], "init")
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 39 iterations in 0.02 seconds (average 0.000538, setup 0.00)
+
+Time for model construction: 0.101 seconds.
+
+Type:        DTMC
+States:      1010 (1 initial)
+Transitions: 1188
+
+Transition matrix: 3350 nodes (8 terminal), 1188 minterms, vars: 53r/53c
+
+Reordering... 
+Reordering until convergence, iteration 1...done (took 0.079 seconds)
+  Iteration 1: transition matrix 33.9%, overall 28.2%
+Reordering until convergence, iteration 2...done (took 0.062 seconds)
+
+Reordering... done (took 0.147 seconds)
+MTBDD nodes of transition matrix: 2215 (3350 before reordering, 33.9% reduction)
+Number of overall MTBDD nodes: 3465 (4825 before reordering, 28.2% reduction)
+
+---------------------------------------------------------------------
+Rebuilding reordered model...
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 39 iterations in 0.03 seconds (average 0.000667, setup 0.00)
+
+Time for model construction: 0.068 seconds.
+
+Type:        DTMC
+States:      1010 (1 initial)
+Transitions: 1188
+
+Transition matrix: 2215 nodes (8 terminal), 1188 minterms, vars: 53r/53c
+
+Warning: "Pmin=?" and "Pmax=?" operators are identical to "P=?" for DTMCs/CTMCs
+
+Prob0: 22 iterations in 0.01 seconds (average 0.000545, setup 0.00)
+
+Prob1: 1 iterations in 0.00 seconds (average 0.000000, setup 0.00)
+
+yes = 1010, no = 0, maybe = 0
+
+Results (including zeros) for filter "init":
+0:(0,1,1,1,1,1,1,1,1,1,1,1,2,2,0,0,1)=1.0
+
+Value in the initial state: 1.0
+
+Time for model checking: 0.014 seconds.
+
+Result: 1.0 (value in the initial state)
+
+---------------------------------------------------------------------
+
+Note: There was 1 warning during computation.
+
