@@ -1783,7 +1783,7 @@ int cli(int argc, char** argv) {
 	std::vector<std::vector<collapse_node::big_int>> all_partitionings_with_minimal_size;
 	std::vector<collapse_node> max_groupings;
 
-	find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, max_groupings, all_partitionings_with_minimal_size);  //  ####refactor maxthreads inner and outer threads config....
+	//find_all_minimal_partitionings(enemies_table, max_threads, all_var_names, max_groupings, all_partitionings_with_minimal_size);  //  ####refactor maxthreads inner and outer threads config....
 
 	standard_logger().info("Applying concrete heuristics...");
 
@@ -1793,7 +1793,11 @@ int cli(int argc, char** argv) {
 
 	std::vector<collapse_node::big_int> welsh_powell_coloring = calc_welsh_powell_coloring(enemies_table);
 
-	std::vector<collapse_node::big_int> max_local_first_coloring = calc_max_local_first_coloring(max_groupings);
+	all_partitionings_with_minimal_size.push_back(starke_coloring_result);
+	all_partitionings_with_minimal_size.push_back(welsh_powell_coloring);
+
+
+	//std::vector<collapse_node::big_int> max_local_first_coloring = calc_max_local_first_coloring(max_groupings);
 
 	// var_list.txt
 	write_var_list_txt(results_directory, all_var_names);
@@ -1802,7 +1806,7 @@ int cli(int argc, char** argv) {
 	write_max_local_groupings(results_directory, max_groupings);
 
 	// all_partitions.json
-	write_all_partitionings(results_directory, all_partitionings_with_minimal_size, starke_coloring_result, max_local_first_coloring, welsh_powell_coloring);
+	write_all_partitionings(results_directory, all_partitionings_with_minimal_size, starke_coloring_result, starke_coloring_result, welsh_powell_coloring);
 
 	// meta.json
 	write_meta_json(results_directory, all_partitionings_with_minimal_size.size());
