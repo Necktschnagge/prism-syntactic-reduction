@@ -246,17 +246,17 @@ int main(int argc, char** argv)
 				\hline
 				\textbf{} & \textbf{\#nodes} & \textbf{\% reduction} & \textbf{\#states} & \textbf{\% reduction} & \textbf{Zeit} \\
 				\hline
-				originales Modell & XXX & { \color{gray} 0} & XXX & { \color{gray} 0} & TTT \\
+				originales Modell & XXX & { \color{gray} 0\%} & XXX & { \color{gray} 0\%} & TTT \\
 				\hline
-				Maximum Merge First & XXX & YY & XXX & YY & TTT \\
-				Remove Nodes & XXX & YY & XXX & YY & TTT \\
-				Welsh-Powell & XXX & YY & XXX & YY & TTT \\
-				Minimum (red. Modelle) & XXX & YY & XXX & YY & \\
+				Maximum Merge First & XXX & YY\% & XXX & YY\% & TTT \\
+				Remove Nodes & XXX & YY\% & XXX & YY\% & TTT \\
+				Welsh-Powell & XXX & YY\% & XXX & YY\% & TTT \\
+				Minimum (red. Modelle) & XXX & YY\% & XXX & YY\% & \\
 				\hline
 			\end{tabular}
 		}
 	\end{center}
-\end{ figure }
+\end{figure}
 
 )xxx";
 
