@@ -1,0 +1,8 @@
+{
+	"model_path": "../Examples/ireduce/in_family.prism",
+	"result_dir": "../RESULTS",
+	"exclude_vars": [
+		"y_Integrator_44480461"
+	],
+	"prism_command": ".\/prism '..\/..\/..\/..\/RESULTS\/prism_model\/reduced_model.prism' -pf 'filter(printall, Pmax=? [ F failure ], \"init\")' -reorder -reorderoptions converge -mtbdd -cuddmaxmem 10g"
+}
