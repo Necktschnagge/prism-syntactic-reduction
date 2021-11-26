@@ -251,7 +251,7 @@ int main(int argc, char** argv)
 				Maximum Merge First & XXX & YY\% & XXX & YY\% & TTT \\
 				Remove Nodes & XXX & YY\% & XXX & YY\% & TTT \\
 				Welsh-Powell & XXX & YY\% & XXX & YY\% & TTT \\
-				Minimum (red. Modelle) & XXX & YY\% & XXX & YY\% & \\
+				max. Reduktion & XXX & YY\% & XXX & YY\% & \\
 				\hline
 			\end{tabular}
 		}
