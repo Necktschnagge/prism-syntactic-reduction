@@ -1,0 +1,95 @@
+PRISM
+=====
+
+Version: 4.3.1.dev
+Date: Fri Nov 26 00:20:23 UTC 2021
+Hostname: fv-az217-427
+Memory limits: cudd=10g, java(heap)=1g
+Command line: prism ../../../../RESULTS/prism_model/reduced_model.prism -pf 'filter(printall, Pmax=? [ F failure ], "init")' -reorder -reorderoptions converge -mtbdd -cuddmaxmem 10g
+
+Parsing model file "../../../../RESULTS/prism_model/reduced_model.prism"...
+
+1 property:
+(1) filter(printall, Pmax=? [ F failure ], "init")
+
+Type:        DTMC
+Modules:     control_flowerror_propagation 
+Variables:   colored_0 colored_9 colored_8 colored_10 colored_12 colored_5 colored_6 colored_7 colored_1 colored_4 colored_11 colored_2 colored_3 
+
+---------------------------------------------------------------------
+
+Model checking: filter(printall, Pmax=? [ F failure ], "init")
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 59 iterations in 0.03 seconds (average 0.000475, setup 0.00)
+
+Time for model construction: 0.097 seconds.
+
+Type:        DTMC
+States:      825 (1 initial)
+Transitions: 997
+
+Transition matrix: 3564 nodes (6 terminal), 997 minterms, vars: 42r/42c
+
+Reordering... 
+Reordering until convergence, iteration 1...done (took 0.054 seconds)
+  Iteration 1: transition matrix 32.6%, overall 28.6%
+Reordering until convergence, iteration 2...done (took 0.045 seconds)
+  Iteration 2: transition matrix 34.7%, overall 30.1%
+Reordering until convergence, iteration 3...done (took 0.042 seconds)
+
+Reordering... done (took 0.142 seconds)
+MTBDD nodes of transition matrix: 2329 (3564 before reordering, 34.7% reduction)
+Number of overall MTBDD nodes: 3717 (5319 before reordering, 30.1% reduction)
+
+---------------------------------------------------------------------
+Rebuilding reordered model...
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 59 iterations in 0.02 seconds (average 0.000305, setup 0.00)
+
+Time for model construction: 0.064 seconds.
+
+Type:        DTMC
+States:      825 (1 initial)
+Transitions: 997
+
+Transition matrix: 2329 nodes (6 terminal), 997 minterms, vars: 42r/42c
+
+Warning: "Pmin=?" and "Pmax=?" operators are identical to "P=?" for DTMCs/CTMCs
+
+Prob0: 25 iterations in 0.01 seconds (average 0.000480, setup 0.00)
+
+Prob1: 19 iterations in 0.01 seconds (average 0.000316, setup 0.00)
+
+yes = 262, no = 266, maybe = 297
+
+Computing remaining probabilities...
+Engine: MTBDD
+
+Iteration matrix MTBDD... [nodes=1380] [27.0 Kb]
+Diagonals MTBDD... [nodes=442] [8.6 Kb]
+
+Starting iterations...
+
+Jacobi: 2599 iterations in 3.97 seconds (average 0.001526, setup 0.00)
+
+Results (including zeros) for filter "init":
+0:(0,1,1,0,0,0,1,1,1,0,4,2,2)=0.27045163915746606
+
+Value in the initial state: 0.27045163915746606
+
+Time for model checking: 4.001 seconds.
+
+Result: 0.27045163915746606 (value in the initial state)
+
+---------------------------------------------------------------------
+
+Note: There was 1 warning during computation.
+
