@@ -1,0 +1,1387 @@
+PRISM
+=====
+
+Version: 4.3.1.dev
+Date: Fri Nov 26 23:50:03 UTC 2021
+Hostname: fv-az123-830
+Memory limits: cudd=10g, java(heap)=1g
+Command line: prism ../../../../RESULTS/prism_model/reduced_model.prism -pf 'filter(printall, Pmax=? [ F failure ], "init")' -reorder -reorderoptions converge -mtbdd -cuddmaxmem 10g
+
+Parsing model file "../../../../RESULTS/prism_model/reduced_model.prism"...
+
+1 property:
+(1) filter(printall, Pmax=? [ F failure ], "init")
+
+Type:        DTMC
+Modules:     control_flowerror_propagation 
+Variables:   colored_0 colored_37 colored_32 colored_38 colored_35 colored_30 colored_36 colored_27 colored_33 colored_31 colored_25 colored_28 colored_22 colored_34 colored_26 colored_29 colored_23 colored_24 colored_4 colored_5 colored_11 colored_21 colored_9 colored_13 colored_10 colored_6 colored_2 colored_16 colored_12 colored_17 colored_18 colored_15 colored_19 colored_20 colored_8 colored_3 colored_14 colored_1 colored_7 
+
+---------------------------------------------------------------------
+
+Model checking: filter(printall, Pmax=? [ F failure ], "init")
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 183 iterations in 4.20 seconds (average 0.022945, setup 0.00)
+
+Time for model construction: 6.304 seconds.
+
+Type:        DTMC
+States:      13882176 (729 initial)
+Transitions: 15313794
+
+Transition matrix: 96322 nodes (12 terminal), 15313794 minterms, vars: 122r/122c
+
+Reordering... 
+Reordering until convergence, iteration 1...done (took 4.105 seconds)
+  Iteration 1: transition matrix 57.6%, overall 54.6%
+Reordering until convergence, iteration 2...done (took 2.698 seconds)
+  Iteration 2: transition matrix 60.0%, overall 57.8%
+Reordering until convergence, iteration 3...done (took 2.673 seconds)
+  Iteration 3: transition matrix 60.9%, overall 58.5%
+Reordering until convergence, iteration 4...done (took 2.65 seconds)
+
+Reordering... done (took 12.135 seconds)
+MTBDD nodes of transition matrix: 37698 (96322 before reordering, 60.9% reduction)
+Number of overall MTBDD nodes: 51340 (123741 before reordering, 58.5% reduction)
+
+---------------------------------------------------------------------
+Rebuilding reordered model...
+
+Building model...
+
+Computing reachable states...
+
+Reachability (BFS): 183 iterations in 1.43 seconds (average 0.007831, setup 0.00)
+
+Time for model construction: 2.969 seconds.
+
+Type:        DTMC
+States:      13882176 (729 initial)
+Transitions: 15313794
+
+Transition matrix: 37698 nodes (12 terminal), 15313794 minterms, vars: 122r/122c
+
+Warning: "Pmin=?" and "Pmax=?" operators are identical to "P=?" for DTMCs/CTMCs
+
+Prob0: 98 iterations in 0.42 seconds (average 0.004245, setup 0.00)
+
+Prob1: 99 iterations in 0.42 seconds (average 0.004283, setup 0.00)
+
+yes = 8436483, no = 4090068, maybe = 1355625
+
+Computing remaining probabilities...
+Engine: MTBDD
+
+Iteration matrix MTBDD... [nodes=18544] [362.2 Kb]
+Diagonals MTBDD... [nodes=6685] [130.6 Kb]
+
+Starting iterations...
+Iteration 64: 5.03 sec so far
+Iteration 83: 10.41 sec so far
+Iteration 94: 15.84 sec so far
+Iteration 103: 20.97 sec so far
+Iteration 112: 26.30 sec so far
+Iteration 121: 31.38 sec so far
+Iteration 128: 36.52 sec so far
+Iteration 134: 42.19 sec so far
+Iteration 140: 47.85 sec so far
+Iteration 147: 52.98 sec so far
+Iteration 154: 58.47 sec so far
+Iteration 160: 63.95 sec so far
+Iteration 165: 69.67 sec so far
+Iteration 171: 75.01 sec so far
+Iteration 177: 80.59 sec so far
+Iteration 183: 86.53 sec so far
+Iteration 187: 91.71 sec so far
+Iteration 193: 97.53 sec so far
+Iteration 199: 103.37 sec so far
+Iteration 205: 109.31 sec so far
+Iteration 209: 114.55 sec so far
+Iteration 214: 119.64 sec so far
+Iteration 219: 124.86 sec so far
+Iteration 224: 129.91 sec so far
+Iteration 229: 137.14 sec so far
+Iteration 234: 142.26 sec so far
+Iteration 239: 147.48 sec so far
+Iteration 244: 152.87 sec so far
+Iteration 249: 158.18 sec so far
+Iteration 253: 163.61 sec so far
+Iteration 258: 168.85 sec so far
+Iteration 263: 174.50 sec so far
+Iteration 268: 180.10 sec so far
+Iteration 272: 185.43 sec so far
+Iteration 277: 190.78 sec so far
+Iteration 282: 196.35 sec so far
+Iteration 287: 202.10 sec so far
+Iteration 292: 208.75 sec so far
+Iteration 297: 214.04 sec so far
+Iteration 302: 219.64 sec so far
+Iteration 307: 225.44 sec so far
+Iteration 312: 232.19 sec so far
+Iteration 317: 237.52 sec so far
+Iteration 322: 243.12 sec so far
+Iteration 327: 248.96 sec so far
+Iteration 332: 255.72 sec so far
+Iteration 337: 261.10 sec so far
+Iteration 342: 266.69 sec so far
+Iteration 347: 272.57 sec so far
+Iteration 351: 278.02 sec so far
+Iteration 356: 283.52 sec so far
+Iteration 361: 289.13 sec so far
+Iteration 366: 295.10 sec so far
+Iteration 371: 301.81 sec so far
+Iteration 376: 307.30 sec so far
+Iteration 381: 313.07 sec so far
+Iteration 386: 319.07 sec so far
+Iteration 390: 324.73 sec so far
+Iteration 395: 330.38 sec so far
+Iteration 400: 336.20 sec so far
+Iteration 405: 342.38 sec so far
+Iteration 409: 347.93 sec so far
+Iteration 414: 353.63 sec so far
+Iteration 419: 359.52 sec so far
+Iteration 424: 365.69 sec so far
+Iteration 429: 372.69 sec so far
+Iteration 434: 378.23 sec so far
+Iteration 439: 384.11 sec so far
+Iteration 444: 390.23 sec so far
+Iteration 448: 395.88 sec so far
+Iteration 453: 401.45 sec so far
+Iteration 458: 407.30 sec so far
+Iteration 463: 413.52 sec so far
+Iteration 467: 419.18 sec so far
+Iteration 472: 424.84 sec so far
+Iteration 477: 430.76 sec so far
+Iteration 482: 436.97 sec so far
+Iteration 486: 442.65 sec so far
+Iteration 491: 448.33 sec so far
+Iteration 496: 454.24 sec so far
+Iteration 501: 460.45 sec so far
+Iteration 505: 466.10 sec so far
+Iteration 510: 471.86 sec so far
+Iteration 515: 477.78 sec so far
+Iteration 520: 483.98 sec so far
+Iteration 524: 489.59 sec so far
+Iteration 529: 495.30 sec so far
+Iteration 534: 501.18 sec so far
+Iteration 539: 507.38 sec so far
+Iteration 543: 513.05 sec so far
+Iteration 548: 518.79 sec so far
+Iteration 553: 524.79 sec so far
+Iteration 557: 529.87 sec so far
+Iteration 562: 536.80 sec so far
+Iteration 567: 542.50 sec so far
+Iteration 572: 548.50 sec so far
+Iteration 576: 553.52 sec so far
+Iteration 581: 560.43 sec so far
+Iteration 586: 566.12 sec so far
+Iteration 591: 572.08 sec so far
+Iteration 596: 578.28 sec so far
+Iteration 600: 583.98 sec so far
+Iteration 605: 589.65 sec so far
+Iteration 610: 595.61 sec so far
+Iteration 615: 601.81 sec so far
+Iteration 619: 607.48 sec so far
+Iteration 624: 613.21 sec so far
+Iteration 629: 619.19 sec so far
+Iteration 633: 624.23 sec so far
+Iteration 638: 631.17 sec so far
+Iteration 643: 636.89 sec so far
+Iteration 648: 642.87 sec so far
+Iteration 652: 647.90 sec so far
+Iteration 657: 654.85 sec so far
+Iteration 662: 660.55 sec so far
+Iteration 667: 666.52 sec so far
+Iteration 671: 671.54 sec so far
+Iteration 676: 678.46 sec so far
+Iteration 681: 684.12 sec so far
+Iteration 686: 690.06 sec so far
+Iteration 690: 695.08 sec so far
+Iteration 695: 702.03 sec so far
+Iteration 700: 707.68 sec so far
+Iteration 705: 713.66 sec so far
+Iteration 709: 718.72 sec so far
+Iteration 714: 725.74 sec so far
+Iteration 719: 731.42 sec so far
+Iteration 724: 737.41 sec so far
+Iteration 728: 742.46 sec so far
+Iteration 733: 749.46 sec so far
+Iteration 738: 755.18 sec so far
+Iteration 743: 761.19 sec so far
+Iteration 747: 766.22 sec so far
+Iteration 752: 773.27 sec so far
+Iteration 757: 778.93 sec so far
+Iteration 762: 784.93 sec so far
+Iteration 767: 791.14 sec so far
+Iteration 771: 796.91 sec so far
+Iteration 776: 802.61 sec so far
+Iteration 781: 808.59 sec so far
+Iteration 785: 813.61 sec so far
+Iteration 790: 820.65 sec so far
+Iteration 795: 826.30 sec so far
+Iteration 800: 832.31 sec so far
+Iteration 804: 837.33 sec so far
+Iteration 809: 844.33 sec so far
+Iteration 814: 850.00 sec so far
+Iteration 819: 856.00 sec so far
+Iteration 823: 861.02 sec so far
+Iteration 828: 868.04 sec so far
+Iteration 833: 873.70 sec so far
+Iteration 838: 879.67 sec so far
+Iteration 842: 884.71 sec so far
+Iteration 847: 891.71 sec so far
+Iteration 852: 897.42 sec so far
+Iteration 857: 903.40 sec so far
+Iteration 861: 908.40 sec so far
+Iteration 866: 915.38 sec so far
+Iteration 871: 921.02 sec so far
+Iteration 876: 926.98 sec so far
+Iteration 880: 932.00 sec so far
+Iteration 885: 938.99 sec so far
+Iteration 890: 944.68 sec so far
+Iteration 895: 950.66 sec so far
+Iteration 899: 955.68 sec so far
+Iteration 904: 962.73 sec so far
+Iteration 909: 968.39 sec so far
+Iteration 914: 974.36 sec so far
+Iteration 918: 979.38 sec so far
+Iteration 923: 986.45 sec so far
+Iteration 928: 992.12 sec so far
+Iteration 933: 998.10 sec so far
+Iteration 937: 1003.12 sec so far
+Iteration 942: 1010.15 sec so far
+Iteration 947: 1015.87 sec so far
+Iteration 952: 1021.85 sec so far
+Iteration 956: 1026.89 sec so far
+Iteration 961: 1033.97 sec so far
+Iteration 966: 1039.69 sec so far
+Iteration 971: 1045.71 sec so far
+Iteration 975: 1050.79 sec so far
+Iteration 980: 1057.86 sec so far
+Iteration 985: 1063.57 sec so far
+Iteration 990: 1069.56 sec so far
+Iteration 994: 1074.61 sec so far
+Iteration 999: 1081.69 sec so far
+Iteration 1004: 1087.37 sec so far
+Iteration 1009: 1093.37 sec so far
+Iteration 1014: 1099.58 sec so far
+Iteration 1018: 1105.39 sec so far
+Iteration 1023: 1111.04 sec so far
+Iteration 1028: 1117.05 sec so far
+Iteration 1033: 1123.26 sec so far
+Iteration 1037: 1129.06 sec so far
+Iteration 1042: 1134.78 sec so far
+Iteration 1047: 1140.73 sec so far
+Iteration 1051: 1145.78 sec so far
+Iteration 1056: 1152.79 sec so far
+Iteration 1061: 1158.46 sec so far
+Iteration 1066: 1164.41 sec so far
+Iteration 1070: 1169.42 sec so far
+Iteration 1075: 1176.46 sec so far
+Iteration 1080: 1182.12 sec so far
+Iteration 1085: 1188.10 sec so far
+Iteration 1090: 1194.30 sec so far
+Iteration 1094: 1200.10 sec so far
+Iteration 1099: 1205.75 sec so far
+Iteration 1104: 1211.70 sec so far
+Iteration 1109: 1217.91 sec so far
+Iteration 1113: 1223.71 sec so far
+Iteration 1118: 1229.34 sec so far
+Iteration 1123: 1235.30 sec so far
+Iteration 1128: 1241.49 sec so far
+Iteration 1132: 1247.20 sec so far
+Iteration 1137: 1252.83 sec so far
+Iteration 1142: 1258.74 sec so far
+Iteration 1147: 1264.86 sec so far
+Iteration 1151: 1270.51 sec so far
+Iteration 1156: 1276.09 sec so far
+Iteration 1161: 1281.95 sec so far
+Iteration 1166: 1288.01 sec so far
+Iteration 1170: 1293.62 sec so far
+Iteration 1175: 1299.12 sec so far
+Iteration 1180: 1304.97 sec so far
+Iteration 1185: 1311.02 sec so far
+Iteration 1189: 1316.58 sec so far
+Iteration 1194: 1322.07 sec so far
+Iteration 1199: 1327.85 sec so far
+Iteration 1204: 1333.86 sec so far
+Iteration 1208: 1339.35 sec so far
+Iteration 1213: 1344.87 sec so far
+Iteration 1218: 1350.63 sec so far
+Iteration 1223: 1356.60 sec so far
+Iteration 1227: 1362.08 sec so far
+Iteration 1232: 1367.52 sec so far
+Iteration 1237: 1373.23 sec so far
+Iteration 1242: 1379.19 sec so far
+Iteration 1246: 1384.67 sec so far
+Iteration 1251: 1390.13 sec so far
+Iteration 1256: 1395.86 sec so far
+Iteration 1261: 1401.77 sec so far
+Iteration 1265: 1407.15 sec so far
+Iteration 1270: 1412.56 sec so far
+Iteration 1275: 1418.23 sec so far
+Iteration 1280: 1424.14 sec so far
+Iteration 1284: 1429.47 sec so far
+Iteration 1289: 1434.94 sec so far
+Iteration 1294: 1440.56 sec so far
+Iteration 1299: 1446.46 sec so far
+Iteration 1303: 1451.78 sec so far
+Iteration 1308: 1457.18 sec so far
+Iteration 1313: 1462.83 sec so far
+Iteration 1318: 1468.66 sec so far
+Iteration 1322: 1473.97 sec so far
+Iteration 1327: 1479.39 sec so far
+Iteration 1332: 1485.08 sec so far
+Iteration 1337: 1490.92 sec so far
+Iteration 1341: 1496.19 sec so far
+Iteration 1346: 1501.61 sec so far
+Iteration 1351: 1507.27 sec so far
+Iteration 1356: 1513.11 sec so far
+Iteration 1360: 1518.41 sec so far
+Iteration 1365: 1523.80 sec so far
+Iteration 1370: 1529.41 sec so far
+Iteration 1375: 1535.24 sec so far
+Iteration 1379: 1540.50 sec so far
+Iteration 1384: 1545.91 sec so far
+Iteration 1389: 1551.52 sec so far
+Iteration 1394: 1557.35 sec so far
+Iteration 1398: 1562.62 sec so far
+Iteration 1403: 1567.99 sec so far
+Iteration 1408: 1573.59 sec so far
+Iteration 1413: 1579.47 sec so far
+Iteration 1417: 1584.78 sec so far
+Iteration 1422: 1590.16 sec so far
+Iteration 1427: 1595.78 sec so far
+Iteration 1432: 1601.60 sec so far
+Iteration 1436: 1606.86 sec so far
+Iteration 1441: 1612.33 sec so far
+Iteration 1446: 1617.98 sec so far
+Iteration 1451: 1623.82 sec so far
+Iteration 1455: 1629.11 sec so far
+Iteration 1460: 1634.48 sec so far
+Iteration 1465: 1640.06 sec so far
+Iteration 1470: 1645.91 sec so far
+Iteration 1474: 1651.19 sec so far
+Iteration 1479: 1656.58 sec so far
+Iteration 1484: 1662.19 sec so far
+Iteration 1489: 1668.07 sec so far
+Iteration 1493: 1673.36 sec so far
+Iteration 1498: 1678.81 sec so far
+Iteration 1503: 1684.39 sec so far
+Iteration 1508: 1690.24 sec so far
+Iteration 1512: 1695.57 sec so far
+Iteration 1517: 1700.95 sec so far
+Iteration 1522: 1706.57 sec so far
+Iteration 1527: 1712.38 sec so far
+Iteration 1531: 1717.62 sec so far
+Iteration 1536: 1723.02 sec so far
+Iteration 1541: 1728.59 sec so far
+Iteration 1546: 1734.41 sec so far
+Iteration 1550: 1739.68 sec so far
+Iteration 1555: 1745.07 sec so far
+Iteration 1560: 1750.62 sec so far
+Iteration 1565: 1756.43 sec so far
+Iteration 1569: 1761.67 sec so far
+Iteration 1574: 1767.02 sec so far
+Iteration 1579: 1772.59 sec so far
+Iteration 1584: 1778.41 sec so far
+Iteration 1588: 1783.70 sec so far
+Iteration 1593: 1789.09 sec so far
+Iteration 1598: 1794.66 sec so far
+Iteration 1603: 1800.49 sec so far
+Iteration 1607: 1805.76 sec so far
+Iteration 1612: 1811.08 sec so far
+Iteration 1617: 1816.64 sec so far
+Iteration 1622: 1822.44 sec so far
+Iteration 1626: 1827.68 sec so far
+Iteration 1631: 1833.08 sec so far
+Iteration 1636: 1838.65 sec so far
+Iteration 1641: 1844.42 sec so far
+Iteration 1645: 1849.67 sec so far
+Iteration 1650: 1855.07 sec so far
+Iteration 1655: 1860.62 sec so far
+Iteration 1660: 1866.44 sec so far
+Iteration 1664: 1871.69 sec so far
+Iteration 1669: 1877.11 sec so far
+Iteration 1674: 1882.68 sec so far
+Iteration 1679: 1888.52 sec so far
+Iteration 1683: 1893.80 sec so far
+Iteration 1688: 1899.19 sec so far
+Iteration 1693: 1904.81 sec so far
+Iteration 1698: 1910.61 sec so far
+Iteration 1702: 1915.87 sec so far
+Iteration 1707: 1921.25 sec so far
+Iteration 1712: 1926.86 sec so far
+Iteration 1717: 1932.64 sec so far
+Iteration 1721: 1937.86 sec so far
+Iteration 1726: 1943.24 sec so far
+Iteration 1731: 1948.82 sec so far
+Iteration 1736: 1954.67 sec so far
+Iteration 1740: 1959.94 sec so far
+Iteration 1745: 1965.29 sec so far
+Iteration 1750: 1970.81 sec so far
+Iteration 1755: 1976.67 sec so far
+Iteration 1759: 1981.90 sec so far
+Iteration 1764: 1987.28 sec so far
+Iteration 1769: 1992.85 sec so far
+Iteration 1774: 1998.65 sec so far
+Iteration 1778: 2003.93 sec so far
+Iteration 1783: 2009.30 sec so far
+Iteration 1788: 2014.90 sec so far
+Iteration 1793: 2020.72 sec so far
+Iteration 1797: 2025.98 sec so far
+Iteration 1802: 2031.34 sec so far
+Iteration 1807: 2036.93 sec so far
+Iteration 1812: 2042.70 sec so far
+Iteration 1816: 2047.98 sec so far
+Iteration 1821: 2053.39 sec so far
+Iteration 1826: 2058.96 sec so far
+Iteration 1831: 2064.75 sec so far
+Iteration 1835: 2070.03 sec so far
+Iteration 1840: 2075.39 sec so far
+Iteration 1845: 2080.94 sec so far
+Iteration 1850: 2086.76 sec so far
+Iteration 1854: 2092.05 sec so far
+Iteration 1859: 2097.44 sec so far
+Iteration 1864: 2102.98 sec so far
+Iteration 1869: 2108.79 sec so far
+Iteration 1873: 2114.04 sec so far
+Iteration 1878: 2119.41 sec so far
+Iteration 1883: 2124.97 sec so far
+Iteration 1888: 2130.79 sec so far
+Iteration 1892: 2136.05 sec so far
+Iteration 1897: 2141.39 sec so far
+Iteration 1902: 2146.98 sec so far
+Iteration 1907: 2152.81 sec so far
+Iteration 1911: 2158.04 sec so far
+Iteration 1916: 2163.42 sec so far
+Iteration 1921: 2169.01 sec so far
+Iteration 1926: 2174.83 sec so far
+Iteration 1930: 2180.06 sec so far
+Iteration 1935: 2185.44 sec so far
+Iteration 1940: 2191.02 sec so far
+Iteration 1945: 2196.85 sec so far
+Iteration 1949: 2202.11 sec so far
+Iteration 1954: 2207.45 sec so far
+Iteration 1959: 2213.07 sec so far
+Iteration 1964: 2218.89 sec so far
+Iteration 1968: 2224.15 sec so far
+Iteration 1973: 2229.57 sec so far
+Iteration 1978: 2235.17 sec so far
+Iteration 1983: 2241.02 sec so far
+Iteration 1987: 2246.32 sec so far
+Iteration 1992: 2251.72 sec so far
+Iteration 1997: 2257.34 sec so far
+Iteration 2002: 2263.16 sec so far
+Iteration 2006: 2268.44 sec so far
+Iteration 2011: 2273.82 sec so far
+Iteration 2016: 2279.43 sec so far
+Iteration 2021: 2285.23 sec so far
+Iteration 2025: 2290.49 sec so far
+Iteration 2030: 2295.89 sec so far
+Iteration 2035: 2301.52 sec so far
+Iteration 2040: 2307.34 sec so far
+Iteration 2044: 2312.61 sec so far
+Iteration 2049: 2318.01 sec so far
+Iteration 2054: 2323.64 sec so far
+Iteration 2059: 2329.51 sec so far
+Iteration 2063: 2334.80 sec so far
+Iteration 2068: 2340.20 sec so far
+Iteration 2073: 2345.83 sec so far
+Iteration 2078: 2351.64 sec so far
+Iteration 2082: 2356.87 sec so far
+Iteration 2087: 2362.23 sec so far
+Iteration 2092: 2367.82 sec so far
+Iteration 2097: 2373.60 sec so far
+Iteration 2101: 2378.86 sec so far
+Iteration 2106: 2384.25 sec so far
+Iteration 2111: 2389.81 sec so far
+Iteration 2116: 2395.60 sec so far
+Iteration 2120: 2400.80 sec so far
+Iteration 2125: 2406.16 sec so far
+Iteration 2130: 2411.74 sec so far
+Iteration 2135: 2417.54 sec so far
+Iteration 2139: 2422.78 sec so far
+Iteration 2144: 2428.16 sec so far
+Iteration 2149: 2433.75 sec so far
+Iteration 2154: 2439.55 sec so far
+Iteration 2158: 2444.80 sec so far
+Iteration 2163: 2450.18 sec so far
+Iteration 2168: 2455.78 sec so far
+Iteration 2173: 2461.58 sec so far
+Iteration 2177: 2466.85 sec so far
+Iteration 2182: 2472.21 sec so far
+Iteration 2187: 2477.85 sec so far
+Iteration 2192: 2483.68 sec so far
+Iteration 2196: 2488.94 sec so far
+Iteration 2201: 2494.32 sec so far
+Iteration 2206: 2499.92 sec so far
+Iteration 2211: 2505.75 sec so far
+Iteration 2215: 2510.97 sec so far
+Iteration 2220: 2516.33 sec so far
+Iteration 2225: 2521.89 sec so far
+Iteration 2230: 2527.75 sec so far
+Iteration 2234: 2533.00 sec so far
+Iteration 2239: 2538.39 sec so far
+Iteration 2244: 2543.93 sec so far
+Iteration 2249: 2549.72 sec so far
+Iteration 2253: 2555.02 sec so far
+Iteration 2258: 2560.39 sec so far
+Iteration 2263: 2565.98 sec so far
+Iteration 2268: 2571.77 sec so far
+Iteration 2272: 2577.04 sec so far
+Iteration 2277: 2582.40 sec so far
+Iteration 2282: 2587.99 sec so far
+Iteration 2287: 2593.78 sec so far
+Iteration 2291: 2599.03 sec so far
+Iteration 2296: 2604.42 sec so far
+Iteration 2301: 2610.00 sec so far
+Iteration 2306: 2615.81 sec so far
+Iteration 2310: 2621.07 sec so far
+Iteration 2315: 2626.48 sec so far
+Iteration 2320: 2632.05 sec so far
+Iteration 2325: 2637.89 sec so far
+Iteration 2329: 2643.15 sec so far
+Iteration 2334: 2648.53 sec so far
+Iteration 2339: 2654.11 sec so far
+Iteration 2344: 2659.95 sec so far
+Iteration 2348: 2665.23 sec so far
+Iteration 2353: 2670.62 sec so far
+Iteration 2358: 2676.15 sec so far
+Iteration 2363: 2681.95 sec so far
+Iteration 2367: 2687.17 sec so far
+Iteration 2372: 2692.53 sec so far
+Iteration 2377: 2698.09 sec so far
+Iteration 2382: 2703.86 sec so far
+Iteration 2386: 2709.07 sec so far
+Iteration 2391: 2714.43 sec so far
+Iteration 2396: 2720.01 sec so far
+Iteration 2401: 2725.83 sec so far
+Iteration 2405: 2731.09 sec so far
+Iteration 2410: 2736.49 sec so far
+Iteration 2415: 2742.12 sec so far
+Iteration 2420: 2747.99 sec so far
+Iteration 2424: 2753.26 sec so far
+Iteration 2429: 2758.63 sec so far
+Iteration 2434: 2764.23 sec so far
+Iteration 2439: 2770.05 sec so far
+Iteration 2443: 2775.31 sec so far
+Iteration 2448: 2780.67 sec so far
+Iteration 2453: 2786.21 sec so far
+Iteration 2458: 2792.03 sec so far
+Iteration 2462: 2797.29 sec so far
+Iteration 2467: 2802.65 sec so far
+Iteration 2472: 2808.27 sec so far
+Iteration 2477: 2814.12 sec so far
+Iteration 2481: 2819.38 sec so far
+Iteration 2486: 2824.76 sec so far
+Iteration 2491: 2830.26 sec so far
+Iteration 2496: 2836.05 sec so far
+Iteration 2500: 2841.29 sec so far
+Iteration 2505: 2846.68 sec so far
+Iteration 2510: 2852.28 sec so far
+Iteration 2515: 2858.08 sec so far
+Iteration 2519: 2863.38 sec so far
+Iteration 2524: 2868.74 sec so far
+Iteration 2529: 2874.34 sec so far
+Iteration 2534: 2880.14 sec so far
+Iteration 2538: 2885.41 sec so far
+Iteration 2543: 2890.73 sec so far
+Iteration 2548: 2896.30 sec so far
+Iteration 2553: 2902.13 sec so far
+Iteration 2557: 2907.42 sec so far
+Iteration 2562: 2912.80 sec so far
+Iteration 2567: 2918.36 sec so far
+Iteration 2572: 2924.19 sec so far
+Iteration 2576: 2929.45 sec so far
+Iteration 2581: 2934.85 sec so far
+Iteration 2586: 2940.43 sec so far
+Iteration 2591: 2946.24 sec so far
+Iteration 2595: 2951.50 sec so far
+Iteration 2600: 2956.88 sec so far
+Iteration 2605: 2962.44 sec so far
+Iteration 2610: 2968.24 sec so far
+Iteration 2614: 2973.48 sec so far
+Iteration 2619: 2978.83 sec so far
+Iteration 2624: 2984.43 sec so far
+Iteration 2629: 2990.21 sec so far
+Iteration 2633: 2995.50 sec so far
+Iteration 2638: 3000.82 sec so far
+Iteration 2643: 3006.39 sec so far
+Iteration 2648: 3012.17 sec so far
+Iteration 2652: 3017.41 sec so far
+Iteration 2657: 3022.79 sec so far
+Iteration 2662: 3028.34 sec so far
+Iteration 2667: 3034.15 sec so far
+Iteration 2671: 3039.36 sec so far
+Iteration 2676: 3044.72 sec so far
+Iteration 2681: 3050.26 sec so far
+Iteration 2686: 3056.07 sec so far
+Iteration 2690: 3061.35 sec so far
+Iteration 2695: 3066.79 sec so far
+Iteration 2700: 3072.46 sec so far
+Iteration 2705: 3078.31 sec so far
+Iteration 2709: 3083.57 sec so far
+Iteration 2714: 3089.00 sec so far
+Iteration 2719: 3094.64 sec so far
+Iteration 2724: 3100.44 sec so far
+Iteration 2728: 3105.71 sec so far
+Iteration 2733: 3111.14 sec so far
+Iteration 2738: 3116.67 sec so far
+Iteration 2743: 3122.44 sec so far
+Iteration 2747: 3127.68 sec so far
+Iteration 2752: 3133.03 sec so far
+Iteration 2757: 3138.62 sec so far
+Iteration 2762: 3144.45 sec so far
+Iteration 2766: 3149.72 sec so far
+Iteration 2771: 3155.09 sec so far
+Iteration 2776: 3160.65 sec so far
+Iteration 2781: 3166.47 sec so far
+Iteration 2785: 3171.74 sec so far
+
+Jacobi: 2785 iterations in 3171.75 seconds (average 1.138865, setup 0.01)
+
+Results (including zeros) for filter "init":
+0:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530142604837353
+3:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470402618203
+6:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7763884294277266
+7:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009424746366638
+8:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.774592914743185
+9:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470440732902
+12:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+13:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+14:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761743795115537
+15:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974548290980081
+16:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182552137989293
+17:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959659994632836
+18:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751104754504587
+19:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999210090076556
+20:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732696356039573
+21:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751326632086786
+22:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999294861838837
+23:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733040694809612
+24:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751240347560042
+25:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999263168256382
+26:(0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732907065141128
+524562:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+524563:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+524564:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+524565:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+524566:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+524567:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+524568:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764111475076073
+524569:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.800950332917838
+524570:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746282005769342
+524571:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+524572:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+524573:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+524574:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+524575:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+524576:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+524577:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974638757240711
+524578:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182580873669475
+524579:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959807691545338
+524580:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+524581:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+524582:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+524583:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+524584:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+524585:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+524586:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751560313139959
+524587:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999380358137583
+524588:(0,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.773340618628544
+1037874:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1037875:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1037876:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530142604837353
+1037877:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1037878:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1037879:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470402618203
+1037880:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7763884294277266
+1037881:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009424746366638
+1037882:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.774592914743185
+1037883:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1037884:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1037885:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470440732902
+1037886:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1037887:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1037888:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761743795115537
+1037889:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974548290980081
+1037890:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182552137989293
+1037891:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959659994632836
+1037892:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751104754504587
+1037893:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999210090076556
+1037894:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732696356039573
+1037895:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751326632086786
+1037896:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999294861838837
+1037897:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733040694809612
+1037898:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751240347560042
+1037899:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999263168256382
+1037900:(0,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732907065141128
+1562436:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1562437:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1562438:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+1562439:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1562440:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1562441:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+1562442:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764111475076073
+1562443:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.800950332917838
+1562444:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746282005769342
+1562445:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1562446:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1562447:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+1562448:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1562449:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+1562450:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+1562451:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974638757240711
+1562452:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182580873669475
+1562453:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959807691545338
+1562454:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+1562455:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+1562456:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+1562457:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+1562458:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+1562459:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+1562460:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751560313139959
+1562461:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999380358137583
+1562462:(0,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.773340618628544
+2073768:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2073769:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2073770:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530331918171462
+2073771:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2073772:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2073773:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535625517596
+2073774:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764280784753607
+2073775:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009558220422501
+2073776:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746552924861262
+2073777:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2073778:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2073779:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535665219081
+2073780:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2073781:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2073782:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761764030436495
+2073783:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974702236878196
+2073784:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.818259911239204
+2073785:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959915899758737
+2073786:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751698644713495
+2073787:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999427888698816
+2073788:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733627192166866
+2073789:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751842925107066
+2073790:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999477743573614
+2073791:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733857041104034
+2073792:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751803937225448
+2073793:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999465623838504
+2073794:(0,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733793061416089
+2573850:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2573851:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2573852:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+2573853:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2573854:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2573855:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+2573856:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764111475076073
+2573857:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.800950332917838
+2573858:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746282005769342
+2573859:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2573860:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2573861:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+2573862:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2573863:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+2573864:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+2573865:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974638757240711
+2573866:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182580873669475
+2573867:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959807691545338
+2573868:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+2573869:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+2573870:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+2573871:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+2573872:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+2573873:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+2573874:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751560313139959
+2573875:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999380358137583
+2573876:(0,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.773340618628544
+3085182:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3085183:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3085184:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530142604837353
+3085185:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3085186:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3085187:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470402618203
+3085188:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7763884294277266
+3085189:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009424746366638
+3085190:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.774592914743185
+3085191:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3085192:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3085193:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470440732902
+3085194:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3085195:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3085196:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761743795115537
+3085197:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974548290980081
+3085198:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182552137989293
+3085199:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959659994632836
+3085200:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751104754504587
+3085201:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999210090076556
+3085202:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732696356039573
+3085203:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751326632086786
+3085204:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999294861838837
+3085205:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733040694809612
+3085206:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751240347560042
+3085207:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999263168256382
+3085208:(0,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732907065141128
+3609744:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3609745:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3609746:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+3609747:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3609748:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3609749:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+3609750:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764111475076073
+3609751:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.800950332917838
+3609752:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746282005769342
+3609753:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3609754:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3609755:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+3609756:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3609757:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+3609758:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+3609759:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974638757240711
+3609760:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182580873669475
+3609761:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959807691545338
+3609762:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+3609763:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+3609764:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+3609765:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+3609766:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+3609767:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+3609768:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751560313139959
+3609769:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999380358137583
+3609770:(0,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.773340618628544
+4123056:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4123057:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4123058:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530142604837353
+4123059:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4123060:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4123061:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470402618203
+4123062:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7763884294277266
+4123063:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009424746366638
+4123064:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.774592914743185
+4123065:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4123066:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4123067:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470440732902
+4123068:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4123069:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4123070:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761743795115537
+4123071:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974548290980081
+4123072:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182552137989293
+4123073:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959659994632836
+4123074:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751104754504587
+4123075:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999210090076556
+4123076:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732696356039573
+4123077:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751326632086786
+4123078:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999294861838837
+4123079:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733040694809612
+4123080:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751240347560042
+4123081:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999263168256382
+4123082:(0,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732907065141128
+4647618:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4647619:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4647620:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+4647621:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4647622:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4647623:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+4647624:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764036880090261
+4647625:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009480407171797
+4647626:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746178478303432
+4647627:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4647628:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4647629:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+4647630:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4647631:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+4647632:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+4647633:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974612098359675
+4647634:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182572311169363
+4647635:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959764370605401
+4647636:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+4647637:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+4647638:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+4647639:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+4647640:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+4647641:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+4647642:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751464016256803
+4647643:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999345695811051
+4647644:(2,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733260147999801
+5165438:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5165439:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5165440:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530331918171462
+5165441:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5165442:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5165443:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535625517596
+5165444:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764229681530456
+5165445:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009544373742495
+5165446:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746473985586692
+5165447:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5165448:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5165449:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535665219081
+5165450:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5165451:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5165452:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761764030436495
+5165453:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974686068261898
+5165454:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182593071580557
+5165455:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959884458366009
+5165456:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751698644713495
+5165457:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999427888698816
+5165458:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733627192166866
+5165459:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751842925107066
+5165460:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999477743573614
+5165461:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733857041104034
+5165462:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.775173046069914
+5165463:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999441088824055
+5165464:(2,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733680889237136
+5672008:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5672009:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5672010:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+5672011:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5672012:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5672013:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+5672014:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764036880090261
+5672015:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009480407171797
+5672016:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746178478303432
+5672017:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5672018:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5672019:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+5672020:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5672021:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+5672022:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+5672023:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974612098359675
+5672024:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182572311169363
+5672025:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959764370605401
+5672026:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+5672027:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+5672028:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+5672029:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+5672030:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+5672031:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+5672032:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751464016256803
+5672033:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999345695811051
+5672034:(2,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733260147999801
+6189828:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6189829:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6189830:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530331918171462
+6189831:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6189832:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6189833:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535625517596
+6189834:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764229681530456
+6189835:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009544373742495
+6189836:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746473985586692
+6189837:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6189838:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6189839:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535665219081
+6189840:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6189841:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6189842:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761764030436495
+6189843:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974686068261898
+6189844:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182593071580557
+6189845:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959884458366009
+6189846:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751698644713495
+6189847:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999427888698816
+6189848:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733627192166866
+6189849:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751842925107066
+6189850:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999477743573614
+6189851:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733857041104034
+6189852:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.775173046069914
+6189853:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999441088824055
+6189854:(2,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733680889237136
+6694418:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6694419:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6694420:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530393395841027
+6694421:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6694422:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6694423:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654554648657244
+6694424:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764369795017763
+6694425:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009584713227557
+6694426:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746697768325501
+6694427:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6694428:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6694429:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654554677702767
+6694430:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6694431:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+6694432:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761769359828343
+6694433:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974733126628342
+6694434:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182608481102168
+6694435:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959970828861169
+6694436:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.775189828132352
+6694437:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999496373512888
+6694438:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733946485065526
+6694439:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7752011278286306
+6694440:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999532342332424
+6694441:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7734127779087971
+6694442:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751933547943318
+6694443:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.799950818556196
+6694444:(2,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7734001829663837
+7187758:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7187759:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7187760:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530331918171462
+7187761:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7187762:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7187763:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535625517596
+7187764:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764229681530456
+7187765:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009544373742495
+7187766:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746473985586692
+7187767:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7187768:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7187769:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535665219081
+7187770:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7187771:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7187772:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761764030436495
+7187773:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974686068261898
+7187774:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182593071580557
+7187775:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959884458366009
+7187776:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751698644713495
+7187777:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999427888698816
+7187778:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733627192166866
+7187779:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751842925107066
+7187780:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999477743573614
+7187781:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733857041104034
+7187782:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.775173046069914
+7187783:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999441088824055
+7187784:(2,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733680889237136
+7692348:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7692349:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7692350:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+7692351:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7692352:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7692353:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+7692354:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764036880090261
+7692355:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009480407171797
+7692356:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746178478303432
+7692357:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7692358:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7692359:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+7692360:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7692361:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+7692362:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+7692363:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974612098359675
+7692364:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182572311169363
+7692365:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959764370605401
+7692366:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+7692367:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+7692368:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+7692369:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+7692370:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+7692371:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+7692372:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751464016256803
+7692373:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999345695811051
+7692374:(2,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733260147999801
+8210168:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8210169:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8210170:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530331918171462
+8210171:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8210172:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8210173:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535625517596
+8210174:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764229681530456
+8210175:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009544373742495
+8210176:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746473985586692
+8210177:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8210178:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8210179:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535665219081
+8210180:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8210181:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8210182:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761764030436495
+8210183:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974686068261898
+8210184:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182593071580557
+8210185:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959884458366009
+8210186:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751698644713495
+8210187:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999427888698816
+8210188:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733627192166866
+8210189:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751842925107066
+8210190:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999477743573614
+8210191:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733857041104034
+8210192:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.775173046069914
+8210193:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999441088824055
+8210194:(2,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733680889237136
+8716738:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8716739:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8716740:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+8716741:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8716742:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8716743:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+8716744:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764036880090261
+8716745:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009480407171797
+8716746:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746178478303432
+8716747:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8716748:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8716749:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+8716750:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8716751:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+8716752:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+8716753:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974612098359675
+8716754:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182572311169363
+8716755:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959764370605401
+8716756:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+8716757:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+8716758:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+8716759:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+8716760:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+8716761:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+8716762:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751464016256803
+8716763:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999345695811051
+8716764:(2,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733260147999801
+9234558:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9234559:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9234560:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530142604837353
+9234561:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9234562:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9234563:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470402618203
+9234564:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7763884294277266
+9234565:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009424746366638
+9234566:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.774592914743185
+9234567:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9234568:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9234569:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470440732902
+9234570:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9234571:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9234572:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761743795115537
+9234573:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974548290980081
+9234574:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182552137989293
+9234575:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959659994632836
+9234576:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751104754504587
+9234577:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999210090076556
+9234578:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732696356039573
+9234579:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751326632086786
+9234580:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999294861838837
+9234581:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733040694809612
+9234582:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751240347560042
+9234583:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999263168256382
+9234584:(4,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732907065141128
+9759120:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9759121:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9759122:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+9759123:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9759124:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9759125:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+9759126:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764111475076073
+9759127:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.800950332917838
+9759128:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746282005769342
+9759129:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9759130:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9759131:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+9759132:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9759133:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+9759134:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+9759135:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974638757240711
+9759136:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182580873669475
+9759137:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959807691545338
+9759138:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+9759139:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+9759140:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+9759141:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+9759142:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+9759143:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+9759144:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751560313139959
+9759145:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999380358137583
+9759146:(4,0,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.773340618628544
+10272432:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10272433:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10272434:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530142604837353
+10272435:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10272436:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10272437:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470402618203
+10272438:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7763884294277266
+10272439:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009424746366638
+10272440:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.774592914743185
+10272441:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10272442:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10272443:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470440732902
+10272444:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10272445:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10272446:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761743795115537
+10272447:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974548290980081
+10272448:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182552137989293
+10272449:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959659994632836
+10272450:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751104754504587
+10272451:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999210090076556
+10272452:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732696356039573
+10272453:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751326632086786
+10272454:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999294861838837
+10272455:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733040694809612
+10272456:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751240347560042
+10272457:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999263168256382
+10272458:(4,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732907065141128
+10796994:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10796995:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10796996:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+10796997:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10796998:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10796999:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+10797000:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764111475076073
+10797001:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.800950332917838
+10797002:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746282005769342
+10797003:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10797004:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10797005:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+10797006:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10797007:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+10797008:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+10797009:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974638757240711
+10797010:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182580873669475
+10797011:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959807691545338
+10797012:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+10797013:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+10797014:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+10797015:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+10797016:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+10797017:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+10797018:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751560313139959
+10797019:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999380358137583
+10797020:(4,2,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.773340618628544
+11308326:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11308327:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11308328:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530331918171462
+11308329:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11308330:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11308331:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535625517596
+11308332:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764280784753607
+11308333:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009558220422501
+11308334:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746552924861262
+11308335:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11308336:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11308337:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654535665219081
+11308338:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11308339:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11308340:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761764030436495
+11308341:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974702236878196
+11308342:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.818259911239204
+11308343:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959915899758737
+11308344:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751698644713495
+11308345:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999427888698816
+11308346:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733627192166866
+11308347:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751842925107066
+11308348:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999477743573614
+11308349:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733857041104034
+11308350:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751803937225448
+11308351:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999465623838504
+11308352:(4,2,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733793061416089
+11808408:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11808409:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11808410:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+11808411:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11808412:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11808413:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+11808414:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764111475076073
+11808415:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.800950332917838
+11808416:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746282005769342
+11808417:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11808418:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11808419:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+11808420:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11808421:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+11808422:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+11808423:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974638757240711
+11808424:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182580873669475
+11808425:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959807691545338
+11808426:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+11808427:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+11808428:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+11808429:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+11808430:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+11808431:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+11808432:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751560313139959
+11808433:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999380358137583
+11808434:(4,2,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.773340618628544
+12319740:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12319741:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12319742:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530142604837353
+12319743:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12319744:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12319745:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470402618203
+12319746:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7763884294277266
+12319747:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009424746366638
+12319748:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.774592914743185
+12319749:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12319750:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12319751:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470440732902
+12319752:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12319753:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12319754:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761743795115537
+12319755:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974548290980081
+12319756:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182552137989293
+12319757:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959659994632836
+12319758:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751104754504587
+12319759:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999210090076556
+12319760:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732696356039573
+12319761:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751326632086786
+12319762:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999294861838837
+12319763:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733040694809612
+12319764:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751240347560042
+12319765:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999263168256382
+12319766:(4,4,0,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732907065141128
+12844302:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12844303:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12844304:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530251039634221
+12844305:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12844306:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12844307:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508195999194
+12844308:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7764111475076073
+12844309:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.800950332917838
+12844310:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7746282005769342
+12844311:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12844312:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12844313:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654508243406872
+12844314:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12844315:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+12844316:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761755913627612
+12844317:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974638757240711
+12844318:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182580873669475
+12844319:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959807691545338
+12844320:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751437535865886
+12844321:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999335301073289
+12844322:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733215567186872
+12844323:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751618960463641
+12844324:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999400531268602
+12844325:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733500580140734
+12844326:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751560313139959
+12844327:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999380358137583
+12844328:(4,4,2,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.773340618628544
+13357614:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+13357615:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+13357616:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8530142604837353
+13357617:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+13357618:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+13357619:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470402618203
+13357620:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7763884294277266
+13357621:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8009424746366638
+13357622:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.774592914743185
+13357623:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+13357624:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+13357625:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8654470440732902
+13357626:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+13357627:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=1.0
+13357628:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8761743795115537
+13357629:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7974548290980081
+13357630:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.8182552137989293
+13357631:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,2,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7959659994632836
+13357632:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751104754504587
+13357633:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999210090076556
+13357634:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,0,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732696356039573
+13357635:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751326632086786
+13357636:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999294861838837
+13357637:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,2,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7733040694809612
+13357638:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7751240347560042
+13357639:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7999263168256382
+13357640:(4,4,4,0,1,0,1,0,0,0,1,0,1,0,0,0,4,4,0,0,0,4,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)=0.7732907065141128
+
+Range of values over initial states: [0.7732696356039573,1.0]
+
+Time for model checking: 3171.494 seconds.
+
+Result: [0.7732696356039573,1.0] (range of values over initial states)
+
+---------------------------------------------------------------------
+
+Note: There was 1 warning during computation.
+
