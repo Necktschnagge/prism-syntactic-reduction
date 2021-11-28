@@ -16,16 +16,19 @@ stages:
  
    jobs:
     - job: Prism_Cloud
+      # This job builds the prism binaries on an ubuntu cloud vm
+      # and uploads the binaries back into the git repository.
+      # This job is intended to run once to get prism binaries in the repository forever.
       strategy:
         matrix:
           ubuntu_20_04:
-            imageName: 'ubuntu-20.04'
-            the_name: 'Azure Pipelines'
+            image_name: 'ubuntu-20.04'
+            agent_pool_name: 'Azure Pipelines'
       pool:
-        vmImage: $(imageName)
-        name: $(the_name)
+        vmImage: $(image_name)
+        name: $(agent_pool_name)
       
-      condition: false
+      condition: false # Only enable if new prism binaries are really needed !!!
       timeoutInMinutes: 30
       steps:
        - script: ls /usr/lib/jvm/
@@ -82,50 +85,51 @@ stages:
 
  - stage: build
    dependsOn: prebuild_artifacts
+   #condition: false #### remove before merging into master
    jobs:
     - job: Cloud
       strategy:
         matrix:
           ubuntu_20_04:
-            imageName: 'ubuntu-20.04'
-            the_name: 'Azure Pipelines'
+            image_name: 'ubuntu-20.04'
+            agent_pool_name: 'Azure Pipelines'
       
       #    ubuntu_18_04_gcc_8:
-      #      imageName: 'ubuntu-18.04'
+      #      image_name: 'ubuntu-18.04'
       #      CC: gcc-8
       #      CXX: g++-8
-      #      the_name: 'Azure Pipelines'
+      #      agent_pool_name: 'Azure Pipelines'
       
       #    ubuntu_16_04_gcc_8:
-      #      imageName: 'ubuntu-16.04'
+      #      image_name: 'ubuntu-16.04'
       #      CC: gcc-8
       #      CXX: g++-8
-      #      the_name: 'Azure Pipelines'
+      #      agent_pool_name: 'Azure Pipelines'
       
           mac_10_15:
-            imageName: 'macos-10.15'
-            the_name: 'Azure Pipelines'
+            image_name: 'macos-10.15'
+            agent_pool_name: 'Azure Pipelines'
       #    mac_10_14:
-      #      imageName: 'macos-10.14'
-      #      the_name: 'Azure Pipelines'
+      #      image_name: 'macos-10.14'
+      #      agent_pool_name: 'Azure Pipelines'
       
           windows_2019:
-            imageName: 'windows-2019'
-            the_name: 'Azure Pipelines'
+            image_name: 'windows-2019'
+            agent_pool_name: 'Azure Pipelines'
       #    windows_2016:
-      #      imageName: 'vs2017-win2016'
-      #      the_name: 'Azure Pipelines'
+      #      image_name: 'vs2017-win2016'
+      #      agent_pool_name: 'Azure Pipelines'
       
       pool:
-        vmImage: $(imageName)
-        name: $(the_name)
+        vmImage: $(image_name)
+        name: $(agent_pool_name)
       #condition: false
       timeoutInMinutes: 30
       steps:
-       - script: git submodule update --init --recursive
+       - script: git submodule update --init --recursive && g++ --version && gcc --version
          displayName: "Init Git Submodules"
          condition: succeeded()
-       - script: sudo apt-get update && sudo apt-get install libboost-all-dev
+       - script: sudo apt-get update && sudo apt-get install libboost-all-dev libtbb-dev
          displayName: "Linux: Install Boost"
          condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
        - script: brew install boost
@@ -149,38 +153,41 @@ stages:
 
  - stage: test_and_analyze
    
-   dependsOn: build
+   dependsOn: [] #build
    
    jobs:
+    - job: analyze_multiple_json_configs
+      strategy:
+        matrix:
+          ubuntu_20_04:
+            image_name: 'ubuntu-20.04'
+            agent_pool_name: 'Azure Pipelines'
+      pool:
+        vmImage: $(image_name)
+        name: $(agent_pool_name)
+      condition: eq(variables['Build.Reason'], 'IndividualCI')
+      timeoutInMinutes: 180
+      steps:      
+       - script: ./script/ci/create_runs_for_multiply_configs.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)"
+         displayName: "Create all runs for diffrent JSONs"
+         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+
     - job: Test_using_binaries_artifacts
       strategy:
         matrix:
           ubuntu_20_04:
-            imageName: 'ubuntu-20.04'
-            the_name: 'Azure Pipelines'
+            image_name: 'ubuntu-20.04'
+            agent_pool_name: 'Azure Pipelines'
       pool:
-        vmImage: $(imageName)
-        name: $(the_name)
-      #condition: false
+        vmImage: $(image_name)
+        name: $(agent_pool_name)
+      condition: false
       timeoutInMinutes: 180
       steps:
        #Boost
        - script: sudo apt-get update && sudo apt-get install libboost-all-dev
          displayName: "Linux: Install Boost"
          condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
-       #Java
-#       - script: ls /usr/lib/jvm/
-#         displayName: "check Java install directory"
-#         condition: succeeded()
-#       - script: sudo rm -r /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
-#         displayName: "Remove Java 11"
-#         condition: succeeded()
-#       - script: sudo apt-get install -y openjdk-8-jdk
-#         displayName: "Install custom Java version"
-#         condition: succeeded()
-#       - script: javac -version
-#         displayName: "Check Java version"
-#         condition: succeeded()
        #real Tasks:
        - script: git checkout artifacts --
          displayName: "Checkout artifacts branch"
@@ -305,12 +312,13 @@ stages:
       strategy:
         matrix:
           Ubuntu 20.04:
-            the_name: 'Performance'
+            agent_pool_name: 'Performance'
       
       pool:
-        vmImage: $(imageName)
-        name: $(the_name)
+        vmImage: $(image_name)
+        name: $(agent_pool_name)
       timeoutInMinutes: 600
+      condition: false
       steps:
        - script: git submodule update --init --recursive
          displayName: "Init Git Submodules"

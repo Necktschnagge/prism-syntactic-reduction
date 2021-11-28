@@ -7,6 +7,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 project(${PROJECT_NAME} VERSION 1.0)
 
+set( CMAKE_VERBOSE_MAKEFILE on )
 
 ############### Language and Flags ###############
 
@@ -17,6 +18,7 @@ set(CMAKE_CXX_EXTENSIONS False)
 set(CMAKE_CXX_FLAGS_RELEASE "/MT /O2 /Ob2 /DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "/MTd /Zi /Ob0 /Od /RTC1")
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread") # due to linkage error on cloud linux build.
 
 ############### Libraries ###############
 
@@ -33,9 +35,9 @@ FIND_PACKAGE(Boost 1.54.0 COMPONENTS regex REQUIRED )
 INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR} )
 
 
-include_directories(SYSTEM extern/spdlog/include)
+include_directories(SYSTEM extern/json/include)
 
-#include_directories(SYSTEM extern/json/include)
+include_directories(SYSTEM extern/spdlog/include)
 
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
@@ -46,7 +48,7 @@ add_subdirectory(src)
 
 add_subdirectory(test)
 
-
+add_subdirectory(tools)
 
 ############### Testing ###############
 

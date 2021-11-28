@@ -75,27 +75,27 @@ const int no = 2;
 const int error = 3;
 
 const int c = 4;
+global cf : [0 .. 33] init 0;
+global y_cfblk1_1787311813 : [0 .. 4] init 1;
+global y_cfblk2_1826447206 : [0 .. 4] init 1;
+global y_cfblk3_1865582599 : [0 .. 4] init 1;
+global y_cfblk4_1904717992 : [0 .. 4] init 1;
+global y_cfblk5_1943853385 : [0 .. 4] init 1;
+global x_cfblk1_1_2152072474 : [0 .. 4] init 1;
+global x_cfblk4_1_1731509086 : [0 .. 4] init 1;
+global x_cfblk5_1_3022977055 : [0 .. 4] init 1;
+global redundancy_model3_cfblk1_0 : [0 .. 4] init 2;
+global y_cfblk1_1787311813_2 : [0 .. 4] init 1;
+global redundancy_model3_cfblk2_1 : [0 .. 4] init 4;
+global y_cfblk2_1826447206_2 : [0 .. 4] init 1;
+global redundancy_model3_cfblk4_2 : [0 .. 4] init 2;
+global y_cfblk4_1904717992_2 : [0 .. 4] init 1;
+global redundancy_model3_cfblk3_3 : [0 .. 4] init 4;
+global y_cfblk3_1865582599_2 : [0 .. 4] init 1;
+global x_cfblk1_1_2152072474_2 : [0 .. 4] init 1;
+global x_cfblk4_1_1731509086_2 : [0 .. 4] init 1;
 
 module control_flowerror_propagation
-    cf : [0 .. 33] init cfblk1_Output_1;
-    y_cfblk1_1787311813 : [0 .. 4] init ok;
-    y_cfblk2_1826447206 : [0 .. 4] init ok;
-    y_cfblk3_1865582599 : [0 .. 4] init ok;
-    y_cfblk4_1904717992 : [0 .. 4] init ok;
-    y_cfblk5_1943853385 : [0 .. 4] init ok;
-    x_cfblk1_1_2152072474 : [0 .. 4] init ok;
-    x_cfblk4_1_1731509086 : [0 .. 4] init ok;
-    x_cfblk5_1_3022977055 : [0 .. 4] init ok;
-    redundancy_model3_cfblk1_0 : [0 .. 4] init no;
-    y_cfblk1_1787311813_2 : [0 .. 4] init ok;
-    redundancy_model3_cfblk2_1 : [0 .. 4] init c;
-    y_cfblk2_1826447206_2 : [0 .. 4] init ok;
-    redundancy_model3_cfblk4_2 : [0 .. 4] init no;
-    y_cfblk4_1904717992_2 : [0 .. 4] init ok;
-    redundancy_model3_cfblk3_3 : [0 .. 4] init c;
-    y_cfblk3_1865582599_2 : [0 .. 4] init ok;
-    x_cfblk1_1_2152072474_2 : [0 .. 4] init ok;
-    x_cfblk4_1_1731509086_2 : [0 .. 4] init ok;
     
     [cfblk1_Output_1] cf = cfblk1_Output_1 & (y_cfblk2_1826447206 = ok & x_cfblk1_1_2152072474 = ok) -> 0.9800000000000001:(cf' = check_redandancy0) & (y_cfblk1_1787311813' = ok) + 2.0e-2:(cf' = check_redandancy0) & (y_cfblk1_1787311813' = error);
     [cfblk1_Output_1] cf = cfblk1_Output_1 & (y_cfblk2_1826447206 != ok | x_cfblk1_1_2152072474 != ok) -> 1.0:(cf' = check_redandancy0) & (y_cfblk1_1787311813' = error);
@@ -176,6 +176,6 @@ endmodule
 formula failure = x_cfblk5_1_3022977055 = error;
 
 rewards "time"
-    true : 1;
+    0=0 : 1;
 endrewards
 
