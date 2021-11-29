@@ -10,3 +10,6 @@
 [submodule "extern/json"]
 	path = extern/json
 	url = https://github.com/nlohmann/json.git
+[submodule "latex-std"]
+	path = latex-std
+	url = https://github.com/Necktschnagge/latex-std
