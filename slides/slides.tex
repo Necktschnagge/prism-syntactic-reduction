@@ -519,4 +519,116 @@ minimum height=2.5em]
 	}	
 \end{frame}
 
+\section{Implementierung}
+
+\begin{frame}
+	\frametitle{grober Abriss}
+	\begin{itemize}
+		\item Parsen der Eingabesprache\pause
+		\item Extrahieren des Multigraph\pause
+		\item Live Range Analysis\pause
+		\item Zwischenergebnis: ungerichteter Graph $H=(\mathrm{Var}, F)$\pause
+		\item \textbf{Graphfärbung...}\pause \begin{itemize}
+			\item Variablenkombinationen mit gleicher Färbung\pause
+			\item Auswahl von Variablenkombinationen\pause
+			\item Auflistung aller $k$-Färbungen, $k$ minimal
+		\end{itemize}
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Variablenkombinationen}
+\begin{definition}[Variablenkombination]
+	Wir nennen $k$ eine \emph{Variablenkombination}, wenn es ein Paar zweier boolscher Funktionen $k = (id, neighbours)$ ist mit
+	\[id, neighbours : \mbox{Var} \to \{0,1\}
+	\] \pause
+	und $\neg \exists x \in \mathrm{Var} : id(x) = neighbours(x) = 1$. Wir nennen $size(k) \coloneqq |id|$ die \emph{Größe} der Variablenkombination. \pause
+	Für ein Paar $k$ bezeichnen wir deren Elemente als $\mathrm{id}(k)$ und $\mathrm{neighbours}(k)$. Entsprechend gilt $k = (\mathrm{id}(k),\mathrm{neighbours}(k))$.
+\end{definition} \pause
+
+Jedem $x \in \mathrm{Var}$ ordnen wir die Variablenkombination $k_x \coloneqq (\{x\}, \{y \in \mathrm{Var} \mid \{x,y\} \in F\})$ zu.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Zusammenführbarkeit}
+
+	\begin{definition}[zusammenführbar]
+		Wir nennen zwei Variablenkombinationen $k, l$ \emph{zusammenführbar}, in Symbolen $k \downarrow l$, wenn \pause $\mathrm{id}(k) \cap \mathrm{neighbours}(l) = \emptyset$ und \pause $\mathrm{id}(l) \cap \mathrm{neighbours}(k) = \emptyset$. \pause Mit $k \cup l$ bezeichnen wir in diesem Fall die aus $k$ und $l$ nach Zusammenführen entstandene Variablenkombination  $k \cup l \coloneqq (\mathrm{id}(k) \cup \mathrm{id}(l), \mathrm{neighbours}(k) \cup \mathrm{neighbours}(l))$. \pause Aus Lesbarkeitsgründen verwenden wir hier die Schreibweise als Teilmengen von $\mathrm{Var}$.
+	\end{definition}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Auflisten aller Variablenkombinationen}
+	\begin{itemize}
+		\item Sei $K_1 \coloneqq \{k_x \mid x\in \mbox{Var} \}$ \pause
+		\item Dann berechnen wir $K_{i+1}$ aus $K_i$ und $K_1$ wie folgt: \pause
+	\end{itemize} 
+\centering
+	\makebox[0pt]{
+		\includegraphics[scale=0.5]{vk.png}
+	}	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Maximale Variablenkombinationen}
+	\begin{itemize}
+		\item Wir kennen $K_1, K_2, K_3, \dots $ \pause
+		\item Dann berechnen wir $L_1, L_2, L_3 \dots$: \pause
+	\end{itemize}
+\begin{definition}[maximale Variablenkombination]
+	Wir nennen eine Variablenkombination $k$ maximal, wenn es keine Variablenkombination $l\in K_1$ gibt, sodass $k, l$ zusammenführbar sind und $k \cup l \neq k$.
+\end{definition} \pause
+\begin{itemize}
+	\item $L \coloneqq L_1 \cup L_2 \cup \dots \cup L_{max\_size}$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Abdeckung aller Variablen}
+	\begin{itemize}
+		\item Finde eine Auswahl $C \subseteq L$ mit $|C| = k$ mit \pause
+		\begin{itemize}
+			\item für jede Variable $x$ gibt es $(id, neighbours) \in C$, welches $x$ enthält, d.h. $id(x) = 1$.
+		\end{itemize}
+	\item Wir brauchen eine geschickte Implementierung!
+	\end{itemize} \pause
+\begin{definition}[Teilauswahl über $L$]
+	Sei $L$ % = (l_1, l_2, \dots, l_n)$
+	eine endliche Menge von Variablenkombinationen. Wir bezeichnen eine Abbildung
+	\begin{equation*}
+	c : L \to \{0, \#, 1\}
+	\end{equation*}
+	als \emph{Teilauswahl über} $L$. \pause Dabei nennen wir $l \in L$ \textit{ausgewählt} für den Fall $c(l) = 1$, \textit{nicht ausgewählt} für den Fall $c(l) = 0$ und \textit{nicht entschieden} für den Fall $c(l) = \#$.
+\end{definition}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Auflistung aller minimalen Auswahlen}
+	\centering
+	\makebox[0pt]{
+		\includegraphics[scale=0.25]{choice.png}
+	}	
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Auflistung aller Graphfärbungen}
+	\begin{itemize}
+		\item mehrfach abgedeckte Variablen auflösen\pause
+		\begin{itemize}
+			\item Sehr viele Modelle können entstehen.
+		\end{itemize} \pause
+		\item Trick an vielen Stellen: Verwendung sortierter Arrays (\texttt{std::vector}) \pause
+		
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Offene Fragen}
+	\begin{itemize}
+		\item Wie verteilen sich alle möglichen Resultate einer Heuristik?\pause
+		\item Wann führen Heuristiken zu mehr Variablen als nötig?
+	\end{itemize}
+\end{frame}
+
 \end{document}
